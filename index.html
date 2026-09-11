@@ -38,6 +38,7 @@ tr:nth-child(even){background:#fafafa}
 .total-box-blue{background:#eff6ff;padding:12px;border-radius:6px;text-align:right;font-size:18px;font-weight:bold;color:#2563eb;margin-top:10px}
 .total-box-orange{background:#fff7ed;padding:12px;border-radius:6px;text-align:right;font-size:18px;font-weight:bold;color:#c2410c;margin-top:10px}
 .total-box-red{background:#fef2f2;padding:12px;border-radius:6px;text-align:right;font-size:18px;font-weight:bold;color:#dc2626;margin-top:10px}
+.total-box-purple{background:#faf5ff;padding:12px;border-radius:6px;text-align:right;font-size:18px;font-weight:bold;color:#7e22ce;margin-top:10px}
 .empty{text-align:center;color:#888;padding:24px}
 .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:bold}
 .tag.cash{background:#e8f5e9;color:#15803d}
@@ -46,6 +47,7 @@ tr:nth-child(even){background:#fafafa}
 .tag.danger{background:#fef2f2;color:#dc2626}
 .tag.in{background:#e8f5e9;color:#15803d}
 .tag.out{background:#fef2f2;color:#dc2626}
+.tag.disc{background:#faf5ff;color:#7e22ce}
 .sep{border:none;border-top:1px dashed #ddd;margin:16px 0}
 .cat-btn{background:#e5e7eb;padding:10px 14px;margin:4px;border-radius:6px;font-weight:bold}
 .cat-btn.active{background:#2563eb;color:#fff}
@@ -57,10 +59,12 @@ tr:nth-child(even){background:#fafafa}
 .denom-row{display:flex;align-items:center;gap:8px;margin:4px 0}
 .denom-row label{width:80px;font-weight:bold}
 .denom-row input{flex:1;margin:0}
+.discount-bar{background:#faf5ff;border:2px solid #d8b4fe;border-radius:6px;padding:10px;margin:8px 0}
+.store-card{padding:8px;border:2px solid #ddd;border-radius:6px;cursor:pointer;margin:4px 0}
+.store-card.selected{border-color:#2563eb;background:#eff6ff}
 </style>
 </head>
 <body>
-
 <!-- EXPIRY LOCK SCREEN -->
 <div id="expiryScreen" class="modal hidden">
   <div class="mbody" style="text-align:center;max-width:420px">
@@ -69,7 +73,6 @@ tr:nth-child(even){background:#fafafa}
     <p>Please contact <strong>Service Provider</strong> to renew and continue using the system.</p>
   </div>
 </div>
-
 <!-- LOGIN MODAL -->
 <div id="loginModal" class="modal">
   <div class="mbody">
@@ -99,7 +102,6 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-
 <!-- SPLIT PAYMENT MODAL -->
 <div id="splitModal" class="modal hidden">
   <div class="mbody">
@@ -117,7 +119,6 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-
 <!-- MAIN APPLICATION -->
 <div id="app" class="hidden">
   <div class="topbar">
@@ -136,16 +137,15 @@ tr:nth-child(even){background:#fafafa}
       <button id="tabProducts" class="hidden" onclick="showTab('products')">📦 Products</button>
       <button id="tabStores" class="hidden" onclick="showTab('stores')">🏪 Stores</button>
       <button id="tabSales" class="hidden" onclick="showTab('sales')">📊 Sales Report</button>
+      <button id="tabDiscounts" class="hidden" onclick="showTab('discounts')">🏷️ Discount Reports</button>
       <!-- SP TAB -->
       <button id="tabService" class="hidden" onclick="showTab('service')">🛠️ Service</button>
       <button onclick="logout()">🚪 Logout</button>
     </div>
   </div>
-
   <div class="container">
-
     <!-- ========================================== -->
-    <!-- CASHIER — SELL SCREEN -->
+    <!-- CASHIER — SELL SCREEN (WITH DISCOUNT) -->
     <!-- ========================================== -->
     <div id="vSell" class="tab-page">
       <div class="grid2">
@@ -157,11 +157,31 @@ tr:nth-child(even){background:#fafafa}
         </div>
         <div class="card">
           <h3>🛒 Current Order</h3>
-          <div id="cartArea" style="min-height:180px">
+          <div id="cartArea" style="min-height:140px">
             <div class="empty">No items added yet.</div>
           </div>
           <hr class="sep">
-          <div class="total-box">TOTAL: ₱<span id="grandTotal">0.00</span></div>
+          <!-- === DISCOUNT SECTION === -->
+          <div class="discount-bar">
+            <h4>🏷️ Apply Discount</h4>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0">
+              <button class="btn-purple" id="btnDiscountNone" onclick="applyDiscount('NONE')">No Discount</button>
+              <button class="btn-purple" id="btnDiscountSenior" onclick="applyDiscount('SENIOR')">👴 Senior Citizen (5%)</button>
+              <button class="btn-purple" id="btnDiscountPWD" onclick="applyDiscount('PWD')">♿ PWD (5%)</button>
+            </div>
+            <div id="discountInfo" style="margin-top:6px;display:none">
+              <label>ID / Card Number:</label>
+              <input type="text" id="discountIdNumber" placeholder="Enter Senior/PWD ID #">
+              <label>Name of Person:</label>
+              <input type="text" id="discountPersonName" placeholder="Enter Name on ID">
+            </div>
+            <div style="margin-top:8px">
+              <strong>Subtotal: </strong>₱<span id="subtotalAmt">0.00</span><br>
+              <strong>Discount: </strong><span id="discountLabel">₱0.00</span><br>
+              <strong class="total-box-purple" style="display:block;margin-top:4px">TOTAL: ₱<span id="grandTotal">0.00</span></strong>
+            </div>
+          </div>
+          <!-- PAYMENT BUTTONS -->
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px">
             <button class="btn-gray" onclick="clearCart()">🗑️ CLEAR</button>
             <button class="btn-green" onclick="payCash()">💵 CASH</button>
@@ -171,7 +191,6 @@ tr:nth-child(even){background:#fafafa}
         </div>
       </div>
     </div>
-
     <!-- ========================================== -->
     <!-- CASHIER — VOID REQUEST SCREEN -->
     <!-- ========================================== -->
@@ -185,7 +204,6 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-
     <!-- ========================================== -->
     <!-- CASHIER — STOCK-OUT REQUEST SCREEN -->
     <!-- ========================================== -->
@@ -214,7 +232,6 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-
     <!-- ========================================== -->
     <!-- CASHIER — END SHIFT SCREEN -->
     <!-- ========================================== -->
@@ -228,7 +245,6 @@ tr:nth-child(even){background:#fafafa}
         <p style="margin:8px 0"><strong>Expected Cash on Hand:</strong> ₱<span id="expectedCash">0.00</span></p>
         <button class="btn-green" onclick="setOpeningFloat()">💰 SET OPENING FLOAT</button>
       </div>
-
       <div class="card">
         <h4>💰 Cash Denomination Declaration</h4>
         <p style="color:#666;font-size:13px">Count and enter actual cash you have before ending shift</p>
@@ -244,7 +260,6 @@ tr:nth-child(even){background:#fafafa}
         <button class="btn-red" onclick="submitEndShift()">✅ FINALIZE & END SHIFT</button>
       </div>
     </div>
-
     <!-- ========================================== -->
     <!-- ADMIN — STOCKS OVERVIEW -->
     <!-- ========================================== -->
@@ -276,7 +291,6 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-
     <!-- ========================================== -->
     <!-- ADMIN — PRODUCTS -->
     <!-- ========================================== -->
@@ -301,7 +315,6 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-
     <!-- ========================================== -->
     <!-- ADMIN — STORES -->
     <!-- ========================================== -->
@@ -322,7 +335,6 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-
     <!-- ========================================== -->
     <!-- ADMIN — SALES REPORT -->
     <!-- ========================================== -->
@@ -350,7 +362,26 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-
+    <!-- ========================================== -->
+    <!-- ADMIN — DISCOUNT REPORTS (NEW) -->
+    <!-- ========================================== -->
+    <div id="vDiscounts" class="tab-page hidden">
+      <div class="card">
+        <h3>🏷️ Discount Reports — <span id="discRptDate"></span></h3>
+        <div class="grid3">
+          <div class="total-box-purple">TOTAL DISCOUNTS:<br>₱<span id="discTotalAmt">0.00</span></div>
+          <div class="total-box-purple">👴 SENIOR DISCOUNTS:<br>₱<span id="discSeniorAmt">0.00</span></div>
+          <div class="total-box-purple">♿ PWD DISCOUNTS:<br>₱<span id="discPWDAmt">0.00</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>📋 Discount Transaction Log</h4>
+        <table>
+          <thead><tr><th>Ticket #</th><th>Date & Time</th><th>Discount Type</th><th>ID #</th><th>Name</th><th>Subtotal</th><th>Discount Amt</th><th>Net Total</th><th>Cashier</th></tr></thead>
+          <tbody id="discountLogBody"></tbody>
+        </table>
+      </div>
+    </div>
     <!-- ========================================== -->
     <!-- SERVICE PROVIDER — SERVICE TAB ONLY -->
     <!-- ========================================== -->
@@ -380,10 +411,8 @@ tr:nth-child(even){background:#fafafa}
         <button class="btn-red" onclick="resetAllData()">⚠️ RESET TO DEFAULT (Clear All Data)</button>
       </div>
     </div>
-
   </div>
 </div>
-
 <script>
 // ==============================================
 // DEFAULTS & SETUP
@@ -393,28 +422,27 @@ const DEFAULT_PASS = {
   admin: '8888',
   sp: '19970407chan'
 };
+const DISCOUNT_RATE = 0.05; // 5% Senior / PWD discount
 const TRIAL_DAYS = 7;
 const $ = id => document.getElementById(id);
 const fmt = n => n.toFixed(2);
 const dt = () => new Date().toLocaleString('en-PH');
 const today = () => new Date().toISOString().split('T')[0];
 const D = () => new Date().toLocaleDateString('en-PH');
-
 // DATA STORE
 function load(key, def){ return JSON.parse(localStorage.getItem(key) || JSON.stringify(def)); }
 function save(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
-
 let PASS = load('pos_pass', { ...DEFAULT_PASS });
 let STORES = load('pos_stores', []);
 let PRODUCTS = load('pos_products', []);
 let STOCKS = load('pos_stocks', {});
 let SALES = load('pos_sales', []);
+let DISCOUNTS = load('pos_discounts', []); // DISCOUNT RECORDS
 let VOID_REQUESTS = load('pos_void_requests', []);
 let STOCK_OUT_REQUESTS = load('pos_stockout_req', []);
 let SHIFT_DATA = load('pos_shift_data', { float: 0 });
 let END_SHIFT_LOG = load('pos_endshift_log', []);
 let SERVICE = load('pos_service', { active: true, expiry: null, firstUse: null });
-
 // SERVICE CHECK
 function getExpiryDate(){
   if(!SERVICE.firstUse){ SERVICE.firstUse = new Date().toISOString(); saveService(); }
@@ -435,17 +463,15 @@ function showExpiryScreen(){
   $('expiryMsg').innerHTML = `Expired on:<br><strong>${exp.toLocaleDateString('en-PH')} — ${exp.toLocaleTimeString('en-PH')}</strong>`;
   $('expiryScreen').classList.remove('hidden');
 }
-
 // APP STATE
 let user = { logged:false, role:'', storeId:null, storeName:'' };
 let cart = [];
 let selectedCategory = null;
-
+let discountType = 'NONE'; // NONE, SENIOR, PWD
 // INIT
 window.onload = function(){
   if(!isServiceActive()){ showExpiryScreen(); return; }
 };
-
 // ==============================================
 // LOGIN
 // ==============================================
@@ -457,7 +483,6 @@ function showLoginForm(role){
   else if(role === 'admin'){ $('adminForm').classList.remove('hidden'); }
   else if(role === 'sp'){ $('spForm').classList.remove('hidden'); }
 }
-
 function renderCashierStoreList(){
   const c = $('cashierStoreList');
   if(!STORES.length){ c.innerHTML = '<div class="empty">⚠️ No stores yet. Login as Admin first.</div>'; return; }
@@ -469,7 +494,6 @@ function pickCashierStore(i){
   document.querySelectorAll('.store-card').forEach(e=>e.classList.remove('selected'));
   $(`cs-${i}`).classList.add('selected');
 }
-
 function loginCashier(){
   const pass = $('cashierPass').value.trim();
   if(pass !== PASS.cashier) return alert('⚠️ Incorrect Password!');
@@ -490,7 +514,6 @@ function loginSP(){
   user = { logged:true, role:'sp', storeId:'ALL', storeName:'System' };
   afterLogin();
 }
-
 // ==============================================
 // AFTER LOGIN — ROLE-BASED FEATURES
 // ==============================================
@@ -498,7 +521,6 @@ function afterLogin(){
   $('loginModal').classList.add('hidden');
   $('app').classList.remove('hidden');
   $('userInfoLine').textContent = `${user.storeName} — ${user.role.toUpperCase()}`;
-
   // HIDE ALL TABS FIRST
   $('tabSell').classList.add('hidden');
   $('tabVoid').classList.add('hidden');
@@ -508,8 +530,8 @@ function afterLogin(){
   $('tabProducts').classList.add('hidden');
   $('tabStores').classList.add('hidden');
   $('tabSales').classList.add('hidden');
+  $('tabDiscounts').classList.add('hidden');
   $('tabService').classList.add('hidden');
-
   // --- CASHIER FEATURES ONLY ---
   if(user.role === 'cashier'){
     $('tabSell').classList.remove('hidden');
@@ -524,6 +546,7 @@ function afterLogin(){
     $('tabProducts').classList.remove('hidden');
     $('tabStores').classList.remove('hidden');
     $('tabSales').classList.remove('hidden');
+    $('tabDiscounts').classList.remove('hidden');
     showTab('stocks');
   }
   // --- SERVICE PROVIDER FEATURES ONLY ---
@@ -532,16 +555,15 @@ function afterLogin(){
     showTab('service');
   }
 }
-
 function logout(){
   user = { logged:false, role:'', storeId:null, storeName:'' };
   cart = [];
+  discountType = 'NONE';
   $('app').classList.add('hidden');
   $('loginModal').classList.remove('hidden');
   $('loginRole').value = '';
   showLoginForm('');
 }
-
 // ==============================================
 // TAB SWITCHING
 // ==============================================
@@ -554,8 +576,7 @@ function showTab(name){
   const tabName = name.charAt(0).toUpperCase() + name.slice(1);
   $(`v${tabName}`).classList.remove('hidden');
   $(`tab${tabName}`).classList.add('active');
-
-  if(name === 'sell'){ renderCategories(); renderProducts(); }
+  if(name === 'sell'){ renderCategories(); renderProducts(); updateDiscountDisplay(); }
   if(name === 'void'){ renderVoidRequestTab(); }
   if(name === 'stockoutreq'){ renderStockOutReqTab(); }
   if(name === 'endshift'){ renderEndShiftTab(); }
@@ -563,9 +584,47 @@ function showTab(name){
   if(name === 'products'){ renderProductTab(); }
   if(name === 'stores'){ renderStoreTab(); }
   if(name === 'sales'){ renderSalesReport(); }
+  if(name === 'discounts'){ renderDiscountReport(); }
   if(name === 'service'){ renderServiceTab(); }
 }
-
+// ==============================================
+// CASHIER — DISCOUNT SYSTEM
+// ==============================================
+function applyDiscount(type){
+  discountType = type;
+  // Toggle ID/Name fields
+  if(type === 'NONE'){
+    $('discountInfo').style.display = 'none';
+    $('btnDiscountNone').style.opacity = '1';
+    $('btnDiscountSenior').style.opacity = '0.6';
+    $('btnDiscountPWD').style.opacity = '0.6';
+  } else {
+    $('discountInfo').style.display = 'block';
+    $('btnDiscountNone').style.opacity = '0.6';
+    $('btnDiscountSenior').style.opacity = type==='SENIOR'?'1':'0.6';
+    $('btnDiscountPWD').style.opacity = type==='PWD'?'1':'0.6';
+  }
+  updateDiscountDisplay();
+}
+function getSubtotal(){
+  return cart.reduce((s,i)=>s + i.price*i.qty,0);
+}
+function getDiscountAmount(){
+  if(discountType === 'NONE') return 0;
+  return getSubtotal() * DISCOUNT_RATE;
+}
+function getGrandTotal(){
+  return getSubtotal() - getDiscountAmount();
+}
+function updateDiscountDisplay(){
+  $('subtotalAmt').textContent = fmt(getSubtotal());
+  if(discountType === 'NONE'){
+    $('discountLabel').textContent = '₱0.00';
+  } else {
+    $('discountLabel').textContent = `${Math.round(DISCOUNT_RATE*100)}% — ₱${fmt(getDiscountAmount())}`;
+  }
+  $('grandTotal').textContent = fmt(getGrandTotal());
+}
 // ==============================================
 // CASHIER — SELL FUNCTIONS
 // ==============================================
@@ -599,18 +658,16 @@ function addToCart(pid){
 function updateCartDisplay(){
   if(!cart.length){
     $('cartArea').innerHTML = '<div class="empty">No items added yet.</div>';
-    $('grandTotal').textContent = '0.00';
-    return;
+  } else {
+    $('cartArea').innerHTML = cart.map(item=>{
+      let sub = item.price * item.qty;
+      return `<div class="cart-row">
+        <div><strong>${item.name}</strong> × ${item.qty}</div>
+        <div>₱${fmt(sub)} <button class="btn-sm btn-gray" onclick="changeQty('${item.id}',1)">+</button> <button class="btn-sm btn-gray" onclick="changeQty('${item.id}',-1)">-</button></div>
+      </div>`;
+    }).join('');
   }
-  let total = 0;
-  $('cartArea').innerHTML = cart.map(item=>{
-    let sub = item.price * item.qty; total += sub;
-    return `<div class="cart-row">
-      <div><strong>${item.name}</strong> × ${item.qty}</div>
-      <div>₱${fmt(sub)} <button class="btn-sm btn-gray" onclick="changeQty('${item.id}',1)">+</button> <button class="btn-sm btn-gray" onclick="changeQty('${item.id}',-1)">-</button></div>
-    </div>`;
-  }).join('');
-  $('grandTotal').textContent = fmt(total);
+  updateDiscountDisplay();
 }
 function changeQty(pid,delta){
   const it = cart.find(x=>x.id===pid);
@@ -619,37 +676,48 @@ function changeQty(pid,delta){
   if(it.qty <= 0) cart = cart.filter(x=>x.id!==pid);
   updateCartDisplay();
 }
-function clearCart(){ cart = []; updateCartDisplay(); }
-function getTotal(){ return cart.reduce((s,i)=>s + i.price*i.qty,0); }
-
+function clearCart(){
+  cart = [];
+  discountType = 'NONE';
+  $('discountIdNumber').value='';
+  $('discountPersonName').value='';
+  applyDiscount('NONE');
+  updateCartDisplay();
+}
 // PAYMENT
 function payCash(){
   if(!cart.length) return alert('⚠️ Cart is empty!');
+  if(discountType!=='NONE' && !$('discountIdNumber').value.trim()) return alert('⚠️ Enter ID Number for Discount!');
+  if(discountType!=='NONE' && !$('discountPersonName').value.trim()) return alert('⚠️ Enter Name for Discount!');
   saveSale('cash','');
 }
 function payGCash(){
   if(!cart.length) return alert('⚠️ Cart is empty!');
+  if(discountType!=='NONE' && !$('discountIdNumber').value.trim()) return alert('⚠️ Enter ID Number for Discount!');
+  if(discountType!=='NONE' && !$('discountPersonName').value.trim()) return alert('⚠️ Enter Name for Discount!');
   let ref = prompt('Enter GCash Reference Number:');
   if(ref===null) return;
   saveSale('gcash',ref||'N/A');
 }
 function openSplitPay(){
   if(!cart.length) return alert('⚠️ Cart is empty!');
-  $('splitTotal').textContent = '₱'+fmt(getTotal());
+  if(discountType!=='NONE' && !$('discountIdNumber').value.trim()) return alert('⚠️ Enter ID Number for Discount!');
+  if(discountType!=='NONE' && !$('discountPersonName').value.trim()) return alert('⚠️ Enter Name for Discount!');
+  $('splitTotal').textContent = '₱'+fmt(getGrandTotal());
   $('splitCash').value = '';
   $('splitGCash').value = '';
   $('splitRef').value = '';
   $('splitModal').classList.remove('hidden');
 }
 function calcSplitGCash(){
-  const total = getTotal();
+  const total = getGrandTotal();
   const cash = parseFloat($('splitCash').value)||0;
   const gcash = Math.max(0, total - cash);
   $('splitGCash').value = fmt(gcash);
 }
 function closeSplitModal(){ $('splitModal').classList.add('hidden'); }
 function confirmSplitPay(){
-  const total = getTotal();
+  const total = getGrandTotal();
   const cash = parseFloat($('splitCash').value)||0;
   const gcash = parseFloat($('splitGCash').value)||0;
   if(Math.abs((cash+gcash)-total) > 0.02) return alert('⚠️ Amount mismatch!');
@@ -658,6 +726,9 @@ function confirmSplitPay(){
   closeSplitModal();
 }
 function saveSale(method, ref, cashAmt=null, gcashAmt=null){
+  const subtotal = getSubtotal();
+  const discountAmt = getDiscountAmount();
+  const netTotal = getGrandTotal();
   const sale = {
     id: Date.now(),
     ticketNo: 'TX'+Date.now(),
@@ -666,20 +737,41 @@ function saveSale(method, ref, cashAmt=null, gcashAmt=null){
     storeId: user.storeId,
     cashier: user.storeName,
     items: cart.map(i=>({id:i.id,name:i.name,qty:i.qty,price:i.price})),
-    total: getTotal(),
+    subtotal,
+    discountType,
+    discountAmt,
+    discountId: discountType!=='NONE' ? $('discountIdNumber').value.trim() : '',
+    discountName: discountType!=='NONE' ? $('discountPersonName').value.trim() : '',
+    total: netTotal,
     method, ref, cashAmt, gcashAmt
   };
   SALES.unshift(sale);
   save('pos_sales', SALES);
+  // Save discount record
+  if(discountType !== 'NONE'){
+    DISCOUNTS.unshift({
+      ticketNo: sale.ticketNo,
+      datetime: sale.datetime,
+      storeId: sale.storeId,
+      cashier: sale.cashier,
+      discountType,
+      discountAmt,
+      discountId: sale.discountId,
+      discountName: sale.discountName,
+      subtotal,
+      netTotal
+    });
+    save('pos_discounts', DISCOUNTS);
+  }
+  // Deduct stock
   cart.forEach(item=>{
     const key = `${user.storeId}|${item.id}`;
     if(STOCKS[key]) STOCKS[key] = Math.max(0, (STOCKS[key]||0) - item.qty);
   });
   save('pos_stocks', STOCKS);
-  alert(`✅ SALE SAVED!\nTicket #: ${sale.ticketNo}`);
+  alert(`✅ SALE SAVED!\nTicket #: ${sale.ticketNo}\nSubtotal: ₱${fmt(subtotal)}\nDiscount: ₱${fmt(discountAmt)}\nTOTAL: ₱${fmt(netTotal)}`);
   clearCart();
 }
-
 // ==============================================
 // CASHIER — VOID REQUEST
 // ==============================================
@@ -713,12 +805,11 @@ function requestVoid(ticketNo){
   alert('✅ VOID REQUEST SENT!\nWaiting for Admin Approval.');
   renderVoidRequestTab();
 }
-
 // ==============================================
 // CASHIER — STOCK-OUT REQUEST
 // ==============================================
 function renderStockOutReqTab(){
-  $('stockOutProdSel').innerHTML = PRODUCTS.filter(p=>p.storeId===user.storeId)
+  $('stockOutProdSel').innerHTML = PRODUCTS.filter(p=>p.storeCode===user.storeId)
     .map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   $('stockOutReqLog').innerHTML = STOCK_OUT_REQUESTS.filter(r=>r.storeId===user.storeId)
     .map(r=>`<tr>
@@ -738,19 +829,20 @@ function submitStockOutReq(){
   if(!pid||!qty||qty<1) return alert('⚠️ Fill all fields!');
   const prod = PRODUCTS.find(p=>p.id===pid);
   STOCK_OUT_REQUESTS.unshift({
-    id: Date.now(),
+    id: Date
+    .now(),
     datetime: dt(),
+    date: today(),
     storeId: user.storeId,
     prodId: pid,
     prodName: prod.name,
-    qty,
-    reasonType,
-    notes,
+    qty: qty,
+    reasonType: reasonType,
+    notes: notes,
     status: 'PENDING'
   });
   save('pos_stockout_req', STOCK_OUT_REQUESTS);
   alert('✅ STOCK-OUT REQUEST SUBMITTED!');
-  $('stockOutQty').value=''; $('stockOutNotes').value='';
   renderStockOutReqTab();
 }
 
@@ -758,75 +850,154 @@ function submitStockOutReq(){
 // CASHIER — END SHIFT
 // ==============================================
 function renderEndShiftTab(){
-  $('curFloat').textContent = '₱'+fmt(SHIFT_DATA.float);
-  const storeSales = SALES.filter(s=>user.storeId===s.storeId);
-  let dayTotal = storeSales.reduce((sum,s)=>sum+s.total,0);
-  $('dayTotal').textContent = '₱'+fmt(dayTotal);
-  $('expectedCash').textContent = '₱'+fmt(SHIFT_DATA.float + dayTotal);
+  $('curFloat').textContent = fmt(SHIFT_DATA.float);
+  let dayTotal = 0;
+  SALES.forEach(s=>{
+    if(s.storeId===user.storeId && s.date===today()){
+      dayTotal += s.total;
+    }
+  });
+  $('dayTotal').textContent = fmt(dayTotal);
+  $('expectedCash').textContent = fmt(SHIFT_DATA.float + dayTotal);
 }
+
 function setOpeningFloat(){
-  const amt = parseFloat(prompt('Enter Opening Cash / Float Amount:'));
-  if(!amt||amt<=0) return alert('⚠️ Enter valid amount!');
-  SHIFT_DATA.float = amt;
+  let val = prompt('Enter Opening Float Amount:');
+  if(val===null) return;
+  let num = parseFloat(val);
+  if(isNaN(num) || num < 0) return alert('⚠️ Enter valid amount!');
+  SHIFT_DATA.float = num;
   save('pos_shift_data', SHIFT_DATA);
-  alert('✅ Opening Cash Set!');
   renderEndShiftTab();
+  alert('✅ Opening Float Set!');
 }
+
 function submitEndShift(){
-  const d1000 = parseFloat($('d1000').value)||0;
-  const d500 = parseFloat($('d500').value)||0;
-  const d200 = parseFloat($('d200').value)||0;
-  const d100 = parseFloat($('d100').value)||0;
-  const d50 = parseFloat($('d50').value)||0;
-  const d20 = parseFloat($('d20').value)||0;
-  const dCoins = parseFloat($('dCoins').value)||0;
-  const totalCash = d1000*1000 + d500*500 + d200*200 + d100*100 + d50*50 + d20*20 + dCoins;
+  const d1000 = parseInt($('d1000').value) || 0;
+  const d500 = parseInt($('d500').value) || 0;
+  const d200 = parseInt($('d200').value) || 0;
+  const d100 = parseInt($('d100').value) || 0;
+  const d50 = parseInt($('d50').value) || 0;
+  const d20 = parseInt($('d20').value) || 0;
+  const dCoins = parseFloat($('dCoins').value) || 0;
   const reason = $('endShiftReason').value.trim() || 'Regular End of Shift';
 
+  const totalCash = d1000*1000 + d500*500 + d200*200 + d100*100 + d50*50 + d20*20 + dCoins;
+
+  let dayTotal = 0;
+  SALES.forEach(s=>{
+    if(s.storeId===user.storeId && s.date===today()){
+      dayTotal += s.total;
+    }
+  });
+  const expected = SHIFT_DATA.float + dayTotal;
+  const variance = totalCash - expected;
+
   END_SHIFT_LOG.unshift({
+    id: Date.now(),
     datetime: dt(),
+    date: today(),
     storeId: user.storeId,
+    cashier: user.storeName,
     openingFloat: SHIFT_DATA.float,
-    declaredCash: totalCash,
-    denomination: { d1000,d500,d200,d100,d50,d20,coins:dCoins },
-    reason
+    daySales: dayTotal,
+    expectedCash: expected,
+    actualCash: totalCash,
+    variance: variance,
+    denominations: { d1000, d500, d200, d100, d50, d20, dCoins },
+    reason: reason
   });
   save('pos_endshift_log', END_SHIFT_LOG);
 
-  // Reset for next shift
+  // Reset float to 0 for next shift
   SHIFT_DATA.float = 0;
   save('pos_shift_data', SHIFT_DATA);
-  SALES = SALES.filter(s=>s.storeId!==user.storeId);
-  save('pos_sales', SALES);
 
-  alert(`✅ SHIFT ENDED!\nDeclared Cash: ₱${fmt(totalCash)}\nReason: ${reason}`);
-  $('d1000').value='';$('d500').value='';$('d200').value='';$('d100').value='';
-  $('d50').value='';$('d20').value='';$('dCoins').value='';$('endShiftReason').value='';
-  showTab('sell');
+  alert(`✅ SHIFT ENDED!
+Opening Float: ₱${fmt(END_SHIFT_LOG[0].openingFloat)}
+Day's Sales: ₱${fmt(dayTotal)}
+Expected: ₱${fmt(expected)}
+Actual: ₱${fmt(totalCash)}
+Variance: ₱${fmt(variance)}`);
+
+  // Clear form
+  $('d1000').value='';
+  $('d500').value='';
+  $('d200').value='';
+  $('d100').value='';
+  $('d50').value='';
+  $('d20').value='';
+  $('dCoins').value='';
+  $('endShiftReason').value='';
+
+  logout();
 }
 
 // ==============================================
 // ADMIN — STOCKS OVERVIEW
 // ==============================================
 function renderAdminStocksTab(){
-  renderStoreSelects();
-  const sf = $('stockViewStore').value;
-  $('stockInProd').innerHTML = PRODUCTS.map(p=>`<option value="${p.id}">${p.name} — ${p.storeCode}</option>`).join('');
-  const vp = sf==='ALL' ? PRODUCTS : PRODUCTS.filter(p=>p.storeCode===sf);
-  $('adminStockBody').innerHTML = vp.map(p=>{
-    const key = `${p.storeCode}|${p.id}`;
-    const qty = STOCKS[key]||0;
-    let st = qty===0 ? '<span class="tag danger">OUT OF STOCK</span>' :
-             qty<5 ? '<span class="tag warn">LOW STOCK</span>' :
-             '<span class="tag cash">IN STOCK</span>';
-    return `<tr><td>${p.storeCode}</td><td>${p.name}</td><td>${qty}</td><td>${st}</td><td>—</td></tr>`;
-  }).join('') || '<tr><td colspan="5" class="empty">No products found.</td>';
+  $('stockViewStore').innerHTML = '<option value="ALL">All Stores</option>' +
+    STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`);
 
-  // PENDING STOCK-OUT REQUESTS
-  const pending = STOCK_OUT_REQUESTS.filter(r=>r.status==='PENDING');
-  $('pendingStockOutBody').innerHTML = pending.length ? pending.map(r=>`
-    <tr>
-      <td>${r.datetime}</td>
+  let filter = $('stockViewStore').value;
+  let html = '';
+  PRODUCTS.forEach(p=>{
+    if(filter!=='ALL' && p.storeCode!==filter) return;
+    let key = `${p.storeCode}|${p.id}`;
+    let qty = STOCKS[key] || 0;
+    let status = qty<=0 ? '<span class="tag danger">OUT OF STOCK</span>' :
+                 qty<=5 ? '<span class="tag warn">LOW</span>' :
+                 '<span class="tag cash">AVAILABLE</span>';
+    html += `<tr>
+      <td>${p.storeCode}</td>
+      <td>${p.name}</td>
+      <td><strong>${qty}</strong></td>
+      <td>${status}</td>
+      <td><button class="btn-sm btn-green" onclick="restockPrompt('${p.storeCode}','${p.id}')">+RESTOCK</button></td>
+    </tr>`;
+  });
+  $('adminStockBody').innerHTML = html || '<tr><td colspan="5" class="empty">No products found.</td>';
+
+  // Load stock-in dropdowns
+  $('stockInStore').innerHTML = STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`);
+  $('stockInProd').innerHTML = PRODUCTS.map(p=>`<option value="${p.id}">${p.storeCode} | ${p.name}</option>`);
+
+  // Pending Stock-Out Requests
+  renderPendingStockOut();
+}
+
+function restockPrompt(storeCode, prodId){
+  let qty = prompt('Enter Quantity to Add:');
+  if(qty===null) return;
+  let num = parseInt(qty);
+  if(isNaN(num) || num<1) return alert('⚠️ Enter valid quantity!');
+  const key = `${storeCode}|${prodId}`;
+  STOCKS[key] = (STOCKS[key] || 0) + num;
+  save('pos_stocks', STOCKS);
+  alert('✅ STOCK UPDATED!');
+  renderAdminStocksTab();
+}
+
+function stockIn(){
+  let store = $('stockInStore').value;
+  let prodId = $('stockInProd').value;
+  let qty = parseInt($('stockInQty').value);
+  if(!store || !prodId || !qty || qty<1) return alert('⚠️ Fill all fields!');
+  const key = `${store}|${prodId}`;
+  STOCKS[key] = (STOCKS[key] || 0) + qty;
+  save('pos_stocks', STOCKS);
+  $('stockInQty').value='';
+  alert('✅ STOCKS ADDED!');
+  renderAdminStocksTab();
+}
+
+function renderPendingStockOut(){
+  let html = '';
+  STOCK_OUT_REQUESTS.forEach(r=>{
+    if(r.status!=='PENDING') return;
+    html += `<tr>
+      <td>${r.date}</td>
       <td>${r.storeId}</td>
       <td>${r.prodName}</td>
       <td>${r.qty}</td>
@@ -836,98 +1007,119 @@ function renderAdminStocksTab(){
         <button class="btn-sm btn-green" onclick="approveStockOut('${r.id}')">✅Approve</button>
         <button class="btn-sm btn-red" onclick="rejectStockOut('${r.id}')">❌Reject</button>
       </td>
-    </tr>`).join('') : '<tr><td colspan="7" class="empty">No pending requests.</td>';
+    </tr>`;
+  });
+  $('pendingStockOutBody').innerHTML = html || '<tr><td colspan="7" class="empty">No pending requests.</td>';
 }
-function stockIn(){
-  const sc = $('stockInStore').value;
-  const pid = $('stockInProd').value;
-  const qty = parseInt($('stockInQty').value);
-  if(!sc||!pid||!qty||qty<1) return alert('⚠️ Fill all fields correctly!');
-  const key = `${sc}|${pid}`;
-  STOCKS[key] = (STOCKS[key]||0) + qty;
-  save('pos_stocks', STOCKS);
-  $('stockInQty').value='';
-  renderAdminStocksTab();
-  alert('✅ STOCKS ADDED!');
-}
-function approveStockOut(reqId){
-  const req = STOCK_OUT_REQUESTS.find(r=>r.id==reqId);
+
+function approveStockOut(id){
+  let req = STOCK_OUT_REQUESTS.find(r=>r.id==id);
   if(!req) return;
-  req.status = 'APPROVED';
   const key = `${req.storeId}|${req.prodId}`;
   STOCKS[key] = Math.max(0, (STOCKS[key]||0) - req.qty);
-  save('pos_stockout_req', STOCK_OUT_REQUESTS);
+  req.status = 'APPROVED';
   save('pos_stocks', STOCKS);
-  alert('✅ Request Approved & Stock Deducted!');
+  save('pos_stockout_req', STOCK_OUT_REQUESTS);
+  alert('✅ REQUEST APPROVED — Stock deducted.');
   renderAdminStocksTab();
 }
-function rejectStockOut(reqId){
-  const req = STOCK_OUT_REQUESTS.find(r=>r.id==reqId);
+
+function rejectStockOut(id){
+  let req = STOCK_OUT_REQUESTS.find(r=>r.id==id);
   if(!req) return;
   req.status = 'REJECTED';
   save('pos_stockout_req', STOCK_OUT_REQUESTS);
-  alert('❌ Request Rejected!');
+  alert('❌ REQUEST REJECTED.');
   renderAdminStocksTab();
 }
 
 // ==============================================
 // ADMIN — PRODUCTS
 // ==============================================
-function renderStoreSelects(){
-  const o=()=> STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
-  $('prodStoreSel').innerHTML = o();
-  $('stockInStore').innerHTML = '<option value="">-- Select Store --</option>' + o();
-  $('stockViewStore').innerHTML = '<option value="ALL">All Stores</option
-    ' + o();
+function renderProductTab(){
+  $('prodStoreSel').innerHTML = STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`);
+  $('prodBody').innerHTML = PRODUCTS.map(p=>`<tr>
+    <td>${p.storeCode}</td>
+    <td>${p.category}</td>
+    <td>${p.name}</td>
+    <td>₱${fmt(p.price)}</td>
+    <td>
+      <button class="btn-sm btn-orange" onclick="editProduct('${p.id}')">✏️Edit</button>
+      <button class="btn-sm btn-red" onclick="deleteProduct('${p.id}')">🗑️Del</button>
+    </td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty">No products yet.</td>';
 }
 
-function renderProductTab(){
-  renderStoreSelects();
-  $('prodBody').innerHTML = PRODUCTS.map(p=>
-    `<tr><td>${p.storeCode}</td><td>${p.category}</td><td>${p.name}</td><td>₱${fmt(p.price)}</td>
-    <td><button class="btn-sm btn-red" onclick="delProduct('${p.id}')">Delete</button></td></tr>`
-  ).join('');
-}
 function addProduct(){
-  const cat = $('newCat').value.trim();
-  const name = $('newProdName').value.trim();
-  const price = parseFloat($('newProdPrice').value);
-  const sc = $('prodStoreSel').value;
-  if(!cat||!name||!price||!sc) return alert('⚠️ Fill all fields!');
-  PRODUCTS.push({id:'p'+Date.now(),category:cat,name,price,storeCode:sc});
+  let cat = $('newCat').value.trim();
+  let name = $('newProdName').value.trim();
+  let price = parseFloat($('newProdPrice').value);
+  let store = $('prodStoreSel').value;
+  if(!cat || !name || !price || !store || price<=0) return alert('⚠️ Fill all fields correctly!');
+  let id = 'PRD'+Date.now();
+  PRODUCTS.push({ id, category:cat, name, price, storeCode:store });
   save('pos_products', PRODUCTS);
-  $('newCat').value='';$('newProdName').value='';$('newProdPrice').value='';
-  renderProductTab(); alert('✅ PRODUCT ADDED!');
+  $('newCat').value='';
+  $('newProdName').value='';
+  $('newProdPrice').value='';
+  alert('✅ PRODUCT ADDED!');
+  renderProductTab();
 }
-function delProduct(pid){
-  if(!confirm('Delete this product?')) return;
-  PRODUCTS = PRODUCTS.filter(p=>p.id!==pid);
-  save('pos_products', PRODUCTS); renderProductTab();
+
+function editProduct(pid){
+  let p = PRODUCTS.find(x=>x.id===pid);
+  if(!p) return;
+  let name = prompt('Edit Product Name:', p.name);
+  if(name===null) return;
+  let price = prompt('Edit Price:', p.price);
+  if(price===null) return;
+  price = parseFloat(price);
+  if(isNaN(price) || price<=0) return alert('⚠️ Invalid price!');
+  p.name = name.trim() || p.name;
+  p.price = price;
+  save('pos_products', PRODUCTS);
+  alert('✅ PRODUCT UPDATED!');
+  renderProductTab();
+}
+
+function deleteProduct(pid){
+  if(!confirm('⚠️ Delete this product? Cannot undo!')) return;
+  PRODUCTS = PRODUCTS.filter(x=>x.id!==pid);
+  save('pos_products', PRODUCTS);
+  alert('✅ PRODUCT DELETED!');
+  renderProductTab();
 }
 
 // ==============================================
 // ADMIN — STORES
 // ==============================================
 function renderStoreTab(){
-  $('storeBody').innerHTML = STORES.map((s,i)=>
-    `<tr><td>${s.code}</td><td>${s.name}</td>
-    <td><button class="btn-sm btn-red" onclick="delStore(${i})">Delete</button></td></tr>`
-  ).join('');
+  $('storeBody').innerHTML = STORES.map(s=>`<tr>
+    <td><strong>${s.code}</strong></td>
+    <td>${s.name}</td>
+    <td><button class="btn-sm btn-red" onclick="deleteStore('${s.code}')">🗑️ DELETE</button></td>
+  </tr>`).join('') || '<tr><td colspan="3" class="empty">No stores yet.</td>';
 }
+
 function addStore(){
-  const code = $('newStoreCode').value.trim().toUpperCase();
-  const name = $('newStoreName').value.trim();
-  if(!code||!name) return alert('⚠️ Enter Store Code and Name!');
-  if(STORES.some(s=>s.code===code)) return alert('⚠️ Store Code already exists!');
-  STORES.push({code,name});
+  let code = $('newStoreCode').value.trim().toUpperCase();
+  let name = $('newStoreName').value.trim();
+  if(!code || !name) return alert('⚠️ Enter both Store Code and Name!');
+  if(STORES.find(s=>s.code===code)) return alert('⚠️ Store Code already exists!');
+  STORES.push({ code, name });
   save('pos_stores', STORES);
-  $('newStoreCode').value='';$('newStoreName').value='';
-  renderStoreTab(); alert('✅ STORE ADDED!');
+  $('newStoreCode').value='';
+  $('newStoreName').value='';
+  alert('✅ STORE ADDED!');
+  renderStoreTab();
 }
-function delStore(i){
-  if(!confirm('Delete this store?')) return;
-  STORES.splice(i,1);
-  save('pos_stores', STORES); renderStoreTab();
+
+function deleteStore(code){
+  if(!confirm(`⚠️ Delete store ${code}? This cannot be undone!`)) return;
+  STORES = STORES.filter(s=>s.code!==code);
+  save('pos_stores', STORES);
+  alert('✅ STORE DELETED!');
+  renderStoreTab();
 }
 
 // ==============================================
@@ -935,81 +1127,128 @@ function delStore(i){
 // ==============================================
 function renderSalesReport(){
   $('rptDate').textContent = D();
-  const storeSales = SALES.filter(s=>user.storeId==='ALL'||s.storeId===user.storeId);
-  let total=0, cashTotal=0, gcashTotal=0;
-  storeSales.forEach(s=>{
-    total += s.total;
-    if(s.method==='cash') cashTotal += s.total;
-    else if(s.method==='gcash') gcashTotal += s.total;
-    else if(s.method==='split'){ cashTotal += s.cashAmt||0; gcashTotal += s.gcashAmt||0; }
-  });
-  $('rptTotal').textContent = fmt(total);
-  $('rptCash').textContent = fmt(cashTotal);
-  $('rptGCash').textContent = fmt(gcashTotal);
+  $('discRptDate').textContent = D();
 
-  $('salesLogBody').innerHTML = storeSales.map(s=>{
-    let mTag = s.method==='cash'?'<span class="tag cash">CASH</span>':
-               s.method==='gcash'?'<span class="tag gcash">GCash</span>':
-               '<span class="tag warn">SPLIT</span>';
-    return `<tr>
-      <td>${s.ticketNo}</td><td>${s.datetime}</td>
-      <td>${s.items.map(i=>i.name+'×'+i.qty).join(', ')}</td>
-      <td>₱${fmt(s.total)}</td><td>${mTag}</td><td>${s.cashier}</td>
-    </tr>`;
-  }).join('');
+  let totalSales = 0, cashSales=0, gcashSales=0;
+  SALES.forEach(s=>{
+    if(s.date===today()){
+      totalSales += s.total;
+      if(s.method==='cash') cashSales += s.total;
+      else if(s.method==='gcash') gcashSales += s.total;
+      else if(s.method==='split') { cashSales += (s.cashAmt||0); gcashSales += (s.gcashAmt||0); }
+    }
+  });
+  $('rptTotal').textContent = fmt(totalSales);
+  $('rptCash').textContent = fmt(cashSales);
+  $('rptGCash').textContent = fmt(gcashSales);
+
+  $('salesLogBody').innerHTML = SALES.filter(s=>s.date===today()).map(s=>`<tr>
+    <td>${s.ticketNo}</td>
+    <td>${s.datetime.split(' - ')[0]}</td>
+    <td>${s.items.map(i=>i.name+'×'+i.qty).join(', ')}</td>
+    <td>₱${fmt(s.total)}</td>
+    <td><span class="tag ${s.method==='cash'?'cash':'gcash'}">${s.method.toUpperCase()}</span></td>
+    <td>${s.cashier}</td>
+  </tr>`).join('') || '<tr><td colspan="6" class="empty">No sales today.</td>';
 
   // Void Requests Log
-  $('voidReqLogBody').innerHTML = VOID_REQUESTS.map(r=>{
-    let st = r.status==='PENDING'?'<span class="tag warn">PENDING</span>':
-             r.status==='APPROVED'?'<span class="tag cash">APPROVED</span>':
-             '<span class="tag danger">REJECTED</span>';
-    return `<tr>
-      <td>${r.ticketNo}</td><td>${r.cashier}</td><td>₱${fmt(r.amount)}</td>
-      <td>${r.reason}</td><td>${st}</td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="5" class="empty">No void requests.</td>';
+  $('voidReqLogBody').innerHTML = VOID_REQUESTS.map(v=>`<tr>
+    <td>${v.ticketNo}</td>
+    <td>${v.cashier}</td>
+    <td>₱${fmt(v.amount)}</td>
+    <td>${v.reason}</td>
+    <td><span class="tag ${v.status==='PENDING'?'warn':'cash'}">${v.status}</span></td>
+  </tr>`).join('') || '<tr><td colspan="5" class="empty">No void requests.</td>';
 }
 
 // ==============================================
-// SERVICE PROVIDER — SERVICE & PASSWORDS
+// ADMIN — DISCOUNT REPORTS
+// ==============================================
+function renderDiscountReport(){
+  let totalDisc=0, seniorDisc=0, pwdDisc=0;
+  DISCOUNTS.forEach(d=>{
+    if(d.datetime.includes(D())){
+      totalDisc += d.discountAmt;
+      if(d.discountType==='SENIOR') seniorDisc += d.discountAmt;
+      else if(d.discountType==='PWD') pwdDisc += d.discountAmt;
+    }
+  });
+  $('discTotalAmt').textContent = fmt(totalDisc);
+  $('discSeniorAmt').textContent = fmt(seniorDisc);
+  $('discPWDAmt').textContent = fmt(pwdDisc);
+
+  $('discountLogBody').innerHTML = DISCOUNTS.filter(d=>d.datetime.includes(D())).map(d=>`<tr>
+    <td>${d.ticketNo}</td>
+    <td>${d.datetime}</td>
+    <td>${d.discountType}</td>
+    <td>${d.discountId}</td>
+    <td>${d.discountName}</td>
+    <td>₱${fmt(d.subtotal)}</td>
+    <td>₱${fmt(d.discountAmt)}</td>
+    <td>₱${fmt(d.netTotal)}</td>
+    <td>${d.cashier}</td>
+  </tr>`).join('') || '<tr><td colspan="9" class="empty">No discounts today.</td>';
+}
+
+// ==============================================
+// SERVICE PROVIDER — SERVICE & PASSWORD
 // ==============================================
 function renderServiceTab(){
-  const active = isServiceActive();
-  $('servStatus').innerHTML = active ? '<span class="tag cash">✅ ACTIVE</span>' : '<span class="tag danger">❌ STOPPED / EXPIRED</span>';
-  $('servExpiry').textContent = getExpiryDate().toLocaleString('en-PH');
+  $('servStatus').innerHTML = SERVICE.active ? 
+    '<span class="tag cash">✅ ACTIVE</span>' : 
+    '<span class="tag danger">❌ STOPPED</span>';
+  $('servExpiry').textContent = getExpiryDate().toLocaleDateString('en-PH') + ' — ' + getExpiryDate().toLocaleTimeString('en-PH');
 }
-function extendService(days,price){
+
+function extendService(days, price){
   let exp = getExpiryDate();
   exp.setDate(exp.getDate() + days);
   SERVICE.expiry = exp.toISOString();
   SERVICE.active = true;
   saveService();
-  alert(`✅ Service Extended!\n${days} Days Added\nExpires: ${exp.toLocaleDateString('en-PH')}\nPaid: ₱${price}`);
+  alert(`✅ SERVICE EXTENDED!\n${days} Days Added — ₱${price}\nNew Expiry: ${exp.toLocaleDateString('en-PH')}`);
   renderServiceTab();
 }
+
 function stopService(){
-  if(!confirm('⚠️ STOP / PAUSE SERVICE? System will lock for ALL USERS until resumed!')) return;
-  SERVICE.active = false; saveService();
-  alert('⏹️ SERVICE STOPPED!'); renderServiceTab();
+  SERVICE.active = false;
+  saveService();
+  alert('⏹️ SERVICE STOPPED! System will lock on refresh.');
+  renderServiceTab();
 }
+
 function resumeService(){
-  SERVICE.active = true; saveService();
-  alert('▶️ SERVICE RESUMED!'); renderServiceTab();
+  SERVICE.active = true;
+  saveService();
+  alert('▶️ SERVICE RESUMED!');
+  renderServiceTab();
 }
+
 function spChangePassword(){
-  const newPass = $('spNewAdminPass').value.trim();
-  if(!newPass||newPass.length<4) return alert('⚠️ Enter new password (min 4 chars)!');
-  PASS.admin = newPass; save('pos_pass',PASS);
+  let np = $('spNewAdminPass').value.trim();
+  if(!np) return alert('⚠️ Enter new password!');
+  PASS.admin = np;
+  save('pos_pass', PASS);
   $('spNewAdminPass').value='';
-  alert('✅ Admin Password Updated!');
+  alert('✅ ADMIN PASSWORD UPDATED!');
 }
+
 function resetAllData(){
-  if(!confirm('⚠️⚠️⚠️ RESET EVERYTHING TO DEFAULT?\n\nAll data will be cleared!\nPasswords reset to default!')) return;
+  if(!confirm('⚠️⚠️⚠️ This will DELETE ALL DATA — Sales, Products, Stores, Stocks, Everything!\n\nType YES to confirm.')) return;
+  if(prompt('Type YES to confirm DELETE ALL:') !== 'YES') return;
   localStorage.clear();
   PASS = { ...DEFAULT_PASS };
+  STORES = [];
+  PRODUCTS = [];
+  STOCKS = {};
+  SALES = [];
+  DISCOUNTS = [];
+  VOID_REQUESTS = [];
+  STOCK_OUT_REQUESTS = [];
+  SHIFT_DATA = { float:0 };
+  END_SHIFT_LOG = [];
   SERVICE = { active:true, expiry:null, firstUse:null };
-  saveService(); save('pos_pass',PASS);
-  alert('✅ SYSTEM RESET COMPLETE!\nDefault Passwords:\nCashier: 1234\nAdmin: 8888\nSP: 19970407chan');
+  alert('✅ ALL DATA RESET TO DEFAULT!');
   location.reload();
 }
 </script>
