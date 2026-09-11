@@ -522,7 +522,6 @@ const D = () => new Date().toLocaleDateString('en-PH');
 const tid = () => 'TXN-'+Date.now();
 
 // ═══════════════════ OFFLINE DATA STORAGE ═══════════════════
-// ALL DATA stored locally — works 100% OFFLINE
 function load(key, def){ 
   try {
     const data = localStorage.getItem(key);
@@ -621,22 +620,28 @@ let selectedProductForStockOut = null;
 let discountTotal = 0;
 let activeShift = null;
 
-// ═══════════════════ INIT CHECK ═══════════════════
+// ═══════════════════ INIT — ALWAYS SHOW LOGIN FIRST ═══════════════════
 window.onload = function(){
-  if(!isServiceActive()){
-    showExpiryScreen();
-    return;
-  }
   renderStoreSelects();
+  // ❌ REMOVED expiry check here — was blocking login!
+  // Login modal shows automatically — no need to check expiry yet
 };
 
 // ═══════════════════ LOGIN ═══════════════════
 function showLoginForm(role){
   ['cashierForm','adminForm','spForm'].forEach(id => $(id).classList.add('hidden'));
-  if(role==='cashier'){ $('cashierForm').classList.remove('hidden'); renderCashierStoreList(); }
-  else if(role==='admin'){ $('adminForm').classList.remove('hidden'); }
-  else if(role==='sp'){ $('spForm').classList.remove('hidden'); }
+  if(role==='cashier'){ 
+    $('cashierForm').classList.remove('hidden'); 
+    renderCashierStoreList(); 
+  }
+  else if(role==='admin'){ 
+    $('adminForm').classList.remove('hidden'); 
+  }
+  else if(role==='sp'){ 
+    $('spForm').classList.remove('hidden'); 
+  }
 }
+
 function renderCashierStoreList(){
   const c = $('cashierStoreList');
   if(!STORES.length){
@@ -645,37 +650,54 @@ function renderCashierStoreList(){
   }
   c.innerHTML = STORES.map((s,i)=>`<div class="store-card" id="cs-${i}" onclick="pickCashierStore(${i})"><strong>${s.code}</strong> — ${s.name}</div>`).join('');
 }
+
 let selectedCashierStoreIdx = null;
 function pickCashierStore(i){
   selectedCashierStoreIdx = i;
   document.querySelectorAll('.store-card').forEach(e=>e.classList.remove('selected'));
   $(`cs-${i}`).classList.add('selected');
 }
+
 function loginCashier(){
   const pass = $('cashierPass').value.trim();
+  if(!pass) return alert('⚠️ Ipasok ang Password!');
   if(pass !== PASS.cashier) return alert('⚠️ Maling Password!');
-  if(selectedCashierStoreIdx===null) return alert('⚠️ Pumili ng tindahan!');
+  if(selectedCashierStoreIdx===null) return alert('⚠️ Pumili muna ng Tindahan!');
   const store = STORES[selectedCashierStoreIdx];
   user = { logged:true, role:'cashier', storeId:store.code, storeName:store.name, name:'Cashier' };
-  startApp();
+  startApp(); // ✅ Expiry check happens INSIDE here
 }
+
 function loginAdmin(){
   const pass = $('adminPass').value.trim();
+  if(!pass) return alert('⚠️ Ipasok ang Password!');
   if(pass !== PASS.admin) return alert('⚠️ Maling Admin Password!');
   user = { logged:true, role:'admin', storeId:'ALL', storeName:'Lahat ng Tindahan', name:'Admin' };
   startApp();
 }
+
 function loginSP(){
   const pass = $('spPass').value.trim();
+  if(!pass) return alert('⚠️ Ipasok ang Password!');
   if(pass !== PASS.sp) return alert('⚠️ Maling SP Password!');
   user = { logged:true, role:'sp', storeId:'ALL', storeName:'System', name:'Service Provider' };
   startApp();
 }
+
 function startApp(){
+  // ✅ CHECK EXPIRY ONLY AFTER LOGIN
+  if(!isServiceActive()){
+    showExpiryScreen();
+    $('loginModal').classList.add('hidden');
+    return;
+  }
+  // ✅ Proceed normally
   $('loginModal').classList.add('hidden');
   $('app').classList.remove('hidden');
   $('userInfoLine').textContent = `${user.storeName} | ${user.role.toUpperCase()} | 🔌 OFFLINE`;
   $('rptDate').textContent = D();
+  
+  // Show role-based tabs
   if(user.role==='cashier'){
     ['tabSell','tabVoidReq','tabCashReq','tabProdOutReq','tabShift','tabSales'].forEach(id=>$(id).classList.remove('hidden'));
   } else if(user.role==='admin'){
@@ -683,8 +705,10 @@ function startApp(){
   } else if(user.role==='sp'){
     ['tabService','tabDeleted'].forEach(id=>$(id).classList.remove('hidden'));
   }
+  
   showTab(user.role==='sp'?'service':'sell');
 }
+
 function logout(){ if(confirm('🚪 Gusto mo bang mag-logout?')) location.reload(); }
 
 // ═══════════════════ TAB NAVIGATION ═══════════════════
@@ -744,497 +768,716 @@ function addToCart(idx){
   else cart.push({ key, name:p.name, price:p.price, qty:1, prodId:pid });
   updateCartDisplay();
 }
-function recalcTotals(){
-  let subt = cart.reduce((s,x)=>s+x.price*x.qty,0);
-  let discType = $('discountSel').value;
-  discountTotal = (discType==='senior' || discType==='pwd') ? subt*0.05 : 0;
-  $('grandTotal').textContent = fmt(subt - discountTotal);
-}
-function updateCartDisplay(){
+  function updateCartDisplay(){
+  let html = '';
+  discountTotal = 0;
+  cart.forEach((item,i)=>{
+    let subtotal = item.price * item.qty;
+    html += `<div class="cart-row">
+      <div><strong>${item.name}</strong> × ${item.qty}</div>
+      <div>₱${fmt(subtotal)} <button class="btn-sm btn-red" onclick="removeCartItem(${i})">×</button></div>
+    </div>`;
+  });
   if(!cart.length){
-    $('cartArea').innerHTML = '<div class
-      class="empty">Wala pang gamit.</div>';
-    }
-    let html = cart.map((it, i) => `
-        <div class="cart-row">
-            <div><strong>${it.name}</strong> ×${it.qty}</div>
-            <div>₱${fmt(it.price * it.qty)}
-                <button class="btn-sm btn-red" onclick="removeCartItem(${i})">✕</button>
-            </div>
-        </div>`).join('');
-    $('cartArea').innerHTML = html;
-    recalcTotals();
+    html = '<div class="empty">Wala pang gamit.</div>';
+  }
+  $('cartArea').innerHTML = html;
+  recalcTotals();
 }
-function removeCartItem(i) { cart.splice(i, 1); updateCartDisplay(); }
-function clearCart() { cart = []; selectedCategory = null; $('prodSearch').value = ''; updateCartDisplay(); renderSellScreen(); }
+
+function removeCartItem(i){
+  cart.splice(i,1);
+  updateCartDisplay();
+}
+
+function recalcTotals(){
+  let subtotal = cart.reduce((sum,it)=>sum + it.price * it.qty, 0);
+  let discType = $('discountSel').value;
+  if(discType==='senior' || discType==='pwd'){
+    discountTotal = subtotal * 0.05;
+  } else {
+    discountTotal = 0;
+  }
+  let grand = subtotal - discountTotal;
+  $('grandTotal').textContent = fmt(grand);
+}
+
+function clearCart(){
+  if(cart.length && !confirm('🗑️ Sigurado bang lilinisin ang lahat?')) return;
+  cart = [];
+  $('discountSel').value = 'none';
+  $('discId').value = '';
+  $('discName').value = '';
+  discountTotal = 0;
+  updateCartDisplay();
+}
 
 // ═══════════════════ PAYMENT ═══════════════════
-let pendingSplitTxn = null;
-function payCash() {
-    let total = parseFloat($('grandTotal').textContent);
-    if (total <= 0) return alert('⚠️ Walang babayaran!');
-    let given = parseFloat(prompt('Ipasok ang ibinigay na pera:'));
-    if (isNaN(given) || given < total) return alert('⚠️ Kulang ang ibinigay na pera!');
-    completeSale('CASH', total, given, null, null);
+function payCash(){
+  if(!cart.length) return alert('⚠️ Walang gamit sa benta!');
+  processPayment('CASH', 0);
 }
-function payGCash() {
-    let total = parseFloat($('grandTotal').textContent);
-    if (total <= 0) return alert('⚠️ Walang babayaran!');
-    let ref = prompt('Ipasok ang GCash Reference #:');
-    if (!ref) return alert('⚠️ Kinakailangan ang Reference #!');
-    completeSale('GCASH', total, null, ref, null);
-}
-function openSplitPay() {
-    let total = parseFloat($('grandTotal').textContent);
-    if (total <= 0) return alert('⚠️ Walang babayaran!');
-    $('splitTotal').textContent = '₱' + fmt(total);
-    $('splitCash').value = '';
-    $('splitGCash').value = '';
-    $('splitRef').value = '';
-    pendingSplitTxn = { total };
-    $('splitModal').classList.remove('hidden');
-}
-function calcSplitGCash() {
-    if (!pendingSplitTxn) return;
-    let cash = parseFloat($('splitCash').value) || 0;
-    let rem = Math.max(0, pendingSplitTxn.total - cash);
-    $('splitGCash').value = fmt(rem);
-}
-function confirmSplitPay() {
-    let cash = parseFloat($('splitCash').value) || 0;
-    let ewallet = parseFloat($('splitGCash').value) || 0;
-    let ref = $('splitRef').value.trim();
-    if (cash + ewallet < pendingSplitTxn.total) return alert('⚠️ Kulang ang kabuuan!');
-    if (ewallet > 0 && !ref) return alert('⚠️ Ilagay ang GCash Reference #!');
-    completeSale('SPLIT', pendingSplitTxn.total, cash, ref, ewallet);
-    closeSplitModal();
-}
-function closeSplitModal() { $('splitModal').classList.add('hidden'); pendingSplitTxn = null; }
 
-// ═══════════════════ COMPLETE SALE & RECEIPT ═══════════════════
-function completeSale(payMethod, total, cashGiven, ref, ewalletAmt) {
-    if (activeShift === null) return alert('⚠️ Wala pang bukas na shift! Buksan muna ang Shift.');
-    // Deduct stock
-    cart.forEach(it => {
-        let pid = it.prodId;
-        STOCKS[pid] = (STOCKS[pid] || 0) - it.qty;
-    });
-    save('pos_stocks', STOCKS);
-
-    let txn = {
-        id: tid(),
-        date: today(),
-        time: new Date().toLocaleTimeString('en-PH'),
-        timestamp: Date.now(),
-        storeId: user.storeId,
-        cashier: user.name,
-        shiftId: activeShift.id,
-        items: [...cart],
-        subtotal: cart.reduce((s, x) => s + x.price * x.qty, 0),
-        discount: discountTotal,
-        payMethod,
-        total,
-        cashGiven,
-        change: cashGiven ? fmt(cashGiven - total) : null,
-        ref,
-        ewalletAmt
-    };
-    SALES.unshift(txn);
-    save('pos_sales', SALES);
-
-    printReceiptPreview(txn);
-    clearCart();
+function payGCash(){
+  if(!cart.length) return alert('⚠️ Walang gamit sa benta!');
+  let ref = prompt('📱 Ipasok ang Reference #:');
+  if(ref===null) return;
+  processPayment('GCASH', 0, ref || '');
 }
-function printReceiptPreview(txn) {
-    let lines = [];
-    lines.push('        GENERAL OFFLINE POS');
-    lines.push(`   ${txn.storeId} — ${txn.cashier}`);
-    lines.push(`   ${new Date(txn.timestamp).toLocaleString('en-PH')}`);
-    lines.push(`   TICKET: ${txn.id}`);
-    lines.push('--------------------------------');
-    txn.items.forEach(it => lines.push(`${it.name.padEnd(18)}${fmt(it.price * it.qty).padStart(8)}  ×${it.qty}`));
-    lines.push('--------------------------------');
-    if (txn.discount > 0) lines.push(`DISKWENTO:             -₱${fmt(txn.discount)}`);
-    lines.push(`KABUUAN:                ₱${fmt(txn.total)}`);
-    lines.push('--------------------------------');
-    if (txn.payMethod === 'CASH') {
-        lines.push(`IBINAYAD:               ₱${fmt(txn.cashGiven)}`);
-        lines.push(`SUKLI:                  ₱${txn.change}`);
-    } else if (txn.payMethod === 'GCASH') {
-        lines.push(`GCASH:                  ₱${fmt(txn.total)}`);
-        lines.push(`REF #: ${txn.ref}`);
-    } else {
-        lines.push(`CASH:                   ₱${fmt(txn.cashGiven)}`);
-        lines.push(`GCASH:                  ₱${fmt(txn.ewalletAmt)}`);
-        lines.push(`REF #: ${txn.ref}`);
+
+function openSplitPay(){
+  if(!cart.length) return alert('⚠️ Walang gamit sa benta!');
+  let total = cart.reduce((sum,it)=>sum + it.price * it.qty, 0) - discountTotal;
+  $('splitTotal').textContent = '₱'+fmt(total);
+  $('splitCash').value = '';
+  $('splitGCash').value = '';
+  $('splitRef').value = '';
+  $('splitModal').classList.remove('hidden');
+}
+
+function calcSplitGCash(){
+  let total = cart.reduce((sum,it)=>sum + it.price * it.qty, 0) - discountTotal;
+  let cash = parseFloat($('splitCash').value) || 0;
+  let gcash = Math.max(0, total - cash);
+  $('splitGCash').value = fmt(gcash);
+}
+
+function closeSplitModal(){ $('splitModal').classList.add('hidden'); }
+
+function confirmSplitPay(){
+  let total = cart.reduce((sum,it)=>sum + it.price * it.qty, 0) - discountTotal;
+  let cash = parseFloat($('splitCash').value) || 0;
+  let gcash = parseFloat($('splitGCash').value) || 0;
+  let ref = $('splitRef').value.trim();
+  if(cash + gcash < total - 0.01) return alert('⚠️ Kulang ang kabuuan!');
+  if(gcash>0 && !ref) return alert('⚠️ Ipasok ang Reference # para sa E-Wallet!');
+  closeSplitModal();
+  saveSale({
+    type:'SPLIT',
+    cashAmt: cash,
+    gcashAmt: gcash,
+    ref: ref
+  });
+}
+
+function processPayment(payType, cashGiven=0, ref=''){
+  saveSale({ type:payType, cashGiven, ref });
+}
+
+function saveSale(payInfo){
+  let subtotal = cart.reduce((sum,it)=>sum + it.price * it.qty, 0);
+  let grand = subtotal - discountTotal;
+  let txn = {
+    id: tid(),
+    storeId: user.storeId,
+    date: today(),
+    time: dt(),
+    items: cart.map(it=>({name:it.name, price:it.price, qty:it.qty, prodId:it.prodId})),
+    subtotal,
+    discount: discountTotal,
+    discType: $('discountSel').value,
+    discId: $('discId').value.trim(),
+    discName: $('discName').value.trim(),
+    total: grand,
+    payType: payInfo.type,
+    cashAmt: payInfo.cashAmt || grand,
+    gcashAmt: payInfo.gcashAmt || 0,
+    ref: payInfo.ref || '',
+    cashier: 'Cashier',
+    shiftId: activeShift?.id || null
+  };
+  SALES.unshift(txn);
+  save('pos_sales', SALES);
+
+  // ✅ Bawasan ang Stock
+  txn.items.forEach(it=>{
+    if(STOCKS[it.prodId]!==undefined){
+      STOCKS[it.prodId] = Math.max(0, STOCKS[it.prodId] - it.qty);
     }
-    lines.push('--------------------------------');
-    lines.push('   SALAMAT PO! — Muli po!');
+  });
+  save('pos_stocks', STOCKS);
 
-    $('receiptContent').textContent = lines.join('\n');
-    $('receiptModal').classList.remove('hidden');
-}
-function printReceipt() {
-    let w = window.open('', '', 'width=320,height=600');
-    w.document.open();
-    w.document.write(`<pre style="font-family:monospace;font-size:12px;white-space:pre-wrap;">${$('receiptContent').textContent}</pre>`);
-    w.document.close();
-    w.print();
-}
-function closeReceiptModal() { $('receiptModal').classList.add('hidden'); }
+  // ✅ Resibo
+  printReceiptData(txn);
 
-// ═══════════════════ SHIFT MANAGEMENT ═══════════════════
-function renderShiftScreen() {
-    let openShift = SHIFTS.find(s => s.storeId === user.storeId && s.closedAt === null);
-    activeShift = openShift || null;
-    if (activeShift) {
-        let start = new Date(activeShift.startedAt);
-        let mins = Math.floor((Date.now() - start) / 60000);
-        let dur = `${Math.floor(mins/60)} oras ${mins%60} min`;
-        $('shiftStatusArea').innerHTML = `
-            <div class="shift-indicator">
-                <strong>✅ SHIFT BUKAS</strong><br>
-                Simula: ${start.toLocaleString('en-PH')}<br>
-                Tagal: ${dur}
-            </div>
-            <button class="btn-red" onclick="openShiftCloseModal()">⏹️ ISARA ANG SHIFT</button>
-        `;
-    } else {
-        $('shiftStatusArea').innerHTML = `
-            <div class="shift-indicator" style="border-left-color:#16a34a;background:#f0fdf4">
-                <strong>🔒 WALANG BUKAS NA SHIFT</strong>
-            </div>
-            <button class="btn-green" onclick="openShift()">▶️ BUKAS ANG SHIFT</button>
-        `;
-    }
-    $('myShiftLog').innerHTML = SHIFTS.filter(s => s.storeId === user.storeId).sort((a,b)=>b.startedAt-a.startedAt).slice(0,7).map(s => {
-        let st = new Date(s.startedAt).toLocaleString('en-PH');
-        let end = s.closedAt ? new Date(s.closedAt).toLocaleString('en-PH') : 'Bukas pa';
-        return `<div class="cart-row"><span>${st}</span><span>${end}</span></div>`;
-    }).join('');
+  cart = [];
+  $('discountSel').value='none';
+  $('discId').value='';
+  $('discName').value='';
+  updateCartDisplay();
+  alert('✅ Benta Nakatapos!');
 }
-function openShift() {
-    if (activeShift) return alert('⚠️ May bukas na Shift na!');
-    activeShift = {
-        id: 'SHIFT-' + Date.now(),
-        storeId: user.storeId,
-        cashier: user.name,
-        startedAt: new Date().toISOString(),
-        closedAt: null,
-        startCash: 0,
-        endCash: 0,
-        endGcash: 0,
-        note: ''
-    };
-    SHIFTS.unshift(activeShift);
-    save('pos_shifts', SHIFTS);
-    renderShiftScreen();
-    alert('✅ Shift ay binuksan na!');
+
+// ═══════════════════ RECEIPT ═══════════════════
+function printReceiptData(txn){
+  let lines = [];
+  lines.push('══════════════════════════');
+  lines.push('        RESIBO');
+  lines.push('══════════════════════════');
+  lines.push('Tindahan: ' + txn.storeId);
+  lines.push('Ticket #: ' + txn.id);
+  lines.push('Petsa: ' + txn.time);
+  lines.push('──────────────────────────');
+  txn.items.forEach(it=>{
+    lines.push(`${it.name} x${it.qty}`);
+    lines.push(`      ₱${fmt(it.price*it.qty)}`);
+  });
+  lines.push('──────────────────────────');
+  lines.push(`Subtotal: ₱${fmt(txn.subtotal)}`);
+  if(txn.discount>0){
+    lines.push(`Diskwento: -₱${fmt(txn.discount)} (${txn.discType})`);
+  }
+  lines.push(`KABUUAN: ₱${fmt(txn.total)}`);
+  lines.push('──────────────────────────');
+  if(txn.payType==='SPLIT'){
+    lines.push(`💵 Cash: ₱${fmt(txn.cashAmt)}`);
+    lines.push(`📱 E-Wallet: ₱${fmt(txn.gcashAmt)}`);
+  } else if(txn.payType==='GCASH'){
+    lines.push(`📱 E-Wallet: ₱${fmt(txn.total)}`);
+    lines.push(`Ref #: ${txn.ref||'Wala'}`);
+  } else {
+    lines.push(`💵 Cash: ₱${fmt(txn.total)}`);
+  }
+  lines.push('══════════════════════════');
+  lines.push('  SALAMAT PO! Bumalik kayo!');
+  lines.push('══════════════════════════');
+
+  $('receiptContent').textContent = lines.join('\n');
+  $('receiptModal').classList.remove('hidden');
 }
-function openShiftCloseModal() {
-    if (!activeShift) return;
+
+function printReceipt(){
+  window.print();
+}
+function closeReceiptModal(){ $('receiptModal').classList.add('hidden'); }
+
+// ═══════════════════ SHIFT SYSTEM ═══════════════════
+function renderShiftScreen(){
+  let openShift = SHIFTS.find(s=>s.storeId===user.storeId && !s.ended);
+  activeShift = openShift || null;
+
+  if(activeShift){
     let start = new Date(activeShift.startedAt);
-    $('shiftStartTm').textContent = start.toLocaleString('en-PH');
-    let mins = Math.floor((Date.now() - start) / 60000);
-    $('shiftDuration').textContent = `${Math.floor(mins/60)}h ${mins%60}m`;
-    $('shiftCashOnHand').value = '';
-    $('shiftGcashOnHand').value = '';
-    $('shiftNote').value = '';
-    $('shiftCloseModal').classList.remove('hidden');
-}
-function closeShiftModal() { $('shiftCloseModal').classList.add('hidden'); }
-function confirmShiftClose() {
-    let cash = parseFloat($('shiftCashOnHand').value) || 0;
-    let gcash = parseFloat($('shiftGcashOnHand').value) || 0;
-    let note = $('shiftNote').value.trim();
-    if (!confirm('⚠️ Sigurado ka bang isasara ang Shift? Hindi na mababago!')) return;
-    activeShift.closedAt = new Date().toISOString();
-    activeShift.endCash = cash;
-    activeShift.endGcash = gcash;
-    activeShift.note = note;
-    activeShift = null;
-    save('pos_shifts', SHIFTS);
-    closeShiftModal();
-    renderShiftScreen();
-    alert('✅ Shift ay isinara na!');
-}
-
-// ═══════════════════ REPORTS & ADMIN SCREENS ═══════════════════
-function renderSalesReport() {
-    let todaySales = SALES.filter(t => t.date === today() && (user.storeId === 'ALL' || t.storeId === user.storeId));
-    let total = todaySales.reduce((s, t) => s + parseFloat(t.total), 0);
-    let cash = todaySales.filter(t => t.payMethod === 'CASH').reduce((s, t) => s + parseFloat(t.total), 0);
-    let gcash = todaySales.filter(t => t.payMethod !== 'CASH').reduce((s, t) => s + parseFloat(t.total), 0);
-    $('rptTotal').textContent = fmt(total);
-    $('rptCash').textContent = fmt(cash);
-    $('rptGCash').textContent = fmt(gcash);
-    $('salesLogBody').innerHTML = todaySales.map(txn => {
-        let payTag = txn.payMethod === 'CASH'
-            ? `<span class="tag cash">CASH</span>`
-            : `<span class="tag gcash">${txn.payMethod} — ${txn.ref||''}</span>`;
-        return `<tr>
-            <td>${txn.time}</td>
-            <td>${txn.items.map(i=>i.name+'×'+i.qty).join(', ')}</td>
-            <td>₱${fmt(txn.total)}</td>
-            <td>${payTag}</td>
-            <td>${txn.ref||'—'}</td>
-        </tr>`;
-    }).join('');
-}
-function showRangeReport() {
-    let f = $('rangeFrom').value, t = $('rangeTo').value;
-    let rangeSales = SALES.filter(x => x.date >= f && x.date <= t);
-    let total = rangeSales.reduce((s, x) => s + parseFloat(x.total), 0);
-    let cash = rangeSales.filter(x => x.payMethod === 'CASH').reduce((s, x) => s + parseFloat(x.total), 0);
-    let gcash = rangeSales.filter(x => x.payMethod !== 'CASH').reduce((s, x) => s + parseFloat(x.total), 0);
-    $('rangeResult').innerHTML = `
-        <hr class="sep">
-        <div class="grid3">
-            <div class="total-box-blue">KABUUAN:<br>₱${fmt(total)}</div>
-            <div class="total-box">CASH:<br>₱${fmt(cash)}</div>
-            <div class="total-box-orange">E-WALLET:<br>₱${fmt(gcash)}</div>
-        </div>
-        <p style="margin-top:8px">Mula ${f} hanggang ${t} — ${rangeSales.length} transaksyon</p>
+    let now = new Date();
+    let mins = Math.floor((now-start)/60000);
+    let hrs = Math.floor(mins/60);
+    let dur = hrs>0 ? `${hrs} oras ${mins%60} min` : `${mins} min`;
+    $('shiftStatusArea').innerHTML = `
+      <div class="shift-indicator">
+        <strong>✅ SHIFT BUKAS</strong><br>
+        Simula: ${start.toLocaleTimeString('en-PH')}<br>
+        Tumagal: ${dur}
+      </div>
+      <button class="btn-red" onclick="openShiftCloseModal()">⏹️ Isara ang Shift</button>
     `;
-}
-function renderStoreSelects() {
-    let opts = () => STORES.map(s => `<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
-    $('prodStoreSel').innerHTML = opts();
-    $('stockInStore').innerHTML = '<option value="">— Pumili —</option>' + opts();
-    $('stockViewStore').innerHTML = '<option value="ALL">Lahat ng Tindahan</option>' + opts();
-    $('shiftFilterStore').innerHTML = '<option value="ALL">Lahat ng Tindahan</option>' + opts();
-}
-function addStore() {
-    let code = $('newStoreCode').value.trim().toUpperCase();
-    let name = $('newStoreName').value.trim();
-    if (!code || !name) return alert('⚠️ Punan lahat!');
-    if (STORES.some(s => s.code === code)) return alert('⚠️ May ganun na Code!');
-    STORES.push({ code, name });
-    save('pos_stores', STORES);
-    renderStoresTab();
-    renderStoreSelects();
-    $('newStoreCode').value = ''; $('newStoreName').value = '';
-    alert('✅ Tindahan naidagdag!');
-}
-function renderStoresTab() {
-    $('storeBody').innerHTML = STORES.map(s => `<tr><td>${s.code}</td><td>${s.name}</td><td><button class="btn-sm btn-red" onclick="delStore('${s.code}')">Burahin</button></td></tr>`).join('');
-}
-function delStore(code) {
-    if (!confirm('⚠️ Burahin ang tindahang ito?')) return;
-    STORES = STORES.filter(s => s.code !== code);
-    save('pos_stores', STORES); renderStoresTab(); renderStoreSelects();
-}
-function addProduct() {
-    let cat = $('newCat').value.trim();
-    let name = $('newProdName').value.trim();
-    let price = parseFloat($('newProdPrice').value);
-    let storeId = $('prodStoreSel').value;
-    if (!cat || !name || !price || !storeId) return alert('⚠️ Punan lahat!');
-    PRODUCTS.push({ storeId, category: cat, name, price });
-    save('pos_products', PRODUCTS);
-    renderProductsTab();
-    renderStockProdSelect();
-    $('newCat').value = ''; $('newProdName').value = ''; $('newProdPrice').value = '';
-    alert('✅ Produkto naidagdag!');
-}
-function renderProductsTab() {
-    $('prodBody').innerHTML = PRODUCTS.map((p, i) => `<tr><td>${p.storeId}</td><td>${p.category}</td><td>${p.name}</td><td>₱${fmt(p.price)}</td><td><button class="btn-sm btn-red" onclick="delProduct(${i})">Burahin</button></td></tr>`).join('');
-}
-function delProduct(i) {
-    if (!confirm('⚠️ Burahin ang produktong ito?')) return;
-    PRODUCTS.splice(i, 1);
-    save('pos_products', PRODUCTS); renderProductsTab();
-}
-function renderStockProdSelect() {
-    let store = $('stockInStore').value;
-    let list = store ? PRODUCTS.filter(p => p.storeId === store) : PRODUCTS;
-    $('stockInProd').innerHTML = '<option value="">— Pumili —</option>' + list.map(p => `<option value="${p.storeId}||${p.category}||${p.name}">${p.name} — ₱${fmt(p.price)}</option>`).join('');
-}
-function stockIn() {
-    let pid = $('stockInProd').value, qty = parseInt($('stockInQty').value);
-    if (!pid || !qty) return alert('⚠️ Punan lahat!');
-    STOCKS[pid] = (STOCKS[pid] || 0) + qty;
-    save('pos_stocks', STOCKS);
-    renderStockTab();
-    alert(`✅ Stock naidagdag! Bagong dami: ${STOCKS[pid]}`);
-}
-function renderStockTab() {
-    let filter = $('stockViewStore').value;
-    $('stockBody').innerHTML = Object.entries(STOCKS).map(([pid, qty]) => {
-        let [storeId, cat, name] = pid.split('||');
-        if (filter !== 'ALL' && storeId !== filter) return '';
-        let status = qty === 0 ? '<span class="tag danger">UBOS NA</span>' : qty < 5 ? '<span class="tag warn">Konti na</span>' : '<span class="tag success">Sapat</span>';
-        return `<tr><td>${storeId}</td><td>${name}</td><td>${qty}</td><td>${status}</td><td><button class="btn-sm btn-orange" onclick="openStockOutModal('${pid}','${name}')">Stock-Out</button></td></tr>`;
-    }).join('') || '<tr><td colspan="5" class="empty">Wala pang stock record.</td></tr>';
-}
-function openStockOutModal(pid, name) {
-    selectedProductForStockOut = pid;
-    $('soProdName').textContent = name;
-    $('soQty').value = ''; $('soReason').value = '';
-    $('stockOutModal').classList.remove('hidden');
-}
-function closeStockOutModal() { $('stockOutModal').classList.add('hidden'); selectedProductForStockOut = null; }
-function confirmStockOut() {
-    let qty = parseInt($('soQty').value);
-    if (!qty) return alert('⚠️ Ilagay ang dami!');
-    STOCKS[selectedProductForStockOut] = Math.max(0, (STOCKS[selectedProductForStockOut] || 0) - qty);
-    save('pos_stocks', STOCKS);
-    closeStockOutModal();
-    renderStockTab();
-    alert('✅ Stock-Out naitala!');
-}
-function renderShiftLogTab() {
-    let filter = $('shiftFilterStore').value;
-    $('shiftLogBody').innerHTML = SHIFTS.filter(s => filter === 'ALL' || s.storeId === filter).sort((a,b)=>new Date(b.startedAt)-new Date(a.startedAt)).map(s => {
-        let st = new Date(s.startedAt).toLocaleString('en-PH');
-        let end = s.closedAt ? new Date(s.closedAt).toLocaleString('en-PH') : 'Bukas pa';
-        return `<tr><td>${s.storeId}</td><td>${s.cashier}</td><td>${st}</td><td>${end}</td><td>₱${fmt(s.endCash)}</td><td>₱${fmt(s.endGcash)}</td><td>${s.note||'—'}</td></tr>`;
-    }).join('');
+  } else {
+    $('shiftStatusArea').innerHTML = `
+      <div class="shift-indicator" style="background:#fef2f2;border-color:#dc2626">
+        <strong>❌ WALANG BUKAS NA SHIFT</strong>
+      </div>
+      <button class="btn-green" onclick="startShift()">▶️ Simulan ang Shift</button>
+    `;
+  }
+
+  // Akting Shift Log
+  let myLogs = SHIFTS.filter(s=>s.storeId===user.storeId).slice(0,5);
+  $('myShiftLog').innerHTML = myLogs.length ? myLogs.map(s=>`
+    <div class="req-card">
+      ${s.ended?'✅ Sarado':'🔴 Bukas'} — ${new Date(s.startedAt).toLocaleString('en-PH')}
+      ${s.ended?'<br>Cash: ₱'+fmt(s.cashOnHand)+' | E-Wallet: ₱'+fmt(s.gcashOnHand):''}
+    </div>
+  `).join('') : '<div class="empty">Wala pang shift.</div>';
 }
 
-// ═══════════════════ REQUEST SYSTEM ═══════════════════
-function loadVoidTickets() {
-    let txns = SALES.filter(t => user.storeId === 'ALL' || t.storeId === user.storeId);
-    let opts = () => txns.map(t => `<option value="${t.id}">${t.id} — ₱${fmt(t.total)} (${t.time})</option>`).join('');
-    $('wrongTicket').innerHTML = '<option value="">— Pumili —</option>' + opts();
-    $('rightTicket').innerHTML = '<option value="">— Pumili —</option>' + opts();
+function startShift(){
+  if(activeShift) return alert('⚠️ May bukas na shift pa!');
+  activeShift = {
+    id: 'SHIFT-'+Date.now(),
+    storeId: user.storeId,
+    cashier: 'Cashier',
+    startedAt: new Date().toISOString(),
+    ended: false
+  };
+  SHIFTS.unshift(activeShift);
+  save('pos_shifts', SHIFTS);
+  renderShiftScreen();
+  alert('✅ Shift Nagsimula!');
 }
-function submitVoidReq() {
-    let w = $('wrongTicket').value, r = $('rightTicket').value, reason = $('voidReason').value.trim();
-    if (!w || !r || !reason) return alert('⚠️ Punan lahat!');
-    VOID_REQS.push({ id: 'VOIDREQ-' + Date.now(), storeId: user.storeId, cashier: user.name, wrongTicket: w, rightTicket: r, reason, status: 'PENDING', submittedAt: new Date().toISOString() });
+
+function openShiftCloseModal(){
+  if(!activeShift) return;
+  let start = new Date(activeShift.startedAt);
+  let now = new Date();
+  let mins = Math.floor((now-start)/60000);
+  let hrs = Math.floor(mins/60);
+  $('shiftStartTm').textContent = start.toLocaleTimeString('en-PH');
+  $('shiftDuration').textContent = hrs>0 ? `${hrs} oras ${mins%60} min` : `${mins} min`;
+  $('shiftCashOnHand').value = '';
+  $('shiftGcashOnHand').value = '';
+  $('shiftNote').value = '';
+  $('shiftCloseModal').classList.remove('hidden');
+}
+
+function closeShiftModal(){ $('shiftCloseModal').classList.add('hidden'); }
+
+function confirmShiftClose(){
+  let cash = parseFloat($('shiftCashOnHand').value) || 0;
+  let gcash = parseFloat($('shiftGcashOnHand').value) || 0;
+  let note = $('shiftNote').value.trim();
+  if(!cash && !gcash) return alert('⚠️ Ipasok ang halaga ng hawak na pera!');
+
+  Object.assign(activeShift, {
+    ended: true,
+    endedAt: new Date().toISOString(),
+    cashOnHand: cash,
+    gcashOnHand: gcash,
+    note: note
+  });
+  save('pos_shifts', SHIFTS);
+  closeShiftModal();
+  renderShiftScreen();
+  alert('✅ Shift Sarado na!');
+}
+
+// ═══════════════════ SALES REPORT ═══════════════════
+function renderSalesReport(){
+  let todaySales = SALES.filter(s=>s.date===today() && (user.storeId==='ALL' || s.storeId===user.storeId));
+  let total = todaySales.reduce((sum,s)=>sum + s.total, 0);
+  let cashT = todaySales.reduce((sum,s)=>sum + (s.payType==='GCASH'?0:s.cashAmt||s.total), 0);
+  let gT = todaySales.reduce((sum,s)=>sum + (s.gcashAmt||(s.payType==='GCASH'?s.total:0)), 0);
+
+  $('rptTotal').textContent = fmt(total);
+  $('rptCash').textContent = fmt(cashT);
+  $('rptGCash').textContent = fmt(gT);
+
+  $('salesLogBody').innerHTML = todaySales.length ? todaySales.map(s=>`
+    <tr>
+      <td>${s.time.split(', ')[1]}</td>
+      <td>${s.items.map(i=>i.name+'×'+i.qty).join(', ')}</td>
+      <td>₱${fmt(s.total)}</td>
+      <td><span class="tag ${s.payType==='GCASH'?'gcash':'cash'}">${s.payType}</span></td>
+      <td>${s.ref||'—'}</td>
+    </tr>
+  `).join('') : '<tr><td colspan="5" class="empty">Wala pang benta ngayon.</td></tr>';
+}
+
+// ═══════════════════ ADMIN: RANGE REPORT ═══════════════════
+function showRangeReport(){
+  let f = $('rangeFrom').value;
+  let t = $('rangeTo').value;
+  if(!f || !t) return alert('⚠️ Punan ang petsa!');
+  let list = SALES.filter(s=>s.date >= f && s.date <= t);
+  let grand = list.reduce((sum,x)=>sum+x.total,0);
+  let cash = list.reduce((sum,x)=>sum + (x.payType==='GCASH'?0:(x.cashAmt||x.total)),0);
+  let gc = list.reduce((sum,x)=>sum + (x.gcashAmt||(x.payType==='GCASH'?x.total:0)),0);
+
+  $('rangeResult').innerHTML = `
+    <hr class="sep">
+    <h4>Buod: ${f} hanggang ${t}</h4>
+    <div class="grid3">
+      <div class="total-box-blue">KABUUAN:<br>₱${fmt(grand)}</div>
+      <div class="total-box">CASH:<br>₱${fmt(cash)}</div>
+      <div class="total-box-orange">E-WALLET:<br>₱${fmt(gc)}</div>
+    </div>
+    <p style="margin-top:8px">Bilang ng Transaksyon: ${list.length}</p>
+  `;
+}
+
+// ═══════════════════ STORES ═══════════════════
+function renderStoresTab(){
+  renderStoreSelects();
+  $('storeBody').innerHTML = STORES.length ? STORES.map((s,i)=>`
+    <tr>
+      <td>${s.code}</td><td>${s.name}</td>
+      <td><button class="btn-sm btn-red" onclick="delStore(${i})">Burahin</button></td>
+    </tr>
+  `).join('') : '<tr><td colspan="3" class="empty">Wala pang tindahan.</td></tr>';
+}
+
+function addStore(){
+  let code = $('newStoreCode').value.trim().toUpperCase();
+  let name = $('newStoreName').value.trim();
+  if(!code || !name) return alert('⚠️ Punan ang lahat!');
+  if(STORES.some(s=>s.code===code)) return alert('⚠️ May ganon nang Store Code!');
+  STORES.push({code,name});
+  save('pos_stores', STORES);
+  $('newStoreCode').value='';
+  $('newStoreName').value='';
+  renderStoresTab();
+  alert('✅ Tindahan Nai-save!');
+}
+
+function delStore(i){
+  if(!confirm('⚠️ Sigurado bang buburahin?')) return;
+  STORES.splice(i,1);
+  save('pos_stores', STORES);
+  renderStoresTab();
+}
+
+function renderStoreSelects(){
+  let opts = ()=>'<option value="">-- Pumili --</option>' + STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+  ['prodStoreSel','stockInStore','shiftFilterStore','stockViewStore'].forEach(id=>{
+    let el = $(id);
+    if(el){
+      let sel = el.value;
+      if(id==='shiftFilterStore' || id==='stockViewStore'){
+        el.innerHTML = '<option value="ALL">Lahat ng Tindahan</option>' + STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+      } else {
+        el.innerHTML = opts();
+      }
+      el.value = sel;
+    }
+  });
+}
+
+// ═══════════════════ PRODUCTS ═══════════════════
+function renderProductsTab(){
+  renderStoreSelects();
+  $('prodBody').innerHTML = PRODUCTS.length ? PRODUCTS.map((p,i)=>`
+    <tr>
+      <td>${p.storeId}</td><td>${p.category}</td><td>${p.name}</td><td>₱${fmt(p.price)}</td>
+      <td><button class="btn-sm btn-red" onclick="delProduct(${i})">Burahin</button></td>
+    </tr>
+  `).join('') : '<tr><td colspan="5" class="empty">Wala pang produkto.</td></tr>';
+}
+
+function addProduct(){
+  let cat = $('newCat').value.trim();
+  let name = $('newProdName').value.trim();
+  let price = parseFloat($('newProdPrice').value);
+  let store = $('prodStoreSel').value;
+  if(!cat || !name || !price || !store) return alert('⚠️ Punan ang lahat!');
+  PRODUCTS.push({storeId:store, category:cat, name, price});
+  save('pos_products', PRODUCTS);
+  $('newCat').value='';
+  $('newProdName').value='';
+  $('newProdPrice').value='';
+  renderProductsTab();
+  alert('✅ Produkto Nai-save!');
+}
+
+function delProduct(i){
+  if(!confirm('⚠️ Sigurado bang buburahin?')) return;
+  PRODUCTS.splice(i,1);
+  save('pos_products', PRODUCTS);
+  renderProductsTab();
+}
+
+// ═══════════════════ STOCKS ═══════════════════
+function renderStockTab(){
+  renderStoreSelects();
+  let filter = $('stockViewStore').value;
+  let all = [];
+  PRODUCTS.forEach(p=>{
+    if(filter!=='ALL' && p.storeId!==filter) return;
+    let pid = `${p.storeId}||${p.category}||${p.name}`;
+    let qty = STOCKS[pid]||0;
+    let status = qty<1 ? '<span class="tag danger">UBOS</span>' : qty<=5 ? '<span class="tag warn">Konti</span>' : '<span class="tag success">Marami</span>';
+    all.push({storeId:p.storeId, name:p.name, qty, status, pid});
+  });
+  $('stockBody').innerHTML = all.length ? all.map(s=>`
+    <tr>
+      <td>${s.storeId}</td><td>${s.name}</td><td>${s.qty}</td><td>${s.status}</td>
+      <td><button class="btn-sm btn-orange" onclick="openStockOutModal('${s.pid}')">📦 Stock-Out</button></td>
+    </tr>
+  `).join('') : '<tr><td colspan="4" class="empty">Wala pang stock.</td></tr>';
+
+  // Update product selectors
+  let prodOpts = (storeId)=>'<option value="">-- Pumili --</option>' +
+    PRODUCTS.filter(p=>p.storeId===storeId).map(p=>`<option value="${p.storeId}||${p.category}||${p.name}">${p.name}</option>`).join('');
+  let sel = $('stockInStore').value;
+  $('stockInProd').innerHTML = prodOpts(sel);
+}
+
+function stockIn(){
+  let store = $('stockInStore').value;
+  let prod = $('stockInProd').value;
+  let qty = parseInt($('stockInQty').value)||0;
+  if(!store || !prod || qty<1) return alert('⚠️ Punan nang tama!');
+  STOCKS[prod] = (STOCKS[prod]||0) + qty;
+  save('pos_stocks', STOCKS);
+  $('stockInQty').value='';
+  renderStockTab();
+  alert('✅ Stock Nai-save!');
+}
+
+function openStockOutModal(pid){
+  selectedProductForStockOut = pid;
+  let prod = PRODUCTS.find(p=>`${p.storeId}||${p.category}||${p.name}`===pid);
+  $('soProdName').textContent = prod?.name || pid;
+  $('soQty').value='1';
+  $('soReason').value='';
+  $('stockOutModal').classList.remove('hidden');
+}
+
+function closeStockOutModal(){ $('stockOutModal').classList.add('hidden'); }
+
+function confirmStockOut(){
+  let qty = parseInt($('soQty').value)||0;
+  let reason = $('soReason').value.trim();
+  if(qty<1) return alert('⚠️ Dapat higit sa 0!');
+  if(STOCKS[selectedProductForStockOut]<qty) return alert('⚠️ Kulang ang stock!');
+  STOCKS[selectedProductForStockOut] -= qty;
+  save('pos_stocks', STOCKS);
+  closeStockOutModal();
+  renderStockTab();
+  alert('✅ Stock-Out Naitala!');
+}
+
+// ═══════════════════ SHIFT LOG (ADMIN) ═══════════════════
+function renderShiftLogTab(){
+  let filter = $('shiftFilterStore').value;
+  let list = filter==='ALL' ? SHIFTS : SHIFTS.filter(s=>s.storeId===filter);
+  $('shiftLogBody').innerHTML = list.length ? list.map(s=>`
+    <tr>
+      <td>${s.storeId}</td>
+      <td>${s.cashier}</td>
+      <td>${new Date(s.startedAt).toLocaleString('en-PH')}</td>
+      <td>${s.ended ? new Date(s.endedAt).toLocaleString('en-PH') : 'Bukas pa'}</td>
+      <td>₱${fmt(s.cashOnHand||0)}</td>
+      <td>₱${fmt(s.gcashOnHand||0)}</td>
+      <td>${s.note||'—'}</td>
+    </tr>
+  `).join('') : '<tr><td colspan="7" class="empty">Wala pang shift.</td></tr>';
+}
+
+// ═══════════════════ CASHIER REQUESTS ═══════════════════
+function loadVoidTickets(){
+  let storeSales = SALES.filter(s=>s.storeId===user.storeId);
+  let opts = (selId)=>'<option value="">-- Pumili --</option>' + storeSales.map(s=>`<option value="${s.id}">${s.id} — ₱${fmt(s.total)} | ${s.time}</option>`).join('');
+  $('wrongTicket').innerHTML = opts();
+  $('rightTicket').innerHTML = opts();
+  $('myVoidReqs').innerHTML = VOID_REQS.filter(r=>r.storeId===user.storeId).map(r=>`
+    <div class="req-card">
+      ${r.approved===true?'✅ NA-APRUBA':r.approved===false?'❌ TINANGGI':'⏳ NAKA-ANTAY'}<br>
+      Maling: ${r.wrongTicket}<br>
+      Tamang: ${r.rightTicket}<br>
+      Dahilan: ${r.reason}
+    </div>
+  `).join('') || '<div class="empty">Wala pang request.</div>';
+}
+
+function submitVoidReq(){
+  let w = $('wrongTicket').value;
+  let r = $('rightTicket').value;
+  let reason = $('voidReason').value.trim();
+  if(!w || !r || !reason) return alert('⚠️ Punan ang lahat!');
+  VOID_REQS.unshift({id:'VOID-'+Date.now(), storeId:user.storeId, wrongTicket:w, rightTicket:r, reason, cashier:'Cashier', date:today(), approved:null});
+  save('pos_void_reqs', VOID_REQS);
+  alert('✅ Request Nai-send!');
+  loadVoidTickets();
+  $('voidReason').value='';
+}
+
+function submitCashReq(){
+  let type = $('cashType').value;
+  let amt = parseFloat($('cashAmt').value)||0;
+  let reason = $('cashReason').value.trim();
+  if(amt<=0 || !reason) return alert('⚠️ Punan nang tama!');
+  CASH_REQS.unshift({id:'CR-'+Date.now(), storeId:user.storeId, type, amount:amt, reason, cashier:'Cashier', date:today()});
+  save('pos_cash_reqs', CASH_REQS);
+  alert('✅ Request Nai-send!');
+  $('cashAmt').value='';
+  $('cashReason').value='';
+  renderCashReqs();
+}
+function renderCashReqs(){
+  $('myCashReqs').innerHTML = CASH_REQS.filter(r=>r.storeId===user.storeId).map(r=>`
+    <div class="req-card">
+      ${r.type} — ₱${fmt(r.amount)}<br>
+      Dahilan: ${r.reason}<br>
+      Petsa: ${r.date}
+    </div>
+  `).join('') || '<div class="empty">Wala pang request.</div>';
+}
+
+function loadProdOutSelect(){
+  $('prodOutSel').innerHTML = '<option value="">-- Pumili --</option>' +
+    PRODUCTS.filter(p=>p.storeId===user.storeId).map(p=>{
+      let pid = `${p.storeId}||${p.category}||${p.name}`;
+      return `<option value="${pid}">${p.name} — Stock: ${STOCKS[pid]||0}</option>`;
+    }).join('');
+  $('myProdOutReqs').innerHTML = PROD_OUT_REQS.filter(r=>r.storeId===user.storeId).map(r=>`
+    <div class="req-card">
+      ${r.approved===true?'✅ NA-APRUBA':r.approved===false?'❌ TINANGGI':'⏳ NAKA-ANTAY'}<br>
+      Produkto: ${r.prodName}<br>
+      Dami: ${r.qty} — ${r.reason}<br>
+      ${r.note?'Nota: '+r.note:''}
+    </div>
+  `).join('') || '<div class="empty">Wala pang request.</div>';
+}
+
+function submitProdOut(){
+  let pid = $('prodOutSel').value;
+  let qty = parseInt($('prodOutQty').value)||0;
+  let reason = $('prodOutReason').value;
+  let note = $('prodOutNote').value.trim();
+  if(!pid || qty<1) return alert('⚠️ Punan nang tama!');
+  let prod = PRODUCTS.find(p=>`${p.storeId}||${p.category}||${p.name}`===pid);
+  PROD_OUT_REQS.unshift({
+    id:'PO-'+Date.now(), storeId:user.storeId, prodId:pid, prodName:prod?.name||pid,
+    qty, reason, note, cashier:'Cashier', date:today(), approved:null
+  });
+  save('pos_prodout_reqs', PROD_OUT_REQS);
+  alert('✅ Request Nai-send!');
+  loadProdOutSelect();
+}
+
+// ═══════════════════ ADMIN: APPROVE REQUESTS ═══════════════════
+function renderAdminRequests(){
+  $('adminVoidList').innerHTML = VOID_REQS.filter(r=>r.approved===null).map(r=>`
+    <div class="req-card">
+      Tindahan: ${r.storeId}<br>
+      Maling: ${r.wrongTicket}<br>
+      Tamang: ${r.rightTicket}<br>
+      Dahilan: ${r.reason} — <strong>${r.cashier}</strong>
+      <div style="margin-top:6px">
+        <button class="btn-sm btn-green" onclick="approveVoid('${r.id}')">✅ Aprubahan</button>
+        <button class="btn-sm btn-red" onclick="rejectVoid('${r.id}')">❌ Tanggihan</button>
+      </div>
+    </div>
+  `).join('') || '<div class="empty">Wala pang request.</div>';
+
+  $('adminProdOutList').innerHTML = PROD_OUT_REQS.filter(r=>r.approved===null).map(r=>`
+    <div class="req-card">
+      Tindahan: ${r.storeId} — ${r.prodName} ×${r.qty}<br>
+      Dahilan: ${r.reason} — <strong>${r.cashier}</strong>
+      <div style="margin-top:6px">
+        <button class="btn-sm btn-green" onclick="approveProdOut('${r.id}')">✅ Aprubahan</button>
+        <button class="btn-sm btn-red" onclick="rejectProdOut('${r.id}')">❌ Tanggihan</button>
+      </div>
+    </div>
+  `).join('') || '<div class="empty">Wala pang request.</div>';
+
+  $('adminCashList').innerHTML = CASH_REQS.map(r=>`
+    <div class="req-card">
+      ${r.type} — ₱${fmt(r.amount)} (${r.storeId})<br>
+      Dahilan: ${r.reason} — ${r.cashier} | ${r.date}
+    </div>
+  `).join('') || '<div class="empty">Wala pang tala.</div>';
+}
+
+function approveVoid(id){
+  let r = VOID_REQS.find(x=>x.id===id);
+  if(r){
+    r.approved = true;
+    // Optional: mark sale as voided here
     save('pos_void_reqs', VOID_REQS);
-    $('voidReason').value = '';
-    alert('✅ Request naipadala! Hintayin ang pag-apruba ng Admin.');
-    renderMyVoidReqs();
+    alert('✅ Na-aprubahan!');
+    renderAdminRequests();
+  }
 }
-function renderMyVoidReqs() {
-    $('myVoidReqs').innerHTML = VOID_REQS.filter(r => r.storeId === user.storeId).sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt)).map(r => {
-        let tag = r.status === 'PENDING' ? '<span class="tag warn">HINDI PA TINUTUGUNAN</span>' : r.status === 'APPROVED' ? '<span class="tag success">APRUBADO</span>' : '<span class="tag danger">TINANGGI</span>';
-        return `<div class="req-card">${tag}<br>Mali: ${r.wrongTicket}<br>Tama: ${r.rightTicket}<br>Dahilan: ${r.reason}</div>`;
-    }).join('');
+function rejectVoid(id){
+  let r = VOID_REQS.find(x=>x.id===id);
+  if(r){
+    r.approved = false;
+    save('pos_void_reqs', VOID_REQS);
+    alert('❌ Tinanggihan!');
+    renderAdminRequests();
+  }
 }
-function submitCashReq() {
-    let type = $('cashType').value, amt = parseFloat($('cashAmt').value), reason = $('cashReason').value.trim();
-    if (!amt || !reason) return alert('⚠️ Punan lahat!');
-    CASH_REQS.push({ id: 'CASHREQ-' + Date.now(), storeId: user.storeId, cashier: user.name, type, amount: amt, reason, status: 'PENDING', submittedAt: new Date().toISOString() });
-    save('pos_cash_reqs', CASH_REQS);
-    $('cashAmt').value = ''; $('cashReason').value = '';
-    alert('✅ Cash Request naipadala!');
-    renderMyCashReqs();
-}
-function renderMyCashReqs() {
-    $('myCashReqs').innerHTML = CASH_REQS.filter(r => r.storeId === user.storeId).sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt)).map(r => {
-        let tag = r.status === 'PENDING' ? '<span class="tag warn">HINDI PA TINUTUGUNAN</span>' : r.status === 'APPROVED' ? '<span class="tag success">APRUBADO</span>' : '<span class="tag danger">TINANGGI</span>';
-        return `<div class="req-card">${tag}<br>${r.type}: ₱${fmt(r.amount)}<br>Dahilan: ${r.reason}</div>`;
-    }).join('');
-}
-function loadProdOutSelect() {
-    let list = PRODUCTS.filter(p => user.storeId === 'ALL' || p.storeId === user.storeId);
-    $('prodOutSel').innerHTML = '<option value="">— Pumili —</option>' + list.map(p => `<option value="${p.storeId}||${p.category}||${p.name}">${p.name} — ₱${fmt(p.price)}</option>`).join('');
-}
-function submitProdOut() {
-    let pid = $('prodOutSel').value, qty = parseInt($('prodOutQty').value), reason = $('prodOutReason').value, note = $('prodOutNote').value.trim();
-    if (!pid || !qty) return alert('⚠️ Punan lahat!');
-    PROD_OUT_REQS.push({ id: 'PRODOUT-' + Date.now(), storeId: user.storeId, cashier: user.name, prodId: pid, qty, reason, note, status: 'PENDING', submittedAt: new Date().toISOString() });
+function approveProdOut(id){
+  let r = PROD_OUT_REQS.find(x=>x.id===id);
+  if(r){
+    r.approved = true;
+    if(STOCKS[r.prodId]!==undefined) STOCKS[r.prodId] = Math.max(0, STOCKS[r.prodId] - r.qty);
     save('pos_prodout_reqs', PROD_OUT_REQS);
-    $('prodOutQty').value = '1'; $('prodOutNote').value = '';
-    alert('✅ Product Out Request naipadala!');
-    renderMyProdOutReqs();
+    save('pos_stocks', STOCKS);
+    alert('✅ Na-aprubahan at nabawasan ang stock!');
+    renderAdminRequests();
+  }
 }
-function renderMyProdOutReqs() {
-    $('myProdOutReqs').innerHTML = PROD_OUT_REQS.filter(r => r.storeId === user.storeId).sort((a,b)=>new Date(b.submittedAt)-new Date(a.submittedAt)).map(r => {
-        let [,,name] = r.prodId.split('||');
-        let tag = r.status === 'PENDING' ? '<span class="tag warn">HINDI PA TINUTUGUNAN</span>' : r.status === 'APPROVED' ? '<span class="tag success">APRUBADO</span>' : '<span class="tag danger">TINANGGI</span>';
-        return `<div class="req-card">${tag}<br>${name} — Dami: ${r.qty}<br>Dahilan: ${r.reason} — ${r.note}</div>`;
-    }).join('');
-}
-function renderAdminRequests() {
-    $('adminVoidList').innerHTML = VOID_REQS.filter(r => r.status === 'PENDING').map(r => `
-        <div class="req-card">
-            <strong>${r.storeId} — ${r.cashier}</strong><br>
-            Mali: ${r.wrongTicket}<br>Tama: ${r.rightTicket}<br>Dahilan: ${r.reason}
-            <div style="margin-top:6px">
-                <button class="btn-sm btn-green" onclick="approveVoid('${r.id}')">✅ Aprubahan</button>
-                <button class="btn-sm btn-red" onclick="rejectVoid('${r.id}')">❌ Tanggihan</button>
-            </div>
-        </div>`).join('') || '<div class="empty">Wala pang hinihintay na Request.</div>';
-    $('adminProdOutList').innerHTML = PROD_OUT_REQS.filter(r => r.status === 'PENDING').map(r => {
-        let [,,name] = r.prodId.split('||');
-        return `<div class="req-card">
-            <strong>${r.storeId} — ${r.cashier}</strong><br>
-            Produkto: ${name} — Dami: ${r.qty}<br>
-            Dahilan: ${r.reason} — ${r.note}
-            <div style="margin-top:6px">
-                <button class="btn-sm btn-green" onclick="approveProdOut('${r.id}')">✅ Aprubahan</button>
-                <button class="btn-sm btn-red" onclick="rejectProdOut('${r.id}')">❌ Tanggihan</button>
-            </div>
-        </div>`;
-    }).join('') || '<div class="empty">Wala pang hinihintay na Request.</div>';
-    $('adminCashList').innerHTML = CASH_REQS.map(r => {
-        let tag = r.status === 'PENDING' ? '<span class="tag warn">HINDI PA TINUTUGUNAN</span>' : r.status === 'APPROVED' ? '<span class="tag success">APRUBADO</span>' : '<span class="tag danger">TINANGGI</span>';
-        return `<div class="req-card">${tag} — ${r.storeId} — ${r.cashier}<br>${r.type}: ₱${fmt(r.amount)} — ${r.reason}</div>`;
-    }).join('') || '<div class="empty">Wala pang Cash Request.</div>';
-}
-function approveVoid(id) { let r = VOID_REQS.find(x=>x.id===id); if(!confirm('Aprubahan?')) return; r.status='APPROVED'; save('pos_void_reqs',VOID_REQS); renderAdminRequests(); alert('✅ Aprubado na!'); }
-function rejectVoid(id) { let r = VOID_REQS.find(x=>x.id===id); if(!confirm('Tanggihan?')) return; r.status='REJECTED'; save('pos_void_reqs',VOID_REQS); renderAdminRequests(); alert('❌ Tinanggihan na!'); }
-function approveProdOut(id) { let r = PROD_OUT_REQS.find(x=>x.id===id); if(!confirm('Aprubahan?')) return; STOCKS[r.prodId] = Math.max(0, (STOCKS[r.prodId]||0)-r.qty); r.status='APPROVED'; save('pos_prodout_reqs',PROD_OUT_REQS); save('pos_stocks',STOCKS); renderAdminRequests(); alert('✅ Aprubado na! Nabawasan na ang Stock.'); }
-function rejectProdOut(id) { let r = PROD_OUT_REQS.find(x=>x.id===id); if(!confirm('Tanggihan?')) return; r.status='REJECTED'; save('pos_prodout_reqs',PROD_OUT_REQS); renderAdminRequests(); alert('❌ Tinanggihan na!'); }
-
-// ═══════════════════ SETTINGS & PASSWORD ═══════════════════
-function changeCashierPass() {
-    let cur = $('curCashierPass').value.trim(), np = $('newCashierPass').value.trim();
-    if (cur !== PASS.cashier) return alert('⚠️ Maling Kasalukuyang Password!');
-    if (!np) return alert('⚠️ Ilagay ang Bagong Password!');
-    PASS.cashier = np; save('pos_pass', PASS);
-    $('curCashierPass').value = ''; $('newCashierPass').value = '';
-    alert('✅ Password na-update!');
-}
-function deleteSalesByDate() {
-    let d = $('delSaleDate').value, reason = $('delSaleReason').value.trim();
-    if (!d || !reason) return alert('⚠️ Punan lahat!');
-    if (!confirm(`⚠️ BURAHIN LAHAT NG BENTA NOONG ${d}? HINDI NA MABABALIK!`)) return;
-    DELETED_SALES.push({ deletedAt: new Date().toISOString(), deletedBy: user.name, saleDate: d, reason, totalAmount: SALES.filter(x=>x.date===d).reduce((s,x)=>s+parseFloat(x.total),0) });
-    SALES = SALES.filter(x => x.date !== d);
-    save('pos_sales', SALES); save('pos_deleted_sales', DELETED_SALES);
-    $('delSaleReason').value = '';
-    alert('✅ Nabura na! Nakikita ito sa SP tab.');
+function rejectProdOut(id){
+  let r = PROD_OUT_REQS.find(x=>x.id===id);
+  if(r){
+    r.approved = false;
+    save('pos_prodout_reqs', PROD_OUT_REQS);
+    alert('❌ Tinanggihan!');
+    renderAdminRequests();
+  }
 }
 
-// ═══════════════════ SP SERVICE MANAGEMENT ═══════════════════
-function renderServiceTab() {
-    let active = isServiceActive(), exp = getExpiryDate();
-    $('servStatus').innerHTML = active ? '<span style="color:green">✅ AKTIBO</span>' : '<span style="color:red">❌ HINDI AKTIBO</span>';
-    $('servExpiry').textContent = exp.toLocaleString('en-PH');
+// ═══════════════════ ADMIN: SETTINGS ═══════════════════
+function changeCashierPass(){
+  let cur = $('curCashierPass').value;
+  let np = $('newCashierPass').value;
+  if(cur!==PASS.cashier) return alert('⚠️ Maling Kasalukuyang Password!');
+  if(!np || np.length<3) return alert('⚠️ Napakaikli ng bagong password!');
+  PASS.cashier = np;
+  save('pos_pass', PASS);
+  alert('✅ Password Nai-update!');
+  $('curCashierPass').value='';
+  $('newCashierPass').value='';
 }
-function extendService(days, price) {
-    let exp = new Date(getExpiryDate());
-    exp.setDate(exp.getDate() + days);
-    SERVICE.expiry = exp.toISOString();
-    SERVICE.active = true;
-    saveService(); renderServiceTab(); alert(`✅ Serbisyo na-extend ng ${days} araw! — ₱${price}`);
-}
-function stopService() { if(!confirm('⚠️ ITIGIL ANG SERBISYO?')) return; SERVICE.active = false; saveService(); renderServiceTab(); alert('✅ Serbisyo ay itinigil na.'); }
-function resumeService() { SERVICE.active = true; saveService(); renderServiceTab(); alert('✅ Serbisyo ay ibinalik na.'); }
-function spChangePasswords() {
-    let na = $('spNewAdminPass').value.trim(), ns = $('spNewSPass').value.trim();
-    if (na) { PASS.admin = na; $('spNewAdminPass').value = ''; }
-    if (ns) { PASS.sp = ns; $('spNewSPass').value = ''; }
-    save('pos_pass', PASS); alert('✅ Password na-update!');
-}
-function renderDeletedSales() {
-    $('deletedBody').innerHTML = DELETED_SALES.map(d => `<tr><td>${new Date(d.deletedAt).toLocaleString('en-PH')}</td><td>${d.deletedBy}</td><td>${d.saleDate}</td><td>₱${fmt(d.totalAmount)}</td><td>${d.reason}</td></tr>`).join(''); }
 
-// ═══════════════════ AUTO-REFRESH ON TAB SWITCH ═══════════════════
-const origShowTab = showTab;
-showTab = function(id) {
-    origShowTab(id);
-    setTimeout(() => {
-        if (id === 'voidReq') renderMyVoidReqs();
-        if (id === 'cashReq') renderMyCashReqs();
-        if (id === 'prodOutReq') renderMyProdOutReqs();
-    }, 50);
-};
+function deleteSalesByDate(){
+  let d = $('delSaleDate').value;
+  let reason = $('delSaleReason').value.trim();
+  if(!d || !reason) return alert('⚠️ Punan ang petsa at dahilan!');
+  let sum = SALES.filter(s=>s.date===d).reduce((x,y)=>x+y.total,0);
+  if(!confirm(`⚠️ BUBURAHIN LAHAT NG BENTA NOONG ${d} — Kabuuan: ₱${fmt(sum)}\nDahilan: ${reason}\n\nHINDI NA ITO MABABALIK!`)) return;
+  DELETED_SALES.push({date:today(),deletedBy:'Admin',saleDate:d,amount:sum,reason});
+  SALES = SALES.filter(s=>s.date!==d);
+  save('pos_sales', SALES);
+  save('pos_deleted_sales', DELETED_SALES);
+  alert('✅ Benta Binura at Naitala sa Deleted Log!');
+}
+
+// ═══════════════════ SP: SERVICE & DELETED ═══════════════════
+function renderServiceTab(){
+  let active = isServiceActive();
+  $('servStatus').innerHTML = active ? '<span style="color:green;font-weight:bold">✅ AKTIBO</span>' : '<span style="color:red;font-weight:bold">❌ HINDI AKTIBO</span>';
+  $('servExpiry').textContent = getExpiryDate().toLocaleString('en-PH');
+}
+
+function extendService(days, price){
+  let cur = getExpiryDate();
+  if(new Date() > cur) cur = new Date();
+  cur.setDate(cur.getDate() + days);
+  SERVICE.expiry = cur.toISOString();
+  saveService();
+  alert(`✅ Serbisyo Nai-extend ng ${days} araw!\nMag-e-expire sa: ${cur.toLocaleString('en-PH')}\nBayad: ₱${price}`);
+  renderServiceTab();
+}
+
+function stopService(){
+  if(!confirm('⚠️ SIGURADO BANG ITITIGIL ANG SERBISYO?')) return;
+  SERVICE.active = false;
+  saveService();
+  alert('✅ Serbisyo Itinigil!');
+  renderServiceTab();
+}
+
+function resumeService(){
+  SERVICE.active = true;
+  saveService();
+  alert('✅ Serbisyo Binalik!');
+  renderServiceTab();
+}
+
+function spChangePasswords(){
+  let na = $('spNewAdminPass').value.trim();
+  let ns = $('spNewSPass').value.trim();
+  if(na) { PASS.admin = na; $('spNewAdminPass').value=''; }
+  if(ns) { PASS.sp = ns; $('spNewSPass').value=''; }
+  if(!na && !ns) return alert('⚠️ Ilagay ang bagong password!');
+  save('pos_pass', PASS);
+  alert('✅ Password(s) Nai-update! Ipaalam nang personal sa may-ari.');
+}
+
+function renderDeletedSales(){
+  $('deletedBody').innerHTML = DELETED_SALES.length ? DELETED_SALES.map(d=>`
+    <tr>
+      <td>${d.date}</td><td>${d.deletedBy}</td><td>${d.saleDate}</td><td>₱${fmt(d.amount)}</td><td>${d.reason}</td>
+    </tr>
+  `).join('') : '<tr><td colspan="5" class="empty">Wala pang binurang benta.</td></tr>';
+}
+
+// ═══════════════════ CASH IN/OUT HELPER ═══════════════════
+setTimeout(()=>{
+  if(user.logged && user.role==='cashier') renderCashReqs();
+}, 300);
+
 </script>
 </body>
 </html>
