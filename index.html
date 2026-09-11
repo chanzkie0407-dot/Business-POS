@@ -1,114 +1,245 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Receipt - Minute Burger</title>
+  <title>Minute Burger POS System</title>
   <meta charset="UTF-8">
   <style>
-    *{margin:0; padding:0; box-sizing:border-box;}
-    .receipt{width:300px; padding:10px; font-family:Arial; font-size:13px;}
+    *{margin:0; padding:0; box-sizing:border-box; font-family:Arial;}
+    body{padding:10px; background:#f5f5f5;}
+    .hidden{display:none !important;}
+    .container{max-width:1000px; margin:0 auto;}
+    .card{background:#fff; padding:15px; border-radius:6px; margin-bottom:10px; box-shadow:0 1px 3px #ccc;}
+    .row{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0;}
+    .between{display:flex; justify-content:space-between; align-items:center;}
+    button{padding:8px 14px; border:none; border-radius:4px; cursor:pointer; font-size:14px;}
+    .btn-primary{background:#d32f2f; color:#fff;}
+    .btn-success{background:#2e7d32; color:#fff;}
+    .btn-gray{background:#eee;}
+    input,select{padding:8px; font-size:14px; border:1px solid #ccc; border-radius:4px; width:180px;}
+    .item-btn{width:110px; padding:10px 6px; margin:3px;}
+    .cart-box{min-height:180px; max-height:280px; overflow-y:auto; border:1px solid #ddd; padding:8px; border-radius:4px;}
+    .cart-item{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #eee;}
+    .total-row{font-size:18px; font-weight:bold; padding:8px 0;}
+    .receipt{width:300px; padding:10px; font-size:13px;}
     .center{text-align:center;}
     .bold{font-weight:bold;}
     .fs16{font-size:16px;}
-    .fs12{font-size:12px;}
-    .fs11{font-size:11px;}
-    .grey{color:#444;}
-    .flex{display:flex; justify-content:space-between;}
     .dashed{border:none; border-top:1px dashed #000; margin:5px 0;}
-    .item{padding:2px 0;}
-    .total{font-size:15px; font-weight:bold; margin-top:4px;}
-    @media print{.receipt{margin:0;} button{display:none;}}
+    @media print{body{background:#fff;} .no-print{display:none;} .receipt{margin:0 auto;}}
   </style>
 </head>
 <body>
+<div class="container">
 
-<div class="receipt" id="receipt">
-  <!-- DYNAMIC STORE HEADER -->
-  <div class="center bold fs16" id="storeNameHeader"></div>
-  <div class="center fs11 grey" style="margin:4px 0 8px;">Minute Burger • Authorized Franchisee</div>
-  <hr class="dashed">
-
-  <!-- CASHIER & DATE INFO -->
-  <div class="flex fs12">
-    <span>Cashier: <span id="cashierName"></span></span>
-    <span>Date: <span id="transDate"></span></span>
+<!-- === LOGIN / STORE SELECTION === -->
+<div id="loginPage" class="card">
+  <h2 class="center">Minute Burger POS - Login</h2>
+  <div class="row" style="justify-content:center; margin-top:15px;">
+    <label>Select Store:</label>
+    <select id="selStore">
+      <option value="Store1">Store1</option>
+      <option value="Davao1">Davao1</option>
+      <option value="Cebu1">Cebu1</option>
+    </select>
   </div>
-  <div class="flex fs12" style="margin:2px 0 6px;">
-    <span>Shift: <span id="shiftNo"></span></span>
-    <span>Time: <span id="transTime"></span></span>
+  <div class="row" style="justify-content:center;">
+    <label>Cashier Name:</label>
+    <input type="text" id="inpCashier" placeholder="Enter Name">
   </div>
-  <hr class="dashed">
-
-  <!-- ITEMS LIST -->
-  <div id="itemsList"></div>
-  <hr class="dashed">
-
-  <!-- PAYMENT SUMMARY -->
-  <div id="paymentSummary"></div>
-  <hr class="dashed">
-
-  <!-- FOOTER -->
-  <div class="center fs11" style="margin-top:8px;">Thank You! Please Come Again.</div>
+  <div class="row" style="justify-content:center;">
+    <label>Shift:</label>
+    <select id="selShift">
+      <option value="1">Shift 1</option>
+      <option value="2">Shift 2</option>
+      <option value="3">Shift 3</option>
+    </select>
+  </div>
+  <div class="row" style="justify-content:center; margin-top:12px;">
+    <button class="btn-primary" onclick="loginSystem()">Login to POS</button>
+  </div>
 </div>
 
-<button onclick="printReceipt()" style="margin-top:10px; padding:6px 12px;">Print Receipt</button>
+<!-- === MAIN POS PAGE === -->
+<div id="posPage" class="card hidden">
+  <div class="between no-print">
+    <div>
+      <strong>Store:</strong> <span id="curStore"></span> |
+      <strong>Cashier:</strong> <span id="curCashier"></span> |
+      <strong>Shift:</strong> <span id="curShift"></span>
+    </div>
+    <button class="btn-gray" onclick="logoutSystem()">Logout</button>
+  </div>
+  <hr class="no-print" style="margin:8px 0;">
+
+  <div style="display:flex; gap:12px;">
+    <!-- PRODUCTS -->
+    <div class="no-print" style="flex:1;">
+      <h4>Menu Items</h4>
+      <div id="menuBtns"></div>
+    </div>
+
+    <!-- CART & PAYMENT -->
+    <div style="width:340px;">
+      <h4>Cart</h4>
+      <div id="cartBox" class="cart-box"></div>
+      <div class="between total-row">
+        <span>TOTAL:</span>
+        <span id="grandTotal">₱0.00</span>
+      </div>
+      <div class="row no-print">
+        <input type="number" id="cashGiven" placeholder="Cash Received" oninput="computeChange()">
+        <button class="btn-success" onclick="payAndPrint()">Pay & Print</button>
+        <button class="btn-gray" onclick="clearCart()">Clear</button>
+      </div>
+      <div>Change: <span id="changeAmt">₱0.00</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- === RECEIPT === -->
+<div id="receiptPage" class="card hidden">
+  <div class="receipt" id="receipt">
+    <div class="center bold fs16" id="receiptStore"></div>
+    <div class="center" style="font-size:11px; color:#444; margin:4px 0 8px;">Minute Burger • Authorized Franchisee</div>
+    <hr class="dashed">
+    <div class="between" style="font-size:12px;">
+      <span>Cashier: <span id="receiptCashier"></span></span>
+      <span>Date: <span id="receiptDate"></span></span>
+    </div>
+    <div class="between" style="font-size:12px; margin:2px 0 6px;">
+      <span>Shift: <span id="receiptShift"></span></span>
+      <span>Time: <span id="receiptTime"></span></span>
+    </div>
+    <hr class="dashed">
+    <div id="receiptItems"></div>
+    <hr class="dashed">
+    <div id="receiptSummary"></div>
+    <hr class="dashed">
+    <div class="center" style="margin-top:8px; font-size:11px;">Thank You! Please Come Again.</div>
+  </div>
+  <div class="no-print" style="margin-top:10px;">
+    <button class="btn-primary" onclick="window.print()">Print</button>
+    <button class="btn-gray" onclick="backToPOS()">Back to POS</button>
+  </div>
+</div>
+
+</div>
 
 <script>
-// ===== SESSION DATA (FROM YOUR LOGIN SYSTEM) =====
-const SESSION = {
-  store: localStorage.getItem("selectedStore") || "Store1",  // store1 / Davao1 / etc.
-  cashier: localStorage.getItem("cashierName") || "Cashier",
-  shift: localStorage.getItem("shiftNumber") || "1"
-};
+// ===== MASTER DATA =====
+const MENU = [
+  {name:"Burger Regular", price:65},
+  {name:"Burger Cheesy", price:75},
+  {name:"Burger Special", price:85},
+  {name:"Fries Regular", price:45},
+  {name:"Fries Large", price:60},
+  {name:"Drink Soda", price:35},
+  {name:"Drink Iced Tea", price:30},
+  {name:"Chicken PC", price:95}
+];
+let cart=[];
+let SESS={store:"", cashier:"", shift:""};
 
-// ===== SAMPLE TRANSACTION DATA =====
-const TRANS = {
-  items: [
-    {name:"Burger Regular", qty:2, price:65.00},
-    {name:"Fries", qty:1, price:45.00}
-  ],
-  payment:{
-    subtotal:175.00,
-    discount:0.00,
-    total:175.00,
-    cash:200.00,
-    change:25.00
-  }
-};
-
-// ===== LOAD RECEIPT =====
-function loadReceipt(){
-  // Header info
-  document.getElementById("storeNameHeader").textContent = SESSION.store;
-  document.getElementById("cashierName").textContent = SESSION.cashier;
-  document.getElementById("shiftNo").textContent = SESSION.shift;
-  const now = new Date();
-  document.getElementById("transDate").textContent = now.toLocaleDateString();
-  document.getElementById("transTime").textContent = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-
-  // Items
-  let itemsHtml = "";
-  TRANS.items.forEach(i=>{
-    itemsHtml += `<div class="flex item fs12"><span>${i.name} x${i.qty}</span><span>₱${(i.price*i.qty).toFixed(2)}</span></div>`;
-  });
-  document.getElementById("itemsList").innerHTML = itemsHtml;
-
-  // Payment
-  const p = TRANS.payment;
-  let payHtml = `
-    <div class="flex fs12"><span>Subtotal</span><span>₱${p.subtotal.toFixed(2)}</span></div>
-    <div class="flex fs12"><span>Discount</span><span>₱${p.discount.toFixed(2)}</span></div>
-    <div class="flex total"><span>TOTAL</span><span>₱${p.total.toFixed(2)}</span></div>
-    <div class="flex fs12" style="margin-top:4px;"><span>Cash</span><span>₱${p.cash.toFixed(2)}</span></div>
-    <div class="flex fs12 bold"><span>Change</span><span>₱${p.change.toFixed(2)}</span></div>
-  `;
-  document.getElementById("paymentSummary").innerHTML = payHtml;
+// ===== LOGIN =====
+function loginSystem(){
+  const st=document.getElementById("selStore").value;
+  const nm=document.getElementById("inpCashier").value.trim()||"Cashier";
+  const sh=document.getElementById("selShift").value;
+  Object.assign(SESS,{store:st,cashier:nm,shift:sh});
+  // Save to localStorage so receipt auto-gets it
+  localStorage.setItem("selectedStore",st);
+  localStorage.setItem("cashierName",nm);
+  localStorage.setItem("shiftNumber",sh);
+  // Update POS header
+  document.getElementById("curStore").textContent=SESS.store;
+  document.getElementById("curCashier").textContent=SESS.cashier;
+  document.getElementById("curShift").textContent=SESS.shift;
+  // Show POS, hide Login
+  document.getElementById("loginPage").classList.add("hidden");
+  document.getElementById("posPage").classList.remove("hidden");
+  renderMenuBtns();
+}
+function logoutSystem(){
+  cart=[]; clearCart();
+  document.getElementById("posPage").classList.add("hidden");
+  document.getElementById("loginPage").classList.remove("hidden");
 }
 
-// ===== PRINT FUNCTION =====
-function printReceipt(){ window.print(); }
+// ===== RENDER MENU =====
+function renderMenuBtns(){
+  const cont=document.getElementById("menuBtns");
+  cont.innerHTML="";
+  MENU.forEach(it=>{
+    const btn=document.createElement("button");
+    btn.className="btn-gray item-btn";
+    btn.textContent=`${it.name}\n₱${it.price}`;
+    btn.onclick=()=>addToCart(it);
+    cont.appendChild(btn);
+  });
+}
 
-// ===== AUTO RUN =====
-window.onload = loadReceipt;
+// ===== CART FUNCTIONS =====
+function addToCart(item){
+  const idx=cart.findIndex(x=>x.name===item.name);
+  idx>=0 ? cart[idx].qty++ : cart.push({...item,qty:1});
+  renderCart();
+}
+function renderCart(){
+  const box=document.getElementById("cartBox");
+  box.innerHTML="";
+  let total=0;
+  cart.forEach((it,i)=>{
+    const amt=it.price*it.qty; total+=amt;
+    box.innerHTML+=`<div class="cart-item">
+      <span>${it.name} x${it.qty}</span>
+      <span>₱${amt.toFixed(2)} <button onclick="remItem(${i})" style="padding:0 4px; font-size:11px; background:#ffcccc; margin-left:4px;">×</button></span>
+    </div>`;
+  });
+  document.getElementById("grandTotal").textContent=`₱${total.toFixed(2)}`;
+  computeChange();
+}
+function remItem(i){cart[i].qty--; if(cart[i].qty<1)cart.splice(i,1); renderCart();}
+function clearCart(){cart=[]; renderCart(); document.getElementById("cashGiven").value=""; document.getElementById("changeAmt").textContent="₱0.00";}
+function getTotal(){return cart.reduce((s,it)=>s+it.price*it.qty,0);}
+function computeChange(){
+  const tot=getTotal();
+  const cash=parseFloat(document.getElementById("cashGiven").value)||0;
+  document.getElementById("changeAmt").textContent=`₱${(cash-tot).toFixed(2)}`;
+}
+
+// ===== PAY & PRINT → RECEIPT WITH DYNAMIC STORE =====
+function payAndPrint(){
+  if(cart.length===0) return alert("Cart is empty!");
+  const total=getTotal();
+  const cash=parseFloat(document.getElementById("cashGiven").value)||0;
+  if(cash<total) return alert("Insufficient Cash!");
+  const now=new Date();
+  // === FILL RECEIPT - STORE NAME AUTO FROM LOGIN/SELECTED STORE ===
+  document.getElementById("receiptStore").textContent=SESS.store; // ← DYNAMIC FROM LOGIN
+  document.getElementById("receiptCashier").textContent=SESS.cashier;
+  document.getElementById("receiptShift").textContent=SESS.shift;
+  document.getElementById("receiptDate").textContent=now.toLocaleDateString();
+  document.getElementById("receiptTime").textContent=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  // Items
+  let itHtml="";
+  cart.forEach(it=>{itHtml+=`<div class="between" style="font-size:12px; padding:2px 0;"><span>${it.name} x${it.qty}</span><span>₱${(it.price*it.qty).toFixed(2)}</span></div>`;});
+  document.getElementById("receiptItems").innerHTML=itHtml;
+  // Summary
+  document.getElementById("receiptSummary").innerHTML=`
+    <div class="between" style="font-size:12px;"><span>Subtotal</span><span>₱${total.toFixed(2)}</span></div>
+    <div class="between" style="font-size:12px; font-weight:bold; font-size:15px;"><span>TOTAL</span><span>₱${total.toFixed(2)}</span></div>
+    <div class="between" style="font-size:12px;"><span>Cash</span><span>₱${cash.toFixed(2)}</span></div>
+    <div class="between bold" style="font-size:13px;"><span>Change</span><span>₱${(cash-total).toFixed(2)}</span></div>
+  `;
+  // Show Receipt Page
+  document.getElementById("posPage").classList.add("hidden");
+  document.getElementById("receiptPage").classList.remove("hidden");
+}
+function backToPOS(){
+  document.getElementById("receiptPage").classList.add("hidden");
+  document.getElementById("posPage").classList.remove("hidden");
+  clearCart();
+}
 </script>
 </body>
 </html>
