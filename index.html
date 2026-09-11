@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Minute Burger POS — Kumpleto</title>
+<title>POS System</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#f5f5f5;padding-bottom:40px}
@@ -40,7 +40,6 @@ tr:nth-child(even){background:#fafafa}
 .empty{text-align:center;color:#888;padding:24px}
 .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:bold}
 .tag.cash{background:#e8f5e9;color:#15803d}
-.tag.gcash{background:#eff6ff;color:#2563eb}
 .tag.warn{background:#fff7ed;color:#c2410c}
 .tag.danger{background:#fef2f2;color:#dc2626}
 .tag.success{background:#d4edda;color:#155724}
@@ -72,7 +71,7 @@ tr:nth-child(even){background:#fafafa}
 <!-- ═══════════════════ LOGIN MODAL ═══════════════════ -->
 <div id="loginModal" class="modal">
   <div class="mbody">
-    <h2 style="text-align:center;color:#2563eb;margin-bottom:20px">🏪 Minute Burger POS — Login</h2>
+    <h2 style="text-align:center;color:#2563eb;margin-bottom:20px">🏪 POS System — Login</h2>
     <select id="loginRole" onchange="showLoginForm(this.value)">
       <option value="">-- Pumili ng Role --</option>
       <option value="cashier">💵 Cashier</option>
@@ -120,17 +119,17 @@ tr:nth-child(even){background:#fafafa}
 <div id="app" class="hidden">
   <div class="topbar">
     <div>
-      <h1>🏪 Minute Burger POS</h1>
+      <h1>🏪 POS System</h1>
       <small id="userInfoLine"></small>
     </div>
     <div class="nav">
       <!-- CASHIER TABS -->
-      <button id="tabSell" class="active" onclick="showTab('sell')">🛒 Magbenta</button>
-      <button id="tabVoidReq" onclick="showTab('voidReq')">📤 Void Request</button>
-      <button id="tabCashReq" onclick="showTab('cashReq')">💰 Cash In/Out</button>
-      <button id="tabProdOutReq" onclick="showTab('prodOutReq')">📦 Product Out</button>
+      <button id="tabSell" class="hidden" onclick="showTab('sell')">🛒 Magbenta</button>
+      <button id="tabVoidReq" class="hidden" onclick="showTab('voidReq')">📤 Void Request</button>
+      <button id="tabCashReq" class="hidden" onclick="showTab('cashReq')">💰 Cash In/Out</button>
+      <button id="tabProdOutReq" class="hidden" onclick="showTab('prodOutReq')">📦 Product Out</button>
       <!-- ADMIN TABS -->
-      <button id="tabSales" onclick="showTab('sales')">📊 Sales Reports</button>
+      <button id="tabSales" class="hidden" onclick="showTab('sales')">📊 Sales Reports</button>
       <button id="tabProducts" class="hidden" onclick="showTab('products')">📦 Produkto</button>
       <button id="tabStocks" class="hidden" onclick="showTab('stocks')">📥 Stock In</button>
       <button id="tabStores" class="hidden" onclick="showTab('stores')">🏪 Tindahan</button>
@@ -139,12 +138,13 @@ tr:nth-child(even){background:#fafafa}
       <!-- SP TABS -->
       <button id="tabService" class="hidden" onclick="showTab('service')">🛠️ Serbisyo</button>
       <button id="tabDeleted" class="hidden" onclick="showTab('deleted')">📈 Binurang Benta</button>
+      <!-- ALWAYS VISIBLE -->
       <button onclick="logout()">🚪 Log-out</button>
     </div>
   </div>
   <div class="container">
     <!-- ─────────────── CASHIER: SELL SCREEN ─────────────── -->
-    <div id="vSell" class="tab-page">
+    <div id="vSell" class="tab-page hidden">
       <div class="grid2">
         <div class="card">
           <h3>📋 Kategorya</h3>
@@ -254,7 +254,7 @@ tr:nth-child(even){background:#fafafa}
       <div class="card">
         <h3>➕ Magdagdag ng Produkto</h3>
         <label>Kategorya:</label>
-        <input type="text" id="newCat" placeholder="Halimbawa: Burger, Inumin...">
+        <input type="text" id="newCat" placeholder="Halimbawa: Pagkain, Inumin...">
         <label>Pangalan ng Produkto:</label>
         <input type="text" id="newProdName" placeholder="Ipasok ang pangalan">
         <label>Presyo (₱):</label>
@@ -300,9 +300,9 @@ tr:nth-child(even){background:#fafafa}
       <div class="card">
         <h3>🏪 Magdagdag ng Tindahan</h3>
         <label>Store Code:</label>
-        <input type="text" id="newStoreCode" placeholder="Halimbawa: CEB01">
+        <input type="text" id="newStoreCode" placeholder="Halimbawa: DVO01">
         <label>Pangalan ng Tindahan:</label>
-        <input type="text" id="newStoreName" placeholder="Halimbawa: Minute Burger Cebu">
+        <input type="text" id="newStoreName" placeholder="Halimbawa: Tindahan ni Juan">
         <button class="btn-green" onclick="addStore()">✅ I-SAVE</button>
       </div>
       <div class="card">
@@ -423,14 +423,12 @@ let TICKET_COUNTER = load('pos_ticket_counter', { num: 0, date: today() });
 
 // ═══════════════════ TICKET # GENERATOR — SUNOD-SUNOD 001,002... ═══════════════════
 function getNewTicketNumber(){
-  // Reset counter kung bagong araw
   if(TICKET_COUNTER.date !== today()){
     TICKET_COUNTER.num = 0;
     TICKET_COUNTER.date = today();
   }
   TICKET_COUNTER.num++;
   save('pos_ticket_counter', TICKET_COUNTER);
-  // Format: 001, 002...
   return String(TICKET_COUNTER.num).padStart(3, '0');
 }
 
@@ -515,32 +513,55 @@ function loginSP(){
   user = { logged:true, role:'sp', storeId:'ALL', storeName:'System', name:'Service Provider' };
   startApp();
 }
+
+// ═══════════════════ ✅ AYUSIN: TABS AYON SA ROLE ═══════════════════
 function startApp(){
   $('loginModal').classList.add('hidden');
   $('app').classList.remove('hidden');
   $('userInfoLine').textContent = `${user.storeName} | ${user.role.toUpperCase()}`;
   $('rptDate').textContent = D();
-  // Ipakita lamang ang tamang tabs ayon sa role
-  if(user.role==='cashier'){
-    ['tabSell','tabVoidReq','tabCashReq','tabProdOutReq'].forEach(id=>$(id).classList.remove('hidden'));
-  } else if(user.role==='admin'){
-    ['tabSales','tabProducts','tabStocks','tabStores','tabAdminReq','tabSettings'].forEach(id=>$(id).classList.remove('hidden'));
-  } else if(user.role==='sp'){
-    ['tabService','tabDeleted'].forEach(id=>$(id).classList.remove('hidden'));
-  }
-  showTab(user.role==='sp'?'service':'sell');
-}
-function logout(){ if(confirm('🚪 Gusto mo bang mag-logout?')) location.reload(); }
 
-// ═══════════════════ TAB NAVIGATION ═══════════════════
+  // ✅ ITAGO MUNA LAHAT NG TABS
+  document.querySelectorAll('.nav button[id^="tab"]').forEach(btn => {
+    btn.classList.add('hidden');
+  });
+
+  // ✅ CASHIER LANG
+  if(user.role === 'cashier'){
+    $('tabSell').classList.remove('hidden');
+    $('tabVoidReq').classList.remove('hidden');
+    $('tabCashReq').classList.remove('hidden');
+    $('tabProdOutReq').classList.remove('hidden');
+    showTab('sell');
+  }
+  // ✅ ADMIN LANG
+  else if(user.role === 'admin'){
+    $('tabSales').classList.remove('hidden');
+    $('tabProducts').classList.remove('hidden');
+    $('tabStocks').classList.remove('hidden');
+    $('tabStores').classList.remove('hidden');
+    $('tabAdminReq').classList.remove('hidden');
+    $('tabSettings').classList.remove('hidden');
+    showTab('sales');
+  }
+  // ✅ SP LANG
+  else if(user.role === 'sp'){
+    $('tabService').classList.remove('hidden');
+    $('tabDeleted').classList.remove('hidden');
+    showTab('service');
+  }
+}
+
+// ═══════════════════ SHOW TAB ═══════════════════
 function showTab(tabId){
-  document.querySelectorAll('.tab-page').forEach(p=>p.classList.add('hidden'));
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  const pageId = 'v'+tabId.charAt(0).toUpperCase()+tabId.slice(1);
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.add('hidden'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+
+  const pageId = 'v' + tabId.charAt(0).toUpperCase() + tabId.slice(1);
   $(pageId).classList.remove('hidden');
-  const btnId = 'tab'+tabId.charAt(0).toUpperCase()+tabId.slice(1);
-  $(btnId).classList.add('active');
-  // I-load ang datos
+  const btnId = 'tab' + tabId.charAt(0).toUpperCase() + tabId.slice(1);
+  if($(btnId)) $(btnId).classList.add('active');
+
   if(tabId==='sell') renderSellScreen();
   if(tabId==='sales') renderSalesReport();
   if(tabId==='products') renderProductsTab();
@@ -553,11 +574,12 @@ function showTab(tabId){
   if(tabId==='prodOutReq') loadProdOutSelect();
 }
 
+function logout(){ if(confirm('🚪 Gusto mo bang mag-logout?')) location.reload(); }
+
 // ═══════════════════ SELL SCREEN ═══════════════════
 function renderSellScreen(){
   let prods = PRODUCTS.filter(p=>p.storeId===user.storeId);
-  // May search filter?
-  let srch = $('prodSearch') ? $('prodSearch').value.toLowerCase().trim() : '';
+  let srch = ($('prodSearch')?.value||'').toLowerCase().trim();
   if(srch) prods = prods.filter(p=>p.name.toLowerCase().includes(srch) || p.category.toLowerCase().includes(srch));
   let cats = [...new Set(prods.map(p=>p.category))];
   $('catList').innerHTML = cats.map(c=>`<button class="cat-btn ${selectedCategory===c?'active':''}" onclick="selectCat('${c}')">${c}</button>`).join('');
@@ -601,16 +623,10 @@ function updateCartDisplay(){
   $('grandTotal').textContent = fmt(getTotal());
 }
 function removeCartItem(i){ cart.splice(i,1); updateCartDisplay(); }
-function clearCart(){ 
-  if(!cart.length) return; 
-  if(confirm('🗑️ Linisin ang order?')){ 
-    cart=[]; 
-    updateCartDisplay(); 
-  } 
-}
+function clearCart(){ if(!cart.length) return; if(confirm('🗑️ Linisin ang order?')){ cart=[]; updateCartDisplay(); } }
 function getTotal(){ return cart.reduce((s,x)=>s+x.price*x.qty,0); }
 
-// ═══════════════════ CASH PAYMENT — MAY INPUT NG BINAYAD AT SUKLI ═══════════════════
+// ═══════════════════ CASH PAYMENT ═══════════════════
 function openCashPay(){
   if(!cart.length) return alert('⚠️ Walang laman ang cart!');
   $('payTotal').textContent = fmt(getTotal());
@@ -629,15 +645,14 @@ function confirmCashPay(){
   let total = getTotal();
   let given = parseFloat($('cashGiven').value)||0;
   if(given < total) return alert('⚠️ Kulang ang ibinayad!');
-  let change = given - total;
-  recordSale({ method:'Cash', amount:total, cashGiven:given, change:change });
+  recordSale({ method:'Cash', amount:total, cashGiven:given, change:given-total });
   closeCashPayModal();
 }
 
-// ═══════════════════ SAVE TRANSACTION / RECORD SALE ═══════════════════
+// ═══════════════════ SAVE TRANSACTION ═══════════════════
 function recordSale(payInfo){
   let total = getTotal();
-  let txnId = getNewTicketNumber(); // FORMAT: 001, 002...
+  let txnId = getNewTicketNumber();
   let sale = {
     ticket: txnId, date:D(), isoDate:today(), time:new Date().toLocaleTimeString('en-PH'),
     storeId:user.storeId, items:cart.map(x=>({name:x.name,qty:x.qty,price:x.price})),
@@ -645,16 +660,12 @@ function recordSale(payInfo){
   };
   SALES.unshift(sale);
   save('pos_sales', SALES);
-  // Bawasan ang stock
   cart.forEach(item=>{ STOCKS[item.prodId] = Math.max(0, (STOCKS[item.prodId]||0) - item.qty); });
   save('pos_stocks', STOCKS);
-  // I-save para sa Void Request
   VOID_REQS.unshift({ id:txnId, ticket:txnId, txn:sale, status:'ACTIVE' });
   save('pos_void_reqs', VOID_REQS);
   alert(`✅ NAI-SAVE!\nTicket #: ${txnId}\nKabuuan: ₱${fmt(total)}`);
-  cart=[];
-  updateCartDisplay();
-  renderSellScreen();
+  cart=[]; updateCartDisplay(); renderSellScreen();
 }
 
 // ═══════════════════ CASHIER: VOID REQUEST ═══════════════════
@@ -676,8 +687,7 @@ function submitVoidReq(){
   if(r){ r.status='PENDING'; r.wrongTicket=wrong; r.rightTicket=right; r.reason=reason; r.reqBy=user.name; r.reqTs=dt(); }
   save('pos_void_reqs', VOID_REQS);
   alert('✅ Naipadala na para aprubahan!');
-  $('voidReason').value='';
-  loadVoidTickets();
+  $('voidReason').value=''; loadVoidTickets();
 }
 function loadMyVoidReqs(){
   let my = VOID_REQS.filter(x=>x.reqBy===user.name);
@@ -689,7 +699,7 @@ function loadMyVoidReqs(){
     </div>`).join('') : '<p>Wala pang request.</p>';
 }
 
-// ═══════════════════ CASHIER: CASH IN/OUT REQUEST ═══════════════════
+// ═══════════════════ CASHIER: CASH IN/OUT ═══════════════════
 function submitCashReq(){
   let type = $('cashType').value;
   let amt = parseFloat($('cashAmt').value);
@@ -698,8 +708,7 @@ function submitCashReq(){
   CASH_REQS.unshift({ id:getNewTicketNumber(), type, amount:amt, reason:note, reqBy:user.name, storeId:user.storeId, ts:dt(), status:'ACTIVE' });
   save('pos_cash_reqs', CASH_REQS);
   alert('✅ Naipadala na!');
-  $('cashAmt').value=''; $('cashReason').value='';
-  loadMyCashReqs();
+  $('cashAmt').value=''; $('cashReason').value=''; loadMyCashReqs();
 }
 function loadMyCashReqs(){
   let my = CASH_REQS.filter(x=>x.reqBy===user.name);
@@ -710,7 +719,7 @@ function loadMyCashReqs(){
     </div>`).join('') : '<p>Wala pang request.</p>';
 }
 
-// ═══════════════════ CASHIER: PRODUCT OUT REQUEST ═══════════════════
+// ═══════════════════ CASHIER: PRODUCT OUT ═══════════════════
 function loadProdOutSelect(){
   let prods = PRODUCTS.filter(p=>p.storeId===user.storeId);
   $('prodOutSel').innerHTML='<option value="">— Pumili Produkto —</option>'+
@@ -724,13 +733,7 @@ function loadProdOutSelect(){
 function filterProdOutSel(){
   let allOpts = Array.from($('prodOutSel').options);
   let srch = $('prodOutSearch').value.toLowerCase().trim();
-  allOpts.forEach(opt => {
-    if(!srch || opt.text.toLowerCase().includes(srch) || opt.value.includes(srch)){
-      opt.style.display = '';
-    } else {
-      opt.style.display = 'none';
-    }
-  });
+  allOpts.forEach(opt => opt.style.display = (!srch || opt.text.toLowerCase().includes(srch)) ? '' : 'none');
 }
 function submitProdOut(){
   let pid = $('prodOutSel').value;
@@ -740,37 +743,21 @@ function submitProdOut(){
   if(!pid||!qty||qty<1) return alert('⚠️ Pumili ng produkto at dami!');
   let avail = STOCKS[pid]||0;
   if(qty>avail) return alert(`⚠️ Kulang ang stock! Natira: ${avail}`);
-  PROD_OUT_REQS.unshift({
-    id: getNewTicketNumber(),
-    pid,
-    qty,
-    reason,
-    note,
-    reqBy: user.name,
-    storeId: user.storeId,
-    ts: dt(),
-    status: 'PENDING'
-  });
+  PROD_OUT_REQS.unshift({ id:getNewTicketNumber(), pid, qty, reason, note, reqBy:user.name, storeId:user.storeId, ts:dt(), status:'PENDING' });
   save('pos_prodout_reqs', PROD_OUT_REQS);
   alert('✅ Naipadala na para aprubahan!');
-  $('prodOutSel').value = '';
-  $('prodOutQty').value = '1';
-  $('prodOutNote').value = '';
-  load
-  MyProdOutReqs();
+  $('prodOutSel').value=''; $('prodOutQty').value='1'; $('prodOutNote').value=''; loadMyProdOutReqs();
 }
 function loadMyProdOutReqs(){
   let my = PROD_OUT_REQS.filter(x=>x.reqBy===user.name);
   $('myProdOutReqs').innerHTML = my.length ? my.map(r=>`
     <div class="req-card">
-      📦 Produkto ID: ${r.pid}<br>
-      Dami: ${r.qty} | Dahilan: ${r.reason}<br>
-      Tandaan: ${r.note||'—'}<br>
+      📦 Produkto: ${r.pid}<br>Dami: ${r.qty} | Dahilan: ${r.reason}<br>
       Katayuan: <span class="tag warn">${r.status}</span> | ${r.ts}
     </div>`).join('') : '<p>Wala pang request.</p>';
 }
 
-// ═══════════════════ ADMIN: PRODUCTS ───────────────
+// ═══════════════════ ADMIN: PRODUCTS ═══════════════════
 function addProduct(){
   let cat = $('newCat').value.trim();
   let name = $('newProdName').value.trim();
@@ -778,7 +765,7 @@ function addProduct(){
   let storeId = $('prodStoreSel').value;
   if(!cat||!name||!price||!storeId) return alert('⚠️ Lahat ng patlang ay kailangan!');
   PRODUCTS.push({ storeId, category:cat, name, price });
-  save('pos_products', PRODUCTS);
+    save('pos_products', PRODUCTS);
   alert('✅ Produkto naidagdag!');
   $('newCat').value=''; $('newProdName').value=''; $('newProdPrice').value='';
   renderProductsTab();
@@ -807,7 +794,7 @@ function delProduct(i){
   renderProductsTab();
 }
 
-// ═══════════════════ ADMIN: STOCK IN ───────────────
+// ═══════════════════ ADMIN: STOCK IN ═══════════════════
 function loadStockInProdList(){
   let storeId = $('stockInStore').value;
   stockInAllProds = PRODUCTS.filter(p=>p.storeId===storeId);
@@ -849,7 +836,7 @@ function renderStockTab(){
   $('stockBody').innerHTML = html || '<tr><td colspan="3" class="empty">Walang stock na nakita.</td></tr>';
 }
 
-// ═══════════════════ ADMIN: STORES ───────────────
+// ═══════════════════ ADMIN: STORES ═══════════════════
 function addStore(){
   let code = $('newStoreCode').value.trim().toUpperCase();
   let name = $('newStoreName').value.trim();
@@ -891,7 +878,7 @@ function renderStoreSelects(){
   });
 }
 
-// ═══════════════════ ADMIN: SALES REPORTS ───────────────
+// ═══════════════════ ADMIN: SALES REPORTS ═══════════════════
 function renderSalesReport(){
   let selDate = $('salesDateSel').value;
   let daySales = SALES.filter(s=>s.isoDate===selDate);
@@ -911,7 +898,7 @@ function renderSalesReport(){
     </tr>`).join('') : '<tr><td colspan="6" class="empty">Walang benta sa petsang ito.</td></tr>';
 }
 
-// ═══════════════════ ADMIN: REQUESTS ───────────────
+// ═══════════════════ ADMIN: APPROVE REQUESTS ═══════════════════
 function renderAdminRequests(){
   // Void Requests
   let voidPending = VOID_REQS.filter(x=>x.status==='PENDING');
@@ -968,7 +955,7 @@ function rejectProdOut(i){
   alert('❌ Tinanggihan!'); renderAdminRequests();
 }
 
-// ═══════════════════ ADMIN: SETTINGS ───────────────
+// ═══════════════════ ADMIN: SETTINGS ═══════════════════
 function changeCashierPass(){
   let cur = $('curCashierPass').value.trim();
   let newPass = $('newCashierPass').value.trim();
@@ -1000,7 +987,7 @@ function deleteSalesByDate(){
   $('delSaleDate').value=''; $('delSaleReason').value='';
 }
 
-// ═══════════════════ SP: SERVICE ───────────────
+// ═══════════════════ SP: SERVICE MANAGEMENT ═══════════════════
 function renderServiceTab(){
   const exp = getExpiryDate();
   const active = isServiceActive();
@@ -1039,7 +1026,7 @@ function spChangePasswords(){
   $('spNewAdminPass').value=''; $('spNewSPass').value='';
 }
 
-// ═══════════════════ SP: DELETED SALES ───────────────
+// ═══════════════════ SP: DELETED SALES LOG ═══════════════════
 function renderDeletedSales(){
   $('deletedBody').innerHTML = DELETED_SALES.length ? DELETED_SALES.map(d=>`
     <tr>
