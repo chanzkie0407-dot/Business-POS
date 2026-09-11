@@ -545,7 +545,7 @@ let cart = [];
 let selectedCategory = null;
 let stockInAllProds = [];
 let currentShift = null;
-  const SERVICE = load('service', { active: true, firstUse: null, expiry: null, price: 0 });
+const SERVICE = load('service', { active: true, firstUse: null, expiry: null, price: 0 });
 // ═══════════════════ TICKET # GENERATOR ═══════════════════
 function getNewTicketNumber(){
   const todayStr = today();
@@ -610,6 +610,25 @@ function loginSP(){
   user={logged:true,role:'sp',storeId:'ALL',storeName:'System',name:'Service Provider'};
   startApp();
 }
+// ═══════════════════ ✅ IDINAGDAG: LOGOUT FUNCTION ═══════════════════
+function logout(){
+  if(confirm('Sigurado po ba kayong gusto ninyong mag-log-out?')){
+    user = { logged:false, role:'', storeId:null, storeName:'', name:'' };
+    // Itago ang app
+    $('app').classList.add('hidden');
+    // Ipakita muli ang login modal
+    $('loginModal').classList.remove('hidden');
+    // I-reset ang login form
+    $('loginRole').value = '';
+    ['cashierForm','adminForm','spForm'].forEach(id=>$(id).classList.add('hidden'));
+    // Linisin ang password fields
+    $('cashierPass').value = '';
+    $('adminPass').value = '';
+    $('spPass').value = '';
+    // Linisin ang cart
+    cart = [];
+  }
+}
 // ═══════════════════ ✅ INAYOS: START APP ═══════════════════
 function startApp(){
   // Itago ang login modal
@@ -653,6 +672,392 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', () => showTab(tabId.charAt(0).toLowerCase() + tabId.slice(1)));
     });
 });
+
+// ═══════════════════ MGA TUMUTULONG NA FUNCTIONS ═══════════════════
+function renderStoreSelects() {
+  const sel1 = $('prodStoreSel');
+  const sel2 = $('stockInStore');
+  const sel3 = $('stockViewStore');
+  if(sel1) sel1.innerHTML = STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+  if(sel2) sel2.innerHTML = '<option value="">-- Pumili --</option>' + STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+  if(sel3) sel3.innerHTML = '<option value="ALL">Lahat ng Tindahan</option>' + STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+}
+
+function checkOpenShift() {
+  if(!SHIFTS.length || SHIFTS[SHIFTS.length-1].endTime) {
+    $('shiftBanner').classList.remove('hidden');
+    $('btnOpenShift').classList.remove('hidden');
+    $('btnCloseShift').classList.add('hidden');
+    currentShift = null;
+  } else {
+    currentShift = SHIFTS[SHIFTS.length-1];
+    $('shiftBanner').classList.add('hidden');
+    $('btnOpenShift').classList.add('hidden');
+    $('btnCloseShift').classList.remove('hidden');
+  }
+}
+
+function openShiftModal() { $('shiftOpenModal').classList.remove('hidden'); $('openingCash').value=''; }
+function closeShiftModal() { $('shiftOpenModal').classList.add('hidden'); }
+function confirmShiftOpen() {
+  const amt = parseFloat($('openingCash').value)||0;
+  if(amt<0) return alert('⚠️ Hindi pwedeng mas mababa sa 0!');
+  currentShift = {
+    storeId: user.storeId,
+    openingCash: amt,
+    startTime: new Date().toISOString(),
+    openingTicket: TICKET_COUNTER.num,
+    cashIn:0, cashOut:0, sales:0
+  };
+  SHIFTS.push(currentShift);
+  save('shifts', SHIFTS);
+  closeShiftModal();
+  checkOpenShift();
+  alert('✅ Shift nabuksan na!');
+}
+
+function openShiftCloseModal() {
+  if(!currentShift) return alert('⚠️ Walang bukas na shift!');
+  $('closeOpening').textContent = fmt(currentShift.openingCash);
+  const shiftSales = SALES.filter(s=>s.ticket>=currentShift.openingTicket && s.storeId===user.storeId).reduce((t,s)=>t+s.total,0);
+  const shiftCashIn = CASH_REQS.filter(r=>r.type==='CASHIN' && r.approved).reduce((t,r)=>t+r.amount,0);
+  const shiftCashOut = CASH_REQS.filter(r=>r.type==='CASHOUT' && r.approved).reduce((t,r)=>t+r.amount,0);
+  $('closeSales').textContent = fmt(shiftSales);
+  $('closeCashIn').textContent = fmt(shiftCashIn);
+  $('closeCashOut').textContent = fmt(shiftCashOut);
+  const expected = currentShift.openingCash + shiftSales + shiftCashIn - shiftCashOut;
+  $('closeExpected').textContent = fmt(expected);
+  $('closeActual').value='';
+  $('closeVariance').textContent = '₱0.00';
+  $('shiftCloseModal').classList.remove('hidden');
+}
+function closeShiftCloseModal() { $('shiftCloseModal').classList.add('hidden'); }
+function computeVariance() {
+  const shiftSales = SALES.filter(s=>s.ticket>=currentShift.openingTicket && s.storeId===user.storeId).reduce((t,s)=>t+s.total,0);
+  const shiftCashIn = CASH_REQS.filter(r=>r.type==='CASHIN' && r.approved).reduce((t,r)=>t+r.amount,0);
+  const shiftCashOut = CASH_REQS.filter(r=>r.type==='CASHOUT' && r.approved).reduce((t,r)=>t+r.amount,0);
+  const expected = currentShift.openingCash + shiftSales + shiftCashIn - shiftCashOut;
+  const actual = parseFloat($('closeActual').value)||0;
+  $('closeVariance').textContent = '₱' + fmt(actual - expected);
+}
+function confirmShiftClose() {
+  if(!currentShift) return;
+  currentShift.endTime = new Date().toISOString();
+  currentShift.closingCash = parseFloat($('closeActual').value)||0;
+  SHIFTS[SHIFTS.length-1] = currentShift;
+  save('shifts', SHIFTS);
+  closeShiftCloseModal();
+  checkOpenShift();
+  alert('✅ Shift natapos na!');
+}
+
+// ═══════════════════ SELL SCREEN FUNCTIONS ═══════════════════
+function renderSellScreen() {
+  const cat = selectedCategory;
+  const search = $('prodSearch').value.toLowerCase().trim();
+  const list = $('prodList');
+  const filtered = PRODUCTS.filter(p=>
+    p.storeId===user.storeId &&
+    (!cat || p.category===cat) &&
+    (!search || p.name.toLowerCase().includes(search))
+  );
+  list.innerHTML = filtered.map(p=>{
+    const qty = (STOCKS[p.id]||0);
+    return `<button class="prod-btn" ${qty<=0?'disabled':''} onclick="addToCart('${p.id}')">
+      <strong>${p.name}</strong> — ₱${fmt(p.price)}
+      ${qty<=0?' <span class="lowstock">(Wala na)</span>':` <small>Stock: ${qty}</small>`}
+    </button>`;
+  }).join('');
+  const cats = [...new Set(PRODUCTS.filter(p=>p.storeId===user.storeId).map(p=>p.category))];
+  $('catList').innerHTML = `<button class="cat-btn ${!cat?'active':''}" onclick="selectCat(null)">Lahat</button>` +
+    cats.map(c=>`<button class="cat-btn ${cat===c?'active':''}" onclick="selectCat('${c}')">${c}</button>`).join('');
+}
+function selectCat(cat) { selectedCategory=cat; renderSellScreen(); }
+function addToCart(id) {
+  if(!currentShift) return alert('⚠️ Buksan muna ang Shift!');
+  const prod = PRODUCTS.find(p=>p.id===id);
+  if(!prod) return;
+  const qty = (STOCKS[id]||0);
+  if(qty<=0) return alert('⚠️ Wala nang stock!');
+  const ex = cart.find(x=>x.id===id);
+  if(ex) ex.qty++;
+  else cart.push({id:prod.id,name:prod.name,price:prod.price,qty:1});
+  updateCartTotal();
+}
+function updateCartTotal() {
+  $('cartArea').innerHTML = cart.length?
+    cart.map((it,i)=>`<div class="cart-row"><span>${it.name} × ${it.qty}</span><span>₱${fmt(it.price*it.qty)} <button class="btn-sm btn-red" onclick="removeCartItem(${i})">−</button></span></div>`).join('')
+    :'<div class="empty">Wala pang gamit.</div>';
+  const total = cart.reduce((t,it)=>t + it.price*it.qty,0);
+  $('grandTotal').textContent = fmt(total);
+}
+function removeCartItem(i) { cart.splice(i,1); updateCartTotal(); }
+function clearCart() { if(cart.length && confirm('Burahin ang lahat?')) { cart=[]; updateCartTotal(); } }
+
+// ═══════════════════ PAYMENT MODALS ═══════════════════
+function openCashPay() { if(!cart.length) return alert('⚠️ Walang laman ang order!'); $('payTotal').textContent = fmt(cart.reduce((t,it)=>t+it.price*it.qty,0)); $('cashGiven').value=''; $('changeAmt').value='₱0.00'; $('cashPayModal').classList.remove('hidden'); }
+function closeCashPayModal() { $('cashPayModal').classList.add('hidden'); }
+function computeChange() {
+  const total = cart.reduce((t,it)=>t+it.price*it.qty,0);
+  const given = parseFloat($('cashGiven').value)||0;
+  $('changeAmt').value = '₱' + fmt(given - total);
+}
+function setCashAmt(a) { $('cashGiven').value=a; computeChange(); }
+function confirmCashPay() {
+  const total = cart.reduce((t,it)=>t+it.price*it.qty,0);
+  const given = parseFloat($('cashGiven').value)||0;
+  if(given<total) return alert('⚠️ Kulang ang bayad!');
+  completeSale('CASH', total, given - total);
+  closeCashPayModal();
+}
+
+function openGCashPay() { if(!cart.length) return alert('⚠️ Walang laman ang order!'); $('gcashTotal').textContent = fmt(cart.reduce((t,it)=>t+it.price*it.qty,0)); $('gcashRef').value=''; $('gcashName').value=''; $('gcashPayModal').classList.remove('hidden'); }
+function closeGCashModal() { $('gcashPayModal').classList.add('hidden'); }
+function confirmGCashPay() {
+  const total = cart.reduce((t,it)=>t+it.price*it.qty,0);
+  if(!$('gcashRef').value.trim()) return alert('⚠️ Ilagay ang Reference #!');
+  completeSale('GCASH', total, 0, $('gcashRef').value.trim(), $('gcashName').value.trim());
+  closeGCashModal();
+}
+
+function openSplitPay() { if(!cart.length) return alert('⚠️ Walang laman ang order!'); const total=cart.reduce((t,it)=>t+it.price*it.qty,0); $('splitTotal').textContent=fmt(total); $('splitCash').value=''; $('splitGCash').value='0.00'; $('splitRef').value=''; $('splitCashGiven').value=''; $('splitChange').value='₱0.00'; $('splitPayModal').classList.remove('hidden'); }
+function closeSplitModal() { $('splitPayModal').classList.add('hidden'); }
+function updateSplitGCash() {
+  const total = cart.reduce((t,it)=>t+it.price*it.qty,0);
+  const cash = parseFloat($('splitCash').value)||0;
+  $('splitGCash').value = fmt(Math.max(0, total - cash));
+}
+function computeSplitChange() {
+  const cash = parseFloat($('splitCash').value)||0;
+  const given = parseFloat($('splitCashGiven').value)||0;
+  $('splitChange').value = '₱' + fmt(given - cash);
+}
+function confirmSplitPay() {
+  const total = cart.reduce((t,it)=>t+it.price*it.qty,0);
+  const cash = parseFloat($('splitCash').value)||0;
+  const gcash = parseFloat($('splitGCash').value)||0;
+  if(Math.abs((cash+gcash)-total)>0.02) return alert('⚠️ Hindi tugma ang halaga!');
+  if(!$('splitRef').value.trim()) return alert('⚠️ Ilagay ang GCash Reference #!');
+  completeSale('SPLIT', total, parseFloat($('splitCashGiven').value)-cash, $('splitRef').value.trim(), '', cash, gcash);
+  closeSplitModal();
+}
+
+// ═══════════════════ ✅ KUMPLETUHIN ANG BENTA ═══════════════════
+function completeSale(payMethod, total, change=0, ref='', payName='', cashPortion=0, gcashPortion=0) {
+  const ticket = getNewTicketNumber();
+  // Ibawas sa stock
+  cart.forEach(it=>{ STOCKS[it.id] = (STOCKS[it.id]||0) - it.qty; });
+  save('stocks', STOCKS);
+  // I-save ang benta
+  const sale = {
+    ticket, storeId: user.storeId, storeName: user.storeName,
+    datetime: new Date().toISOString(), items: [...cart], total,
+    payMethod, change, ref, payName, cashPortion, gcashPortion,
+    voided: false, deleted: false
+  };
+  SALES.push(sale);
+  save('sales', SALES);
+  // Ipakita ang resibo
+  showReceipt(sale);
+  // Linisin ang cart
+  cart=[];
+  updateCartTotal();
+}
+
+function showReceipt(sale) {
+  const r = $('receiptContent');
+  r.innerHTML = `
+    <h3>🏪 ${sale.storeName}</h3>
+    <p>Ticket #: ${sale.ticket}</p>
+    <p>${new Date(sale.datetime).toLocaleString('en-PH')}</p>
+    <div class="line"></div>
+    ${sale.items.map(it=>`<div class="item"><span>${it.name} × ${it.qty}</span><span>₱${fmt(it.price*it.qty)}</span></div>`).join('')}
+    <div class="line"></div>
+    <div class="total">KABUUAN: ₱${fmt(sale.total)}</div>
+    <div class="paymethod">Bayad: ${sale.payMethod}</div>
+    ${sale.ref?`<div class="paymethod">Ref: ${sale.ref}</div>`:''}
+    ${sale.change>0?`<div class="paymethod">Sukli: ₱${fmt(sale.change)}</div>`:''}
+    <div class="line"></div>
+    <p>✅ Salamat po!</p>
+  `;
+  $('receiptModal').classList.remove('hidden');
+}
+function printReceipt() { window.print(); }
+function closeReceiptModal() { $('receiptModal').classList.add('hidden'); }
+
+// ═══════════════════ SALES REPORT ═══════════════════
+function renderSalesReport() {
+  const d = $('salesDateSel').value;
+  $('rptDate').textContent = d;
+  let list = SALES.filter(s=>s.datetime.startsWith(d) && !s.voided && !s.deleted);
+  if(user.storeId!=='ALL') list = list.filter(s=>s.storeId===user.storeId);
+  const total = list.reduce((t,s)=>t+s.total,0);
+  const cash = list.filter(s=>s.payMethod==='CASH').reduce((t,s)=>t+s.total,0);
+  const gcash = list.filter(s=>s.payMethod==='GCASH').reduce((t,s)=>t+s.total,0);
+  const split = list.filter(s=>s.payMethod==='SPLIT').reduce((t,s)=>t+s.total,0);
+  const voided = list.filter(s=>s.payMethod==='VOID').reduce((t,s)=>t+s.total,0);
+  $('rptTotal').textContent = fmt(total);
+  $('rptCash').textContent = fmt(cash);
+  $('rptGCash').textContent = fmt(gcash);
+  $('rptSplit').textContent = fmt(split);
+  $('rptVoid').textContent = fmt(voided);
+  $('rptCount').textContent = list.length;
+  $('salesLogBody').innerHTML = list.map(s=>`
+    <tr>
+      <td>${s.ticket}</td>
+      <td>${new Date(s.datetime).toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'})}</td>
+      <td>${s.items.length} gamit</td>
+      <td>₱${fmt(s.total)}</td>
+      <td><span class="tag ${s.payMethod==='CASH'?'cash':s.payMethod==='GCASH'?'gcash':'split'}">${s.payMethod}</span></td>
+      <td>₱${fmt(s.change)}</td>
+      <td>${s.voided?'<span class="tag void">VOID</span>':'✅ OK'}</td>
+    </tr>`).join('');
+}
+
+// ═══════════════════ PRODUCTS & STORES ═══════════════════
+function addProduct() {
+  const cat = $('newCat').value.trim();
+  const name = $('newProdName').value.trim();
+  const price = parseFloat($('newProdPrice').value);
+  const storeId = $('prodStoreSel').value;
+  if(!cat || !name || !price || !storeId) return alert('⚠️ Punan ang lahat!');
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
+  PRODUCTS.push({id, category:cat, name, price, storeId});
+  save('products', PRODUCTS);
+  alert('✅ Produkto naidagdag!');
+  $('newCat').value=''; $('newProdName').value=''; $('newProdPrice').value='';
+  renderProductsTab();
+}
+function renderProductsTab() {
+  const search = $('prodListSearch').value.toLowerCase().trim();
+  let list = PRODUCTS;
+  if(user.storeId!=='ALL') list = list.filter(p=>p.storeId===user.storeId);
+  if(search) list = list.filter(p=>p.name.toLowerCase().includes(search)||p.category.toLowerCase().includes(search));
+  $('prodBody').innerHTML = list.map(p=>{
+    const s = STORES.find(x=>x.code===p.storeId)?.name||p.storeId;
+    const q = STOCKS[p.id]||0;
+    return `<tr><td>${s}</td><td>${p.category}</td><td>${p.name}</td><td>₱${fmt(p.price)}</td><td>${q}</td><td><button class="btn-sm btn-red" onclick="delProduct('${p.id}')">Burahin</button></td></tr>`;
+  }).join('');
+}
+function delProduct(id) { if(confirm('Burahin ang produkto?')) { PRODUCTS=PRODUCTS.filter(p=>p.id!==id); save('products',PRODUCTS); renderProductsTab(); } }
+
+function addStore() {
+  const code = $('newStoreCode').value.trim().toUpperCase();
+  const name = $('newStoreName').value.trim();
+  if(!code || !name) return alert('⚠️ Punan ang lahat!');
+  if(STORES.find(s=>s.code===code)) return alert('⚠️ May tindahan na may ganitong Code!');
+  STORES.push({code,name});
+  save('stores', STORES);
+  alert('✅ Tindahan naidagdag!');
+  $('newStoreCode').value=''; $('newStoreName').value='';
+  $('storeBody').innerHTML = STORES.map(s=>`<tr><td>${s.code}</td><td>${s.name}</td><td><button class="btn-sm btn-red" onclick="delStore('${s.code}')">Burahin</button></td></tr>`).join('');
+  renderStoreSelects();
+}
+function delStore(code) { if(confirm('Burahin ang tindahan?')) { STORES=STORES.filter(s=>s.code!==code); save('stores',STORES); $('storeBody').innerHTML = STORES.map(s=>`<tr><td>${s.code}</td><td>${s.name}</td><td><button class="btn-sm btn-red" onclick="delStore('${s.code}')">Burahin</button></td></tr>`).join(''); renderStoreSelects(); } }
+
+function stockIn() {
+  const storeId = $('stockInStore').value;
+  const prodId = $('stockInProd').value;
+  const qty = parseInt($('stockInQty').value);
+  if(!storeId || !prodId || !qty) return alert('⚠️ Punan ang lahat!');
+  STOCKS[prodId] = (STOCKS[prodId]||0) + qty;
+  save('stocks', STOCKS);
+  alert('✅ Stock naidagdag!');
+  renderStockTab();
+}
+function loadStockInProdList() {
+  const storeId = $('stockInStore').value;
+  stockInAllProds = storeId ? PRODUCTS.filter(p=>p.storeId===storeId) : PRODUCTS;
+  filterStockInProds();
+}
+function filterStockInProds() {
+  const s = $('stockProdSearch').value.toLowerCase().trim();
+  const filtered = s ? stockInAllProds.filter(p=>p.name.toLowerCase().includes(s)) : stockInAllProds;
+  $('stockInProd').innerHTML = filtered.map(p=>`<option value="${p.id}">${p.name} — ₱${fmt(p.price)}</option>`).join('');
+}
+function renderStockTab() {
+  const storeId = $('stockViewStore').value;
+  let list = Object.entries(STOCKS).map(([id,qty])=>{
+    const p = PRODUCTS.find(x=>x.id===id);
+    if(!p) return null;
+    return {storeId:p.storeId, pname:p.name, qty};
+  }).filter(Boolean);
+  if(storeId!=='ALL') list = list.filter(x=>x.storeId===storeId);
+  $('stockBody').innerHTML = list.map(x=>{
+    const s = STORES.find(st=>st.code===x.storeId)?.name||x.storeId;
+    return `<tr><td>${s}</td><td>${x.pname}</td><td>${x.qty}</td></tr>`;
+  }).join('');
+}
+
+// ═══════════════════ SETTINGS ═══════════════════
+function changeCashierPass() {
+  const cur = $('curCashierPass').value.trim();
+  const newP = $('newCashierPass').value.trim();
+  if(cur!==PASS.cashier) return alert('⚠️ Maling kasalukuyang password!');
+  if(newP.length<4) return alert('⚠️ Hindi bababa sa 4 na titik!');
+  PASS.cashier = newP;
+  save('pass', PASS);
+  alert('✅ Na-update na!');
+  $('curCashierPass').value=''; $('newCashierPass').value='';
+}
+function deleteSalesByDate() {
+  const d = $('delSaleDate').value;
+  const reason = $('delSaleReason').value.trim();
+  if(!d || !reason) return alert('⚠️ Punan ang lahat!');
+  if(!confirm(`Sigurado bang BURAHIN LAHAT ng benta noong ${d}? Hindi na ito mababawi!`)) return;
+  const toDel = SALES.filter(s=>s.datetime.startsWith(d) && !s.deleted);
+  toDel.forEach(s=>{ DELETED_SALES.push({when:new Date().toISOString(), type:'DELETE', saleDate:d, ticket:s.ticket, storeId:s.storeId, amount:s.total, reason}); s.deleted=true; });
+  save('deleted_sales', DELETED_SALES);
+  save('sales', SALES);
+  alert(`✅ ${toDel.length} benta naitago sa log. Tingnan sa Binurang Benta.`);
+  $('delSaleDate').value=''; $('delSaleReason').value='';
+}
+
+// ═══════════════════ SERVICE PROVIDER ═══════════════════
+function extendService(days,price) {
+  if(!confirm(`I-activate / I-extend ng ${days} araw? ₱${price}`)) return;
+  if(!SERVICE.firstUse) SERVICE.firstUse = new Date().toISOString();
+  const curExp = SERVICE.expiry ? new Date(SERVICE.expiry) : new Date();
+  if(curExp<new Date()) curExp.setTime(Date.now());
+  curExp.setTime(curExp.getTime() + days*86400000);
+  SERVICE.expiry = curExp.toISOString();
+  SERVICE.active = true;
+  SERVICE.price = price;
+  saveService();
+  alert(`✅ Serbisyo aktibo hanggang ${curExp.toLocaleDateString('en-PH')}`);
+  updateServiceDisplay();
+}
+function stopService() { SERVICE.active=false; saveService(); alert('✅ Serbisyo naitigil!'); updateServiceDisplay(); }
+function resumeService() { SERVICE.active=true; saveService(); alert('✅ Serbisyo naibalik!'); updateServiceDisplay(); }
+function updateServiceDisplay() {
+  $('servStatus').innerHTML = SERVICE.active ? '<span class="tag success">✅ AKTIBO</span>' : '<span class="tag danger">❌ NAHIHINTI</span>';
+  $('servExpiry').textContent = getExpiryDate().toLocaleString('en-PH');
+}
+function spChangePasswords() {
+  const a = $('spNewAdminPass').value.trim();
+  const s = $('spNewSPass').value.trim();
+  if(a && a.length>=4) PASS.admin=a;
+  if(s && s.length>=4) PASS.sp=s;
+  save('pass', PASS);
+  alert('✅ Password na-update!');
+  $('spNewAdminPass').value=''; $('spNewSPass').value='';
+}
+
+// ═══════════════════ PLACEHOLDER FUNCTIONS (para hindi mag-error) ═══════════════════
+function submitVoidReq(){ alert('⚠️ Tampok na ginagawa pa lamang.'); }
+function submitCashReq(){ alert('⚠️ Tampok na ginagawa pa lamang.'); }
+function submitProdOut(){ alert('⚠️ Tampok na ginagawa pa lamang.'); }
+function filterProdOutSel(){}
+
+// ═══════════════════ PAGKATAPOS MAG-LOAD ═══════════════════
+window.addEventListener('load', function(){
+  setTimeout(()=>{
+    if($('servStatus')) updateServiceDisplay();
+    if($('salesDateSel')) renderSalesReport();
+    if($('storeBody')) $('storeBody').innerHTML = STORES.map(s=>`<tr><td>${s.code}</td><td>${s.name}</td><td><button class="btn-sm btn-red" onclick="delStore('${s.code}')">Burahin</button></td></tr>`).join('');
+  },100);
+});
+
 </script>
 </body>
 </html>
