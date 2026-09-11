@@ -1,679 +1,456 @@
 <!DOCTYPE html>
-<html lang="tl">
+<html lang="tl-PH">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>POS System — Offline Ready</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Roboto,Arial,sans-serif}
-body{background:#f0f4f8;padding-bottom:40px}
-.hidden{display:none !important}
-button{border:none;border-radius:8px;padding:10px 14px;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.15s ease}
-button:active{transform:scale(0.97)}
-input,select,textarea{border:2px solid #e2e8f0;border-radius:8px;padding:10px 12px;width:100%;margin:4px 0 10px;font-size:15px;background:#fafafa}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#2563eb;background:#fff}
-label{font-size:14px;color:#475569;font-weight:600;display:block;margin-top:6px}
-h2,h3,h4{color:#1e293b;margin-bottom:12px}
-p{color:#475569;line-height:1.5}
-.modal{position:fixed;inset:0;background:rgba(15,23,42,0.6);display:flex;align-items:center;justify-content:center;padding:15px;z-index:9999}
-.mbody{background:#fff;border-radius:12px;padding:24px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
-.topbar{background:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,0.06);position:sticky;top:0;z-index:100}
-.topbar h1{font-size:18px;color:#1e40af;display:flex;align-items:center;gap:8px}
-.topbar small{display:block;color:#64748b;font-size:12px;margin-top:2px}
-.offline-badge{background:#dcfce7;color:#166534;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;margin-left:8px}
-.nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.nav button{padding:8px 12px;font-size:13px;background:#f1f5f9;color:#334155}
-.nav button:hover{background:#e2e8f0}
-.nav button.active{background:#2563eb;color:#fff;box-shadow:0 2px 4px rgba(37,99,235,0.3)}
-.container{max-width:1200px;margin:16px auto;padding:0 12px}
-.card{background:#fff;border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
-.btn-green{background:#16a34a;color:#fff}
-.btn-green:hover{background:#15803d}
-.btn-red{background:#dc2626;color:#fff}
-.btn-red:hover{background:#b91c1c}
-.btn-blue{background:#2563eb;color:#fff}
-.btn-blue:hover{background:#1d4ed8}
-.btn-orange{background:#f97316;color:#fff}
-.btn-orange:hover{background:#ea580c}
-.btn-purple{background:#9333ea;color:#fff}
-.btn-purple:hover{background:#7e22ce}
-.btn-gray{background:#64748b;color:#fff}
-.btn-gray:hover{background:#475569}
-.btn-sm{padding:5px 9px;font-size:12px;border-radius:6px;width:auto;margin:3px}
-table{width:100%;border-collapse:collapse;margin-top:10px}
-th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #f1f5f9;font-size:14px}
-th{background:#f8fafc;font-weight:700;color:#334155}
-tr:hover{background:#f8fafc}
-.total-box{background:#ecfdf5;padding:14px;border-radius:10px;text-align:right;font-size:20px;font-weight:700;color:#065f46;margin-top:12px;border:2px solid #bbf7d0}
-.total-box-blue{background:#eff6ff;padding:14px;border-radius:10px;text-align:right;font-size:20px;font-weight:700;color:#1e40af;margin-top:12px;border:2px solid #bfdbfe}
-.total-box-orange{background:#fff7ed;padding:14px;border-radius:10px;text-align:right;font-size:20px;font-weight:700;color:#c2410c;margin-top:12px;border:2px solid #fed7aa}
-.total-box-red{background:#fef2f2;padding:14px;border-radius:10px;text-align:right;font-size:18px;font-weight:700;color:#dc2626;margin-top:12px;border:2px solid #fecaca}
-.empty{text-align:center;color:#94a3b8;padding:30px}
-.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
-.tag.cash{background:#dcfce7;color:#166534}
-.tag.gcash{background:#dbeafe;color:#1e40af}
-.tag.split{background:#fef3c7;color:#92400e}
-.tag.void{background:#fee2e2;color:#dc2626}
-.tag.warn{background:#fef3c7;color:#92400e}
-.tag.danger{background:#fee2e2;color:#dc2626}
-.tag.success{background:#dcfce7;color:#166534}
-.tag.info{background:#e0e7ff;color:#4338ca}
-.sep{border:none;border-top:2px dashed #e2e8f0;margin:18px 0}
-.cat-btn{background:#f1f5f9;padding:10px 14px;margin:4px;border-radius:8px;font-weight:600;border:2px solid transparent}
-.cat-btn.active{background:#2563eb;color:#fff;border-color:#1d4ed8}
-.prod-btn{background:#f8fafc;padding:12px;border-radius:8px;text-align:left;border-left:4px solid #16a34a;margin:4px 0}
-.prod-btn:hover{background:#ecfdf5;cursor:pointer}
-.prod-btn:disabled{opacity:0.5;cursor:not-allowed;border-left-color:#94a3b8}
-.cart-row{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid #f1f5f9}
-.qty-group{display:flex;gap:4px;align-items:center}
-.qty-group button{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;font-weight:700}
-.flex-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.flex-between{display:flex;justify-content:space-between;align-items:center}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.req-card{border:1px solid #e2e8f0;padding:14px;border-radius:8px;margin:8px 0;background:#fafafa}
-.search-input{margin-bottom:12px;border-color:#94a3b8}
-.pay-btn{padding:14px 10px;font-size:15px;font-weight:700}
-.quick-amt{background:#f1f5f9;padding:8px 10px;margin:3px;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
-.quick-amt:hover{background:#e2e8f0}
-.receipt-preview{background:#fff;padding:20px;border:2px dashed #cbd5e1;border-radius:10px;max-width:320px;margin:0 auto}
-.receipt-preview h3{text-align:center;font-size:16px;margin-bottom:4px}
-.receipt-preview p{font-size:12px;text-align:center;color:#64748b;margin:2px}
-.receipt-preview .line{border-bottom:1px dashed #cbd5e1;margin:6px 0}
-.receipt-preview .item{display:flex;justify-content:space-between;font-size:13px;padding:2px 0}
-.receipt-preview .total{display:flex;justify-content:space-between;font-size:15px;font-weight:700;margin-top:6px}
-.receipt-preview .paymethod{display:flex;justify-content:space-between;font-size:13px;color:#475569}
-.shift-badge{background:#dbeafe;color:#1e40af;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600}
-.lowstock{color:#dc2626;font-weight:600}
-.alert-box{background:#fef3c7;border-left:4px solid #f59e0b;padding:10px 14px;border-radius:6px;margin:10px 0;color:#92400e}
-.success-box{background:#dcfce7;border-left:4px solid #22c55e;padding:10px 14px;border-radius:6px;margin:10px 0;color:#166534}
-.store-card{border:2px solid #e2e8f0;border-radius:10px;padding:14px;margin:8px;cursor:pointer;transition:all 0.2s}
-.store-card:hover,.store-card.selected{border-color:#2563eb;background:#eff6ff}
-@media print{body *{visibility:hidden} .receipt-preview,.receipt-preview *{visibility:visible} .receipt-preview{position:absolute;left:0;top:0;width:100%}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minute Burger POS</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,sans-serif;}
+    body{background:#f5f5f5;padding:10px;}
+    .hidden{display:none !important;}
+    .login-container{max-width:400px;margin:60px auto;background:#fff;padding:25px;border-radius:10px;box-shadow:0 2px 8px #0002;}
+    h2{text-align:center;margin-bottom:20px;color:#222;}
+    input,select,button{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:5px;font-size:15px;}
+    button{background:#2563eb;color:#fff;border:none;cursor:pointer;font-weight:500;}
+    button:hover{background:#1d4ed8;}
+    .btn-red{background:#dc2626;}
+    .btn-red:hover{background:#b91c1c;}
+    .btn-sm{width:auto;padding:4px 8px;font-size:13px;}
+    .nav{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap;}
+    .nav button{width:auto;flex:min-content;}
+    .nav button.active{background:#065f46;box-shadow:inset 0 -2px 0 #034a36;}
+    .tab-page{background:#fff;padding:15px;border-radius:8px;box-shadow:0 2px 6px #0002;margin-top:10px;}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;}
+    .sell-col{background:#f8fafc;padding:10px;border-radius:6px;}
+    .prod-btn{text-align:left;margin:4px 0;}
+    .prod-btn:disabled{opacity:0.5;cursor:not-allowed;}
+    .cart-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #eee;}
+    .empty{text-align:center;color:#888;padding:15px;}
+    .line{border-bottom:2px dashed #aaa;margin:8px 0;}
+    .total{font-weight:bold;font-size:16px;text-align:right;margin:8px 0;}
+    .paymethod{text-align:right;font-size:14px;color:#333;}
+    .modal{position:fixed;inset:0;background:#0006;display:flex;align-items:center;justify-content:center;padding:10px;z-index:100;}
+    .modal > div{background:#fff;padding:20px;border-radius:10px;max-width:420px;width:100%;max-height:90vh;overflow:auto;}
+    table{width:100%;border-collapse:collapse;margin-top:8px;}
+    th,td{border:1px solid #ddd;padding:6px;text-align:left;font-size:14px;}
+    th{background:#f1f5f9;}
+    .tag{display:inline-block;padding:2px 6px;border-radius:4px;font-size:12px;font-weight:bold;}
+    .tag.cash{background:#dcfce7;color:#166534;}
+    .tag.gcash{background:#e0e7ff;color:#3730a3;}
+    .tag.split{background:#fef3c7;color:#92400e;}
+    .tag.void{background:#fee2e2;color:#991b1b;}
+    .tag.success{background:#dcfce7;color:#166534;}
+    .tag.danger{background:#fee2e2;color:#991b1b;}
+    .lowstock{color:#b91c1c;}
+    .cat-btn{width:auto;padding:5px 10px;font-size:13px;}
+    .cat-btn.active{background:#065f46;}
+    .denom-row{display:flex;gap:6px;align-items:center;margin:4px 0;}
+    .denom-row span{width:70px;font-weight:500;}
+    .denom-row input{flex:1;margin:0;}
+    .shift-banner{background:#fef3c7;border:1px solid #f59e0b;padding:8px;border-radius:5px;margin-bottom:10px;}
+    #userInfoLine{text-align:right;font-size:14px;color:#444;margin-bottom:8px;}
+    @media print{
+      body *{visibility:hidden;}
+      #receiptModal,#receiptModal *{visibility:visible;}
+      #receiptModal{position:absolute;left:0;top:0;width:100%;}
+      button{display:none !important;}
+    }
+  </style>
 </head>
 <body>
-<!-- ═══════════════════ EXPIRY LOCK SCREEN ═══════════════════ -->
-<div id="expiryScreen" class="modal hidden">
-  <div class="mbody" style="text-align:center;max-width:420px">
-    <h2 style="color:#dc2626">⚠️ SERBISYO NATAPOS NA</h2>
-    <p id="expiryMsg" style="margin:16px 0;line-height:1.6"></p>
-    <p>Mangyaring makipag-ugnayan sa <strong>Service Provider</strong> para mag-renew.</p>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="login-container">
+  <h2>🔐 Pag-log In</h2>
+  <div>
+    <label>Tindahan</label>
+    <select id="loginStore"></select>
   </div>
-</div>
-<!-- ═══════════════════ LOGIN MODAL ═══════════════════ -->
-<div id="loginModal" class="modal">
-  <div class="mbody">
-    <h2 style="text-align:center;color:#1e40af;margin-bottom:20px">🏪 POS System — Mag-login <span class="offline-badge">✓ Offline Ready</span></h2>
-    <select id="loginRole" onchange="showLoginForm(this.value)">
-      <option value="">-- Pumili ng Role --</option>
-      <option value="cashier">💵 Cashier</option>
-      <option value="admin">🔐 Admin / May-ari</option>
-      <option value="sp">🛠️ Service Provider</option>
+  <div>
+    <label>Katungkulan</label>
+    <select id="loginRole">
+      <option value="cashier">Tagatanggap ng Bayad</option>
+      <option value="admin">Tagapamahala</option>
+      <option value="sp">May-ari</option>
     </select>
-    <div id="cashierForm" class="hidden">
-      <label>🏪 Pumili ng Tindahan:</label>
-      <div id="cashierStoreList" style="max-height:180px;overflow-y:auto;margin-bottom:12px"></div>
-      <label>🔑 Password:</label>
-      <input type="password" id="cashierPass" placeholder="Default: 1234">
-      <button class="btn-green" onclick="loginCashier()">✅ Mag-login</button>
-    </div>
-    <div id="adminForm" class="hidden">
-      <label>🔐 Admin Password:</label>
-      <input type="password" id="adminPass" placeholder="Default: 8888">
-      <button class="btn-green" onclick="loginAdmin()">✅ Mag-login</button>
-    </div>
-    <div id="spForm" class="hidden">
-      <label>🛠️ Service Provider Password:</label>
-      <input type="password" id="spPass" placeholder="Ipasok ang SP Password">
-      <button class="btn-purple" onclick="loginSP()">✅ Mag-login</button>
-    </div>
   </div>
-</div>
-<!-- ═══════════════════ SHIFT OPEN MODAL ═══════════════════ -->
-<div id="shiftOpenModal" class="modal hidden">
-  <div class="mbody">
-    <h3>🕒 Buksan ang Shift</h3>
-    <p>Ilagay ang halagang nasa kaha bago magsimula.</p>
-    <label>Panimulang Halaga (₱):</label>
-    <input type="number" step="0.01" id="openingCash" placeholder="0.00">
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn-green" onclick="confirmShiftOpen()">✅ KUMPIRMA</button>
-      <button class="btn-gray" onclick="closeShiftModal()">❌ KANSELO</button>
-    </div>
+  <div>
+    <label>Pangalan</label>
+    <input type="text" id="loginName" placeholder="Ilagay ang pangalan">
   </div>
-</div>
-<!-- ═══════════════════ CASH PAYMENT MODAL ═══════════════════ -->
-<div id="cashPayModal" class="modal hidden">
-  <div class="mbody">
-    <h3>💵 Bayad — Cash</h3>
-    <p>Kabuuan: <strong style="font-size:18px">₱<span id="payTotal">0.00</span></strong></p>
-    <label>Halagang Tinanggap:</label>
-    <input type="number" id="cashGiven" placeholder="0.00" step="0.01" min="0" oninput="computeChange()">
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px">
-      <span class="quick-amt" onclick="setCashAmt(50)">₱50</span>
-      <span class="quick-amt" onclick="setCashAmt(100)">₱100</span>
-      <span class="quick-amt" onclick="setCashAmt(200)">₱200</span>
-      <span class="quick-amt" onclick="setCashAmt(500)">₱500</span>
-      <span class="quick-amt" onclick="setCashAmt(1000)">₱1000</span>
-    </div>
-    <label>Sukli:</label>
-    <input type="text" id="changeAmt" value="₱0.00" readonly style="font-weight:bold;color:#16a34a;background:#ecfdf5">
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="btn-green" onclick="confirmCashPay()">✅ KUMPIRMA</button>
-      <button class="btn-gray" onclick="closeCashPayModal()">❌ KANSELO</button>
-    </div>
+  <div>
+    <label>Password</label>
+    <input type="password" id="loginPass" placeholder="Ilagay ang password">
   </div>
+  <button onclick="doLogin()">Mag-log In</button>
 </div>
-<!-- ═══════════════════ GCASH PAYMENT MODAL ═══════════════════ -->
-<div id="gcashPayModal" class="modal hidden">
-  <div class="mbody">
-    <h3>📱 Bayad — GCash</h3>
-    <p>Kabuuan: <strong style="font-size:18px">₱<span id="gcashTotal">0.00</span></strong></p>
-    <label>Reference Number:</label>
-    <input type="text" id="gcashRef" placeholder="Ilagay ang Ref. #" style="text-transform:uppercase">
-    <label>Pangalan ng Nagbayad:</label>
-    <input type="text" id="gcashName" placeholder="Opsyonal">
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="btn-blue" onclick="confirmGCashPay()">✅ KUMPIRMA</button>
-      <button class="btn-gray" onclick="closeGCashModal()">❌ KANSELO</button>
-    </div>
-  </div>
-</div>
-<!-- ═══════════════════ SPLIT PAYMENT MODAL ═══════════════════ -->
-<div id="splitPayModal" class="modal hidden">
-  <div class="mbody">
-    <h3>💰 Bayad — Hati (Cash + GCash)</h3>
-    <p>Kabuuan: <strong style="font-size:18px">₱<span id="splitTotal">0.00</span></strong></p>
-    <div class="grid2">
-      <div>
-        <label>💵 Cash na Bahagi:</label>
-        <input type="number" step="0.01" min="0" id="splitCash" placeholder="0.00" oninput="updateSplitGCash()">
-      </div>
-      <div>
-        <label>📱 GCash na Bahagi:</label>
-        <input type="number" step="0.01" min="0" id="splitGCash" placeholder="0.00" readonly style="background:#eff6ff">
-      </div>
-    </div>
-    <label>GCash Reference #:</label>
-    <input type="text" id="splitRef" placeholder="Ilagay ang Ref. #">
-    <label>Halagang Ibinigay sa Cash:</label>
-    <input type="number" step="0.01" min="0" id="splitCashGiven" placeholder="0.00" oninput="computeSplitChange()">
-    <label>Sukli mula sa Cash:</label>
-    <input type="text" id="splitChange" value="₱0.00" readonly style="font-weight:bold;color:#16a34a;background:#ecfdf5">
-    <div style="display:flex;gap:8px;margin-top:14px">
-      <button class="btn-orange" onclick="confirmSplitPay()">✅ KUMPIRMA</button>
-      <button class="btn-gray" onclick="closeSplitModal()">❌ KANSELO</button>
-    </div>
-  </div>
-</div>
-<!-- ═══════════════════ RECEIPT MODAL ═══════════════════ -->
-<div id="receiptModal" class="modal hidden">
-  <div class="mbody" style="max-width:360px">
-    <div id="receiptContent" class="receipt-preview"></div>
-    <div style="display:flex;gap:8px;margin-top:16px;justify-content:center">
-      <button class="btn-blue" onclick="printReceipt()">🖨️ I-PRINT / KOPYAHIN</button>
-      <button class="btn-green" onclick="closeReceiptModal()">✅ TAPOS</button>
-    </div>
-  </div>
-</div>
-<!-- ═══════════════════ SHIFT CLOSE MODAL ═══════════════════ -->
-<div id="shiftCloseModal" class="modal hidden">
-  <div class="mbody">
-    <h3>🕒 Pagtatapos ng Shift</h3>
-    <div class="card" style="background:#f8fafc;margin:0;padding:12px">
-      <p><strong>Panimulang Halaga:</strong> ₱<span id="closeOpening">0.00</span></p>
-      <p><strong>Kabuuang Benta:</strong> ₱<span id="closeSales">0.00</span></p>
-      <p><strong>Cash In +:</strong> ₱<span id="closeCashIn">0.00</span></p>
-      <p><strong>Cash Out -:</strong> ₱<span id="closeCashOut">0.00</span></p>
-      <hr class="sep">
-      <p class="total-box" style="text-align:left">Inaasahang Halaga: ₱<span id="closeExpected">0.00</span></p>
-    </div>
-    <label>💵 Aktwal na Halaga sa Kaha:</label>
-    <input type="number" step="0.01" id="closeActual" placeholder="0.00" oninput="computeVariance()">
-    <p style="margin-top:8px">Pagkakaiba: <strong id="closeVariance">₱0.00</strong></p>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn-green" onclick="confirmShiftClose()">✅ TAPOSIN ANG SHIFT</button>
-      <button class="btn-gray" onclick="closeShiftCloseModal()">❌ KANSELO</button>
-    </div>
-  </div>
-</div>
-<!-- ═══════════════════ MAIN APPLICATION ═══════════════════ -->
+
+<!-- MAIN APP -->
 <div id="app" class="hidden">
-  <div class="topbar">
-    <div>
-      <h1>🏪 POS System <span class="offline-badge">✓ Offline Ready</span></h1>
-      <small id="userInfoLine"></small>
+  <div id="userInfoLine"></div>
+  <div class="nav">
+    <button id="tabSell" onclick="showTab('sell')">Benta</button>
+    <button id="tabShift" onclick="showTab('shift')">Shift</button>
+    <button id="tabSales" onclick="showTab('sales')">Ulat ng Benta</button>
+    <button id="tabProducts" onclick="showTab('products')">Produkto</button>
+    <button id="tabStocks" onclick="showTab('stocks')">Imbentaryo</button>
+    <button id="tabStores" onclick="showTab('stores')">Tindahan</button>
+    <button id="tabSettings" onclick="showTab('settings')">Mga Setting</button>
+    <button id="tabService" onclick="showTab('service')">Serbisyo</button>
+    <button id="tabVoidReq" onclick="showTab('voidreq')">Kanselasyon</button>
+    <button id="tabCashReq" onclick="showTab('cashreq')">Pondo</button>
+    <button id="tabProdOutReq" onclick="showTab('prodout')">Pagbawas</button>
+    <button id="tabAdminReq" onclick="showTab('adminreq')">Mga Kahilingan</button>
+    <button id="tabDeleted" onclick="showTab('deleted')">Talaan ng Pagbura</button>
+    <button class="btn-sm btn-red" style="margin-left:auto" onclick="logout()">Mag-log Out</button>
+  </div>
+
+  <!-- SELL SCREEN -->
+  <div id="vSell" class="tab-page">
+    <div id="shiftBanner" class="shift-banner hidden">
+      ⚠️ Walang bukas na Shift. Buksan muna bago magbenta.
+      <button id="btnOpenShift" onclick="openShiftModal()">Buksan ang Shift</button>
     </div>
-    <div class="nav">
-      <button id="tabSell" class="hidden" onclick="showTab('sell')">🛒 Magbenta</button>
-      <button id="tabVoidReq" class="hidden" onclick="showTab('voidReq')">📤 Void Request</button>
-      <button id="tabCashReq" class="hidden" onclick="showTab('cashReq')">💰 Cash In/Out</button>
-      <button id="tabProdOutReq" class="hidden" onclick="showTab('prodOutReq')">📦 Product Out</button>
-      <button id="tabShift" class="hidden" onclick="showTab('shift')">🕒 Shift</button>
-      <button id="tabSales" class="hidden" onclick="showTab('sales')">📊 Sales Reports</button>
-      <button id="tabProducts" class="hidden" onclick="showTab('products')">📦 Produkto</button>
-      <button id="tabStocks" class="hidden" onclick="showTab('stocks')">📥 Stock In</button>
-      <button id="tabStores" class="hidden" onclick="showTab('stores')">🏪 Tindahan</button>
-      <button id="tabAdminReq" class="hidden" onclick="showTab('adminReq')">✅ Requests</button>
-      <button id="tabSettings" class="hidden" onclick="showTab('settings')">⚙️ Settings</button>
-      <button id="tabService" class="hidden" onclick="showTab('service')">🛠️ Serbisyo</button>
-      <button id="tabDeleted" class="hidden" onclick="showTab('deleted')">📈 Binurang Benta</button>
-      <button onclick="logout()">🚪 Log-out</button>
+    <div class="grid">
+      <div class="sell-col">
+        <input type="text" id="prodSearch" placeholder="Maghanap ng produkto..." oninput="renderSellScreen()">
+        <div id="catList" style="margin:6px 0"></div>
+        <div id="prodList"></div>
+      </div>
+      <div class="sell-col">
+        <h3>🛒 Kasalukuyang Order</h3>
+        <div id="cartArea"></div>
+        <div class="line"></div>
+        <div class="total">Kabuuang Halaga: ₱<span id="grandTotal">0.00</span></div>
+        <div style="display:flex;gap:6px;margin-top:10px">
+          <button onclick="openCashPay()">💵 Cash</button>
+          <button onclick="openGCashPay()">📱 GCash</button>
+          <button onclick="openSplitPay()">💵+📱 Hatibayad</button>
+          <button class="btn-red" onclick="clearCart()">Burahin</button>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="container">
-    <!-- CASHIER: SELL -->
-    <div id="vSell" class="tab-page hidden">
-      <div id="shiftBanner" class="alert-box hidden">⚠️ Wala pang bukas na Shift. <button class="btn-sm btn-blue" onclick="openShiftModal()">Buksan Shift</button></div>
-      <div class="grid2">
-        <div class="card">
-          <h3>📋 Kategorya</h3>
-          <div id="catList" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
-          <h4>Produkto</h4>
-          <input type="text" id="prodSearch" placeholder="🔍 Maghanap ng pangalan..." oninput="renderSellScreen()" class="search-input">
-          <div id="prodList" style="max-height:480px;overflow-y:auto"></div>
-        </div>
-        <div class="card">
-          <h3>🛒 Kasalukuyang Order</h3>
-          <div id="cartArea" style="min-height:160px;margin-top:10px"><div class="empty">Wala pang gamit.</div></div>
-          <hr class="sep">
-          <div class="total-box">KABUUAN: ₱<span id="grandTotal">0.00</span></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px">
-            <button class="btn-gray" onclick="clearCart()">🗑️ LINISIN</button>
-            <button class="btn-green pay-btn" onclick="openCashPay()">💵 CASH</button>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr;gap:6px;margin-top:6px">
-            <button class="btn-blue pay-btn" onclick="openGCashPay()">📱 GCASH</button>
-            <button class="btn-orange pay-btn" onclick="openSplitPay()">💰 HATI (CASH+GCASH)</button>
-          </div>
-        </div>
-      </div>
+
+  <!-- SHIFT PAGE -->
+  <div id="vShift" class="tab-page">
+    <h3>Pamamahala ng Shift</h3>
+    <button id="btnCloseShift" class="hidden" onclick="openShiftCloseModal()">Tapusin ang Shift</button>
+  </div>
+
+  <!-- SALES REPORT -->
+  <div id="vSales" class="tab-page">
+    <h3>Ulat ng Benta</h3>
+    <input type="date" id="salesDateSel" onchange="renderSalesReport()">
+    <p>Petsa: <span id="rptDate"></span></p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0">
+      <div>Total: ₱<span id="rptTotal">0.00</span></div>
+      <div>Cash: ₱<span id="rptCash">0.00</span></div>
+      <div>GCash: ₱<span id="rptGCash">0.00</span></div>
+      <div>Hatibayad: ₱<span id="rptSplit">0.00</span></div>
     </div>
-    <!-- CASHIER: SHIFT -->
-    <div id="vShift" class="tab-page hidden">
-      <div class="card">
-        <h3>🕒 Katayuan ng Shift</h3>
-        <div id="shiftStatusArea"></div>
-        <div style="display:flex;gap:8px;margin-top:12px">
-          <button id="btnOpenShift" class="btn-green" onclick="openShiftModal()">✅ Buksan ang Shift</button>
-          <button id="btnCloseShift" class="btn-red hidden" onclick="openShiftCloseModal()">⏹️ Tapusin ang Shift</button>
-        </div>
-      </div>
-      <div class="card"><h4>📋 Buod ng Shift</h4><div id="shiftSummary"><p class="empty">Walang bukas na shift.</p></div></div>
+    <p>Bilang ng Benta: <span id="rptCount">0</span></p>
+    <table><thead><tr><th>Ticket</th><th>Oras</th><th>Bilang</th><th>Halaga</th><th>Paraan</th><th>Sukli</th><th>Katayuan</th></tr></thead>
+    <tbody id="salesLogBody"></tbody></table>
+  </div>
+
+  <!-- PRODUCTS PAGE -->
+  <div id="vProducts" class="tab-page">
+    <h3>Magdagdag ng Produkto</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <input type="text" id="newCat" placeholder="Kategorya">
+      <input type="text" id="newProdName" placeholder="Pangalan ng Produkto">
+      <input type="number" step="0.01" id="newProdPrice" placeholder="Presyo">
+      <select id="prodStoreSel"></select>
     </div>
-    <!-- CASHIER: VOID REQUEST -->
-    <div id="vVoidReq" class="tab-page hidden">
-      <div class="card">
-        <h3>📤 Mag-request ng Void</h3>
-        <label>Maling Ticket #:</label>
-        <select id="wrongTicket"></select>
-        <label>Tamang Ticket #:</label>
-        <select id="rightTicket"></select>
-        <label>Dahilan:</label>
-        <textarea id="voidReason" placeholder="Ilagay ang dahilan..." rows="3"></textarea>
-        <button class="btn-green" onclick="submitVoidReq()">✅ Ipadala Request</button>
-      </div>
-      <div class="card"><h4>Aking mga Request</h4><div id="myVoidReqs"></div></div>
+    <button onclick="addProduct()">I-save ang Produkto</button>
+    <hr style="margin:15px 0">
+    <input type="text" id="prodListSearch" placeholder="Maghanap..." oninput="renderProductsTab()">
+    <table><thead><tr><th>Tindahan</th><th>Kategorya</th><th>Pangalan</th><th>Presyo</th><th>Stock</th><th>Gawin</th></tr></thead>
+    <tbody id="prodBody"></tbody></table>
+  </div>
+
+  <!-- STOCKS PAGE -->
+  <div id="vStocks" class="tab-page">
+    <h3>Pagpasok ng Stock</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <select id="stockInStore" onchange="loadStockInProdList()"></select>
+      <select id="stockInProd"></select>
+      <input type="number" id="stockInQty" placeholder="Dami">
     </div>
-    <!-- CASHIER: CASH IN/OUT -->
-    <div id="vCashReq" class="tab-page hidden">
-      <div class="card">
-        <h3>💰 Cash In / Cash Out Request</h3>
-        <label>Uri:</label>
-        <select id="cashType">
-          <option value="CASHIN">💰 Cash In</option>
-          <option value="CASHOUT">💸 Cash Out</option>
-        </select>
-        <label>Halaga:</label>
-        <input type="number" step="0.01" id="cashAmt" placeholder="0.00">
-        <label>Dahilan:</label>
-        <textarea id="cashReason" placeholder="Ilagay ang dahilan..." rows="3"></textarea>
-        <button class="btn-green" onclick="submitCashReq()">✅ Ipadala</button>
-      </div>
-      <div class="card"><h4>Aking mga Request</h4><div id="myCashReqs"></div></div>
+    <input type="text" id="stockProdSearch" placeholder="Salain ang produkto..." oninput="filterStockInProds()">
+    <button onclick="stockIn()">Ipasuk sa Stock</button>
+    <hr style="margin:15px 0">
+    <h3>Talaan ng Imbentaryo</h3>
+    <select id="stockViewStore" onchange="renderStockTab()"></select>
+    <table><thead><tr><th>Tindahan</th><th>Produkto</th><th>Dami</th></tr></thead>
+    <tbody id="stockBody"></tbody></table>
+  </div>
+
+  <!-- STORES PAGE -->
+  <div id="vStores" class="tab-page">
+    <h3>Pamahalaan ang Tindahan</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <input type="text" id="newStoreCode" placeholder="Hal. DVO">
+      <input type="text" id="newStoreName" placeholder="Hal. Davao Branch">
     </div>
-    <!-- CASHIER: PRODUCT OUT -->
-    <div id="vProdOutReq" class="tab-page hidden">
-      <div class="card">
-        <h3>📦 Product Out Request</h3>
-        <label>Produkto:</label>
-        <input type="text" id="prodOutSearch" placeholder="🔍 Maghanap..." oninput="filterProdOutSel()" class="search-input">
-        <select id="prodOutSel"></select>
-        <label>Dami:</label>
-        <input type="number" id="prodOutQty" min="1" value="1">
-        <label>Dahilan:</label>
-        <select id="prodOutReason">
-          <option value="TRANSFER">🚚 Ipadala sa ibang tindahan</option>
-          <option value="DAMAGED">🔴 Sira</option>
-          <option value="EXPIRED">🟡 Napanis</option>
-        </select>
-        <label>Karagdagang Detalye:</label>
-        <textarea id="prodOutNote" placeholder="Pangalan ng tindahan / iba pang detalye..." rows="2"></textarea>
-        <button class="btn-green" onclick="submitProdOut()">✅ Ipadala Request</button>
-      </div>
-      <div class="card"><h4>Aking mga Request</h4><div id="myProdOutReqs"></div></div>
+    <button onclick="addStore()">Magdagdag ng Tindahan</button>
+    <table><thead><tr><th>Code</th><th>Pangalan</th><th>Gawin</th></tr></thead>
+    <tbody id="storeBody"></tbody></table>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div id="vSettings" class="tab-page">
+    <h3>Palitan ang Password — Tagatanggap ng Bayad</h3>
+    <input type="password" id="curCashierPass" placeholder="Kasalukuyang Password">
+    <input type="password" id="newCashierPass" placeholder="Bagong Password (4+ na titik)">
+    <button onclick="changeCashierPass()">I-update</button>
+    <hr style="margin:15px 0">
+    <h3>Burahin ang Talaan ng Benta</h3>
+    <input type="date" id="delSaleDate">
+    <input type="text" id="delSaleReason" placeholder="Dahilan ng Pagbura">
+    <button class="btn-red" onclick="deleteSalesByDate()">Burahin</button>
+  </div>
+
+  <!-- SERVICE PAGE -->
+  <div id="vService" class="tab-page">
+    <h3>Katayuan ng Serbisyo</h3>
+    <p>Katayuan: <span id="servStatus"></span></p>
+    <p>Magtatapos sa: <span id="servExpiry"></span></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0">
+      <button onclick="extendService(30,1500)">1 Buwan — ₱1,500</button>
+      <button onclick="extendService(365,15000)">1 Taon — ₱15,000</button>
+      <button onclick="resumeService()">Ibalik ang Serbisyo</button>
+      <button class="btn-red" onclick="stopService()">Itigil ang Serbisyo</button>
     </div>
-    <!-- ADMIN: SALES REPORTS -->
-    <div id="vSales" class="tab-page hidden">
-      <div class="card">
-        <h3>📊 Sales Reports — <span id="rptDate"></span></h3>
-        <label>Pumili ng Petsa:</label>
-        <input type="date" id="salesDateSel" onchange="renderSalesReport()">
-        <div class="grid3" style="margin-top:10px">
-          <div class="total-box-blue">KABUUAN:<br>₱<span id="rptTotal">0.00</span></div>
-          <div class="total-box">CASH:<br>₱<span id="rptCash">0.00</span></div>
-          <div class="total-box-orange">GCASH:<br>₱<span id="rptGCash">0.00</span></div>
-        </div>
-        <div class="grid3" style="margin-top:6px">
-          <div class="total-box-orange">HATI:<br>₱<span id="rptSplit">0.00</span></div>
-          <div class="total-box-red">BENTANG BINAWAS:<br>₱<span id="rptVoid">0.00</span></div>
-          <div class="total-box-blue">BILANG:<br><span id="rptCount">0</span></div>
-        </div>
-      </div>
-      <div class="card">
-        <h4>Transaction Log</h4>
-        <table>
-          <thead><tr><th>Ticket #</th><th>Oras</th><th>Gamit</th><th>Halaga</th><th>Bayad</th><th>Sukli</th><th>Katayuan</th></tr></thead>
-          <tbody id="salesLogBody"></tbody>
-        </table>
-      </div>
-    </div>
-    <!-- ADMIN: PRODUCTS -->
-    <div id="vProducts" class="tab-page hidden">
-      <div class="card">
-        <h3>➕ Magdagdag ng Produkto</h3>
-        <label>Kategorya:</label>
-        <input type="text" id="newCat" placeholder="Halimbawa: Pagkain, Inumin...">
-        <label>Pangalan ng Produkto:</label>
-        <input type="text" id="newProdName" placeholder="Ipasok ang pangalan">
-        <label>Presyo (₱):</label>
-        <input type="number" id="newProdPrice" placeholder="0.00" step="0.01" min="0">
-        <label>Tindahan:</label>
-        <select id="prodStoreSel"></select>
-        <button class="btn-green" onclick="addProduct()">✅ I-SAVE</button>
-      </div>
-      <div class="card">
-        <h3>📦 Listahan ng Produkto</h3>
-        <input type="text" placeholder="🔍 Maghanap..." oninput="renderProductsTab()" class="search-input" id="prodListSearch">
-        <table>
-          <thead><tr><th>Tindahan</th><th>Kategorya</th><th>Pangalan</th><th>Presyo</th><th>Stock</th><th>Gawin</th></tr></thead>
-          <tbody id="prodBody"></tbody>
-        </table>
-      </div>
-    </div>
-    <!-- ADMIN: STOCK IN -->
-    <div id="vStocks" class="tab-page hidden">
-      <div class="card">
-        <h3>📥 Stock In (Dagdag na Stock)</h3>
-        <label>Tindahan:</label>
-        <select id="stockInStore" onchange="loadStockInProdList()"></select>
-        <label>Produkto:</label>
-        <input type="text" id="stockProdSearch" placeholder="🔍 Maghanap..." oninput="filterStockInProds()" class="search-input">
-        <select id="stockInProd"></select>
-        <label>Dami na Idadagdag:</label>
-        <input type="number" id="stockInQty" min="1" placeholder="Dami">
-        <button class="btn-green" onclick="stockIn()">✅ I-SAVE</button>
-      </div>
-      <div class="card">
-        <h3>📊 Kasalukuyang Stock</h3>
-        <label>Salain ayon sa Tindahan:</label>
-        <select id="stockViewStore" onchange="renderStockTab()"><option value="ALL">Lahat ng Tindahan</option></select>
-        <table>
-          <thead><tr><th>Tindahan</th><th>Produkto</th><th>Natira</th></tr></thead>
-          <tbody id="stockBody"></tbody>
-        </table>
-      </div>
-    </div>
-    <!-- ADMIN: STORES -->
-    <div id="vStores" class="tab-page hidden">
-      <div class="card">
-        <h3>🏪 Magdagdag ng Tindahan</h3>
-        <label>Store Code:</label>
-        <input type="text" id="newStoreCode" placeholder="Halimbawa: DVO01">
-        <label>Pangalan ng Tindahan:</label>
-        <input type="text" id="newStoreName" placeholder="Halimbawa: Tindahan ni Juan">
-        <button class="btn-green" onclick="addStore()">✅ I-SAVE</button>
-      </div>
-      <div class="card">
-        <h3>🏬 Listahan ng Tindahan</h3>
-        <table>
-          <thead><tr><th>Code</th><th>Pangalan</th><th>Gawin</th></tr></thead>
-          <tbody id="storeBody"></tbody>
-        </table>
-      </div>
-    </div>
-    <!-- ADMIN: APPROVE REQUESTS -->
-    <div id="vAdminReq" class="tab-page hidden">
-      <div class="card">
-        <h3>📥 Pending Void Requests</h3>
-        <p class="alert-box">💡 Kapag naaprubahan: <strong>MABABAWAS sa benta</strong> at <strong>IBABALIK SA STOCK</strong> ang Maling Transaksyon.</p>
-        <div id="adminVoidList"></div>
-      </div>
-      <div class="card">
-        <h3>📥 Pending Product Out Requests</h3>
-        <p class="alert-box">💡 Kapag naaprubahan: <strong>MABABAWAS AGAD SA STOCK</strong>.</p>
-        <div id="adminProdOutList"></div>
-      </div>
-      <div class="card"><h3>💰 Cash In / Out Records</h3><div id="adminCashList"></div></div>
-    </div>
-    <!-- ADMIN: SETTINGS -->
-    <div id="vSettings" class="tab-page hidden">
-      <div class="card">
-        <h3>🔑 Palitan ang Password ng Cashier</h3>
-        <label>Kasalukuyang Password:</label>
-        <input type="password" id="curCashierPass" placeholder="Ipasok ang kasalukuyang password">
-        <label>Bagong Password:</label>
-        <input type="password" id="newCashierPass" placeholder="Hindi bababa sa 4 na titik">
-        <button class="btn-green" onclick="changeCashierPass()">✅ I-UPDATE</button>
-      </div>
-      <div class="card">
-        <h3>🗑️ Burahin ang Benta</h3>
-        <label>Petsa ng Benta na Buburahin:</label>
-        <input type="date" id="delSaleDate">
-        <label>Dahilan:</label>
-        <textarea id="delSaleReason" placeholder="Bakit binubura..." rows="2"></textarea>
-        <button class="btn-red" onclick="deleteSalesByDate()">🗑️ BURAHIN ANG BENTA</button>
-      </div>
-    </div>
-    <!-- SP: SERVICE MANAGEMENT -->
-    <div id="vService" class="tab-page hidden">
-      <div class="card">
-        <h3>⏱️ Katayuan ng Serbisyo at Subscription</h3>
-        <p><strong>Katayuan:</strong> <span id="servStatus"></span></p>
-        <p><strong>Mag-e-expire sa:</strong> <span id="servExpiry"></span></p>
-        <hr class="sep">
-        <h4>▶️ I-activate / I-extend ang Serbisyo</h4>
-        <div style="display:flex;flex-direction:column;gap:8px;margin:10px 0">
-          <button class="btn-green" onclick="extendService(7,179)">💳 ₱179 — 1 Linggo (7 Araw)</button>
-          <button class="btn-blue" onclick="extendService(14,349)">💳 ₱349 — 2 Linggo (14 Araw)</button>
-          <button class="btn-orange" onclick="extendService(30,589)">💳 ₱589 — 1 Buwan (30 Araw)</button>
-        </div>
-        <hr class="sep">
-        <h4>⏹️ Manual Control</h4>
-        <button class="btn-red" onclick="stopService()">⏹️ HINTIN ANG SERBISYO</button>
-        <button class="btn-green" style="margin-top:6px" onclick="resumeService()">▶️ IBALIK ANG SERBISYO</button>
-        <hr class="sep">
-        <h4>🔑 Palitan ang mga Password</h4>
-        <label>Bagong Admin Password:</label>
-        <input type="password" id="spNewAdminPass" placeholder="Iwanan kung ayaw baguhin">
-        <label>Bagong SP Password:</label>
-        <input type="password" id="spNewSPass" placeholder="Iwanan kung ayaw baguhin">
-        <button class="btn-purple" onclick="spChangePasswords()">✅ I-UPDATE ANG PASSWORD</button>
-      </div>
-    </div>
-    <!-- SP: DELETED SALES LOG -->
-    <div id="vDeleted" class="tab-page hidden">
-      <div class="card">
-        <h3>📈 Benta na Binura / Na-Void</h3>
-        <p class="alert-box">⚠️ Nakikita lamang ng Service Provider.</p>
-        <table>
-          <thead><tr><th>Kailan</th><th>Uri</th><th>Petsa ng Benta</th><th>Ticket</th><th>Tindahan</th><th>Halaga</th><th>Dahilan</th></tr></thead>
-          <tbody id="deletedBody"></tbody>
-        </table>
-      </div>
+    <hr style="margin:15px 0">
+    <h3>Palitan ang Mga Password — Admin / May-ari</h3>
+    <input type="password" id="spNewAdminPass" placeholder="Bagong Password — Admin">
+    <input type="password" id="spNewSPass" placeholder="Bagong Password — May-ari">
+    <button onclick="spChangePasswords()">I-update ang Pareho</button>
+  </div>
+
+  <!-- DELETED SALES LOG -->
+  <div id="vDeleted" class="tab-page">
+    <h3>Talaan ng Pagbura</h3>
+    <table><thead><tr><th>Kailan</th><th>Petsa ng Benta</th><th>Ticket</th><th>Tindahan</th><th>Halaga</th><th>Dahilan</th></tr></thead>
+    <tbody id="deletedBody"></tbody></table>
+  </div>
+
+  <!-- REQUEST PLACEHOLDERS -->
+  <div id="vVoidReq" class="tab-page"><h3>Kanselasyon ng Benta</h3><p>Ilalabas sa susunod na bersyon.</p></div>
+  <div id="vCashReq" class="tab-page"><h3>Pagpasok/Paglabas ng Pondo</h3><p>Ilalabas sa susunod na bersyon.</p></div>
+  <div id="vProdOutReq" class="tab-page"><h3>Pagbawas ng Produkto</h3><p>Ilalabas sa susunod na bersyon.</p></div>
+  <div id="vAdminReq" class="tab-page"><h3>Mga Kahilingan</h3><p>Ilalabas sa susunod na bersyon.</p></div>
+</div>
+
+<!-- MODALS -->
+<!-- OPEN SHIFT -->
+<div id="shiftOpenModal" class="modal hidden">
+  <div>
+    <h3>Buksan ang Shift</h3>
+    <label>Pondo sa Pagsisimula</label>
+    <input type="number" step="0.01" id="openingCash" placeholder="Halaga">
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button onclick="confirmShiftOpen()">Kumpirmahin</button>
+      <button class="btn-red" onclick="closeShiftModal()">Kanselahin</button>
     </div>
   </div>
 </div>
+
+<!-- CLOSE SHIFT — DENOMINATION INPUT -->
+<div id="shiftCloseModal" class="modal hidden">
+  <div>
+    <h3>Tapusin ang Shift — Bilangin ang Pera</h3>
+    <p>Pondo sa Pagsisimula: ₱<span id="closeOpening">0.00</span></p>
+    <p>Kabuuang Benta: ₱<span id="closeSales">0.00</span></p>
+    <p>Pagpasok ng Pondo: ₱<span id="closeCashIn">0.00</span></p>
+    <p>Paglabas ng Pondo: ₱<span id="closeCashOut">0.00</span></p>
+    <p>Inaasahang Halaga: ₱<span id="closeExpected">0.00</span></p>
+    <hr style="margin:8px 0">
+    <p style="font-weight:bold">Ilagay ang BILANG ng piraso:</p>
+    <div class="denom-row"><span>₱1,000</span><input type="number" min="0" id="d1000" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>₱500</span><input type="number" min="0" id="d500" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>₱200</span><input type="number" min="0" id="d200" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>₱100</span><input type="number" min="0" id="d100" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>₱50</span><input type="number" min="0" id="d50" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>₱20</span><input type="number" min="0" id="d20" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>₱10</span><input type="number" min="0" id="d10" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>₱5</span><input type="number" min="0" id="d5" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>₱1</span><input type="number" min="0" id="d1" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>25¢</span><input type="number" min="0" id="d025" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>10¢</span><input type="number" min="0" id="d010" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>5¢</span><input type="number" min="0" id="d005" oninput="computeFromDenomination()"></div>
+    <div class="denom-row"><span>1¢</span><input type="number" min="0" id="d001" oninput="computeFromDenomination()"></div>
+    <hr style="margin:8px 0">
+    <p>Totong Halaga: <input type="text" id="closeActual" readonly style="width:auto;display:inline;margin-left:6px"></p>
+    <p>Pagkakaiba: <span id="closeVariance">₱0.00</span></p>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button onclick="confirmShiftClose()">Tapusin ang Shift</button>
+      <button class="btn-red" onclick="closeShiftCloseModal()">Kanselahin</button>
+    </div>
+  </div>
+</div>
+
+<!-- CASH PAYMENT -->
+<div id="cashPayModal" class="modal hidden">
+  <div>
+    <h3>Pagbabayad — Cash</h3>
+    <p>Kabuuang Halaga: ₱<span id="payTotal">0.00</span></p>
+    <label>Natanggap na Halaga</label>
+    <input type="number" step="0.01" id="cashGiven" oninput="computeChange()">
+    <p>Sukli: <input type="text" id="changeAmt" readonly style="width:auto"></p>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button onclick="confirmCashPay()">Kumpirmahin</button>
+      <button class="btn-red" onclick="closeCashPayModal()">Kanselahin</button>
+    </div>
+  </div>
+</div>
+
+<!-- GCash PAYMENT -->
+<div id="gcashPayModal" class="modal hidden">
+  <div>
+    <h3>Pagbabayad — GCash</h3>
+    <p>Kabuuang Halaga: ₱<span id="gcashTotal">0.00</span></p>
+    <label>Numero ng Sanggunian</label>
+    <input type="text" id="gcashRef" placeholder="Ilagay ang Ref #">
+    <label>Pangalan ng Nagbayad</label>
+    <input type="text" id="gcashName" placeholder="Pangalan">
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button onclick="confirmGCashPay()">Kumpirmahin</button>
+      <button class="btn-red" onclick="closeGCashModal()">Kanselahin</button>
+    </div>
+  </div>
+</div>
+
+<!-- SPLIT PAYMENT -->
+<div id="splitPayModal" class="modal hidden">
+  <div>
+    <h3>Hatibayad — Cash + GCash</h3>
+    <p>Kabuuang Halaga: ₱<span id="splitTotal">0.00</span></p>
+    <label>Halagang Cash</label>
+    <input type="number" step="0.01" id="splitCash" oninput="updateSplitGCash()">
+    <label>Halagang GCash</label>
+    <input type="number" step="0.01" id="splitGCash" readonly>
+    <label>Natanggap na Pera (Cash)</label>
+    <input type="number" step="0.01" id="splitCashGiven" oninput="computeSplitChange()">
+    <p>Sukli: <input type="text" id="splitChange" readonly style="width:auto"></p>
+    <label>Numero ng Sanggunian — GCash</label>
+    <input type="text" id="splitRef" placeholder="Ilagay ang Ref #">
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button onclick="confirmSplitPay()">Kumpirmahin</button>
+      <button class="btn-red" onclick="closeSplitModal()">Kanselahin</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT -->
+<div id="receiptModal" class="modal hidden">
+  <div id="receiptContent" style="background:#fff;padding:15px;border-radius:8px;min-width:300px"></div>
+  <div style="text-align:center;margin-top:8px">
+    <button onclick="printReceipt()">🖨️ I-print</button>
+    <button class="btn-red" onclick="closeReceiptModal()">Isara</button>
+  </div>
+</div>
+
 <script>
-// ═══════════════════ OFFLINE DATA STORAGE — LANG SA BROWSER ═══════════════════
-const STORAGE_PREFIX = 'pos_system_';
+// ═══════════════════ MGA TUMUTULONG NA PUNDASYON ═══════════════════
 const $ = id => document.getElementById(id);
-const fmt = n => (Math.round((Number(n)||0)*100)/100).toFixed(2);
-const dt = () => new Date().toLocaleString('en-PH');
-const today = () => new Date().toISOString().split('T')[0];
-const D = () => new Date().toLocaleDateString('en-PH');
-function load(key, def){ try{const v=localStorage.getItem(STORAGE_PREFIX+key); return v?JSON.parse(v):def}catch{return def} }
-function save(key,val){ localStorage.setItem(STORAGE_PREFIX+key, JSON.stringify(val)) }
-// ═══════════════════ DEFAULT PASSWORDS ═══════════════════
-const DEFAULT_PASS = { cashier:'1234', admin:'8888', sp:'19970407chan' };
-const TRIAL_DAYS = 7;
-let PASS = load('pass', { ...DEFAULT_PASS });
-let STORES = load('stores', []);
-let PRODUCTS = load('products', []);
-let STOCKS = load('stocks', {});
-let SALES = load('sales', []);
-let VOID_REQS = load('void_reqs', []);
-let CASH_REQS = load('cash_reqs', []);
-let PROD_OUT_REQS = load('prodout_reqs', []);
+const fmt = n => (n||0).toFixed(2);
+const save = (k,v) => localStorage.setItem('mb_'+k, JSON.stringify(v));
+const load = (k,d) => {const j=localStorage.getItem('mb_'+k); return j?JSON.parse(j):d;};
+
+// ═══════════════════ Datos ═══════════════════
+let STORES     = load('stores',  [ {code:'DVO',name:'Davao Branch'} ]);
+let PRODUCTS   = load('products', []);
+let STOCKS     = load('stocks',   {});
+let SALES      = load('sales',    []);
+let SHIFTS     = load('shifts',   []);
 let DELETED_SALES = load('deleted_sales', []);
-let SHIFTS = load('shifts', []);
-let TICKET_COUNTER = load('ticket_counter', { num:0, date:today() });
-let user = { logged:false, role:'', storeId:null, storeName:'', name:'' };
-let cart = [];
-let selectedCategory = null;
+let CASH_REQS  = load('cashreqs', []);
+let PASS       = load('pass',     { cashier:'', admin:'', sp:'' });
+let SERVICE    = load('service',  { active:true, expiry:null, firstUse:null, price:0 });
+let TICKET_COUNTER = load('ticket', {num:1});
+
+let user = null, cart=[], currentShift=null, selectedCategory=null;
 let stockInAllProds = [];
-let currentShift = null;
-const SERVICE = load('service', { active: true, firstUse: null, expiry: null, price: 0 });
-// ═══════════════════ TICKET # GENERATOR ═══════════════════
-function getNewTicketNumber(){
-  const todayStr = today();
-  if(TICKET_COUNTER.date !== todayStr){ TICKET_COUNTER.num=0; TICKET_COUNTER.date=todayStr }
-  TICKET_COUNTER.num++;
-  save('ticket_counter', TICKET_COUNTER);
-  return String(TICKET_COUNTER.num).padStart(3,'0');
-}
-// ═══════════════════ SERVICE & EXPIRY ═══════════════════
-function getExpiryDate(){
-  if(!SERVICE.firstUse){ SERVICE.firstUse = new Date().toISOString(); saveService() }
-  return SERVICE.expiry ? new Date(SERVICE.expiry) : new Date(new Date(SERVICE.firstUse).getTime() + TRIAL_DAYS*86400000);
-}
-function saveService(){ save('service', SERVICE) }
-function isServiceActive(){ return SERVICE.active && new Date() < getExpiryDate() }
-function showExpiryScreen(){
-  const exp = getExpiryDate();
-  $('expiryMsg').innerHTML = `Natapos noong:<br><strong>${exp.toLocaleDateString('en-PH')} — ${exp.toLocaleTimeString('en-PH')}</strong>`;
-  $('expiryScreen').classList.remove('hidden');
-}
-// ═══════════════════ INIT ═══════════════════
-window.onload = function(){
-  if(!isServiceActive()){ showExpiryScreen(); return }
-  renderStoreSelects();
-  $('salesDateSel').value = today();
-};
-// ═══════════════════ LOGIN ═══════════════════
-function showLoginForm(role){
-  ['cashierForm','adminForm','spForm'].forEach(id=>$(id).classList.add('hidden'));
-  if(role==='cashier'){ $('cashierForm').classList.remove('hidden'); renderCashierStoreList() }
-  else if(role==='admin'){ $('adminForm').classList.remove('hidden') }
-  else if(role==='sp'){ $('spForm').classList.remove('hidden') }
-}
-function renderCashierStoreList(){
-  const c = $('cashierStoreList');
-  if(!STORES.length){ c.innerHTML='<div class="empty">⚠️ Walang tindahan. Mag-login muna bilang Admin.</div>'; return }
-  c.innerHTML = STORES.map((s,i)=>`<div class="store-card" id="cs-${i}" onclick="pickCashierStore(${i})"><strong>${s.code}</strong> — ${s.name}</div>`).join('');
-}
-let selectedCashierStoreIdx = null;
-function pickCashierStore(i){
-  selectedCashierStoreIdx=i;
-  document.querySelectorAll('.store-card').forEach(e=>e.classList.remove('selected'));
-  $(`cs-${i}`).classList.add('selected');
-}
-function loginCashier(){
-  const pass=$('cashierPass').value.trim();
-  if(pass!==PASS.cashier) return alert('⚠️ Maling Password!');
-  if(selectedCashierStoreIdx===null) return alert('⚠️ Pumili ng tindahan!');
-  const store=STORES[selectedCashierStoreIdx];
-  user={logged:true,role:'cashier',storeId:store.code,storeName:store.name,name:'Cashier'};
+
+const getNewTicketNumber = () => { TICKET_COUNTER.num++; save('ticket',TICKET_COUNTER); return TICKET_COUNTER.num; };
+const getExpiryDate = () => SERVICE.expiry ? new Date(SERVICE.expiry) : new Date(0);
+const saveService = () => { SERVICE.expiry = SERVICE.expiry ? new Date(SERVICE.expiry).toISOString() : null; save('service',SERVICE); };
+
+// ═══════════════════ PAGPASOK ═══════════════════
+function doLogin(){
+  const store = $('loginStore').value;
+  const role = $('loginRole').value;
+  const name = $('loginName').value.trim();
+  const pass = $('loginPass').value;
+  if(!store || !name || !pass) return alert('⚠️ Punan ang lahat!');
+  const ok = (role==='cashier' && pass===PASS.cashier) ||
+             (role==='admin'   && pass===PASS.admin)   ||
+             (role==='sp'      && pass===PASS.sp);
+  if(!ok) return alert('⚠️ Maling Password!');
+  const storeObj = STORES.find(s=>s.code===store);
+  user = { storeId:store, storeName:storeObj.name, role, name };
   startApp();
 }
-function loginAdmin(){
-  const pass=$('adminPass').value.trim();
-  if(pass!==PASS.admin) return alert('⚠️ Maling Admin Password!');
-  user={logged:true,role:'admin',storeId:'ALL',storeName:'Lahat ng Tindahan',name:'Admin'};
-  startApp();
-}
-function loginSP(){
-  const pass=$('spPass').value.trim();
-  if(pass!==PASS.sp) return alert('⚠️ Maling SP Password!');
-  user={logged:true,role:'sp',storeId:'ALL',storeName:'System',name:'Service Provider'};
-  startApp();
-}
-// ═══════════════════ ✅ IDINAGDAG: LOGOUT FUNCTION ═══════════════════
+
 function logout(){
-  if(confirm('Sigurado po ba kayong gusto ninyong mag-log-out?')){
-    user = { logged:false, role:'', storeId:null, storeName:'', name:'' };
-    // Itago ang app
-    $('app').classList.add('hidden');
-    // Ipakita muli ang login modal
+  if(confirm('Sigurado bang mag-log out?')){
+    user=null; cart=[]; currentShift=null; selectedCategory=null;
     $('loginModal').classList.remove('hidden');
-    // I-reset ang login form
-    $('loginRole').value = '';
-    ['cashierForm','adminForm','spForm'].forEach(id=>$(id).classList.add('hidden'));
-    // Linisin ang password fields
-    $('cashierPass').value = '';
-    $('adminPass').value = '';
-    $('spPass').value = '';
-    // Linisin ang cart
-    cart = [];
+    $('app').classList.add('hidden');
+    $('loginPass').value='';
   }
 }
-// ═══════════════════ ✅ INAYOS: START APP ═══════════════════
+
+// ═══════════════════ SIMULAN ANG APLIKASYON ═══════════════════
 function startApp(){
-  // Itago ang login modal
   $('loginModal').classList.add('hidden');
-  // Ipakita ang main app
   $('app').classList.remove('hidden');
-  // Ipakita ang user info
   $('userInfoLine').textContent = `${user.storeName} | ${user.role.toUpperCase()} — ${user.name}`;
-  // Itago LAHAT ng tabs muna
   document.querySelectorAll('.nav button[id^="tab"]').forEach(b=>b.classList.add('hidden'));
-  // Ipakita tabs base sa role AT pumunta sa tamang screen
   if(user.role==='cashier'){
     ['tabSell','tabVoidReq','tabCashReq','tabProdOutReq','tabShift'].forEach(id=>$(id).classList.remove('hidden'));
     checkOpenShift();
-    showTab('sell'); // ✅ Dederetso sa SELL screen
+    setTimeout(()=>showTab('sell'), 50);
   } else if(user.role==='admin'){
     ['tabSales','tabProducts','tabStocks','tabStores','tabAdminReq','tabSettings'].forEach(id=>$(id).classList.remove('hidden'));
-    showTab('sales'); // ✅ Admin → Sales Report
+    setTimeout(()=>showTab('sales'), 50);
   } else if(user.role==='sp'){
     ['tabService','tabDeleted'].forEach(id=>$(id).classList.remove('hidden'));
-    showTab('service'); // ✅ SP → Service page
+    setTimeout(()=>showTab('service'), 50);
   }
+  renderStoreSelects();
+  if($('storeBody')) $('storeBody').innerHTML = STORES.map(s=>`<tr><td>${s.code}</td><td>${s.name}</td><td><button class="btn-sm btn-red" onclick="delStore('${s.code}')">Burahin</button></td></tr>`).join('');
 }
-// ═══════════════════ ✅ INAYOS: SHOW TAB FUNCTION ═══════════════════
+
+// ═══════════════════ IPAKITA ANG TAB ═══════════════════
 function showTab(tabId) {
-    // Itago lahat ng page content
     document.querySelectorAll('.tab-page').forEach(p => p.classList.add('hidden'));
-    // Alisin active sa lahat ng button
     document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
-    // ✅ Tugma: 'sell' → 'vSell', 'sales' → 'vSales'
     const viewId = 'v' + tabId.charAt(0).toUpperCase() + tabId.slice(1);
     document.getElementById(viewId).classList.remove('hidden');
-    // Markahan ang napiling button na active
     event.currentTarget.classList.add('active');
+    if(tabId==='sell') renderSellScreen();
+    if(tabId==='sales') { $('salesDateSel').valueAsDate = new Date(); renderSalesReport(); }
+    if(tabId==='products') renderProductsTab();
+    if(tabId==='stocks') { renderStockTab(); loadStockInProdList(); }
+    if(tabId==='deleted') renderDeletedLog();
+    if(tabId==='service') updateServiceDisplay();
 }
-// ═══════════════════ ✅ KAPAG NAKA-LOAD ANG PAGE ═══════════════════
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Maglagay ng click event sa lahat ng nav button
     document.querySelectorAll('.nav button[id^="tab"]').forEach(btn => {
-        const tabId = btn.id.replace('tab', ''); // tabSell → Sell
+        const tabId = btn.id.replace('tab', '');
         btn.addEventListener('click', () => showTab(tabId.charAt(0).toLowerCase() + tabId.slice(1)));
     });
+    // Ihanda ang listahan ng tindahan sa pagpasok
+    $('loginStore').innerHTML = STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+    $('salesDateSel').valueAsDate = new Date();
 });
 
-// ═══════════════════ MGA TUMUTULONG NA FUNCTIONS ═══════════════════
+// ═══════════════════ TUMUTULONG NA PAGHANDA ═══════════════════
 function renderStoreSelects() {
   const sel1 = $('prodStoreSel');
   const sel2 = $('stockInStore');
@@ -716,6 +493,7 @@ function confirmShiftOpen() {
   alert('✅ Shift nabuksan na!');
 }
 
+// ═══════════════════ PAGSASARA NG SHIFT — AYON SA DENOMINASYON ═══════════════════
 function openShiftCloseModal() {
   if(!currentShift) return alert('⚠️ Walang bukas na shift!');
   $('closeOpening').textContent = fmt(currentShift.openingCash);
@@ -727,23 +505,53 @@ function openShiftCloseModal() {
   $('closeCashOut').textContent = fmt(shiftCashOut);
   const expected = currentShift.openingCash + shiftSales + shiftCashIn - shiftCashOut;
   $('closeExpected').textContent = fmt(expected);
-  $('closeActual').value='';
+  // Linisin ang lahat ng patlang ng bilang
+  ['d1000','d500','d200','d100','d50','d20','d10','d5','d1','d025','d010','d005','d001'].forEach(id=>{
+    const el = $(id); if(el) el.value='';
+  });
+  $('closeActual').value='₱0.00';
   $('closeVariance').textContent = '₱0.00';
   $('shiftCloseModal').classList.remove('hidden');
 }
+
 function closeShiftCloseModal() { $('shiftCloseModal').classList.add('hidden'); }
-function computeVariance() {
+
+function computeFromDenomination() {
+  const d1000 = parseInt($('d1000')?.value)||0;
+  const d500  = parseInt($('d500')?.value)||0;
+  const d200  = parseInt($('d200')?.value)||0;
+  const d100  = parseInt($('d100')?.value)||0;
+  const d50   = parseInt($('d50')?.value)||0;
+  const d20   = parseInt($('d20')?.value)||0;
+  const d10   = parseInt($('d10')?.value)||0;
+  const d5    = parseInt($('d5')?.value)||0;
+  const d1    = parseInt($('d1')?.value)||0;
+  const d025  = parseInt($('d025')?.value)||0;
+  const d010  = parseInt($('d010')?.value)||0;
+  const d005  = parseInt($('d005')?.value)||0;
+  const d001  = parseInt($('d001')?.value)||0;
+
+  const total = d1000*1000 + d500*500 + d200*200 + d100*100 +
+                d50*50 + d20*20 + d10*10 + d5*5 + d1*1 +
+                d025*0.25 + d010*0.10 + d005*0.05 + d001*0.01;
+
+  $('closeActual').value = '₱' + fmt(total);
+
   const shiftSales = SALES.filter(s=>s.ticket>=currentShift.openingTicket && s.storeId===user.storeId).reduce((t,s)=>t+s.total,0);
   const shiftCashIn = CASH_REQS.filter(r=>r.type==='CASHIN' && r.approved).reduce((t,r)=>t+r.amount,0);
   const shiftCashOut = CASH_REQS.filter(r=>r.type==='CASHOUT' && r.approved).reduce((t,r)=>t+r.amount,0);
   const expected = currentShift.openingCash + shiftSales + shiftCashIn - shiftCashOut;
-  const actual = parseFloat($('closeActual').value)||0;
-  $('closeVariance').textContent = '₱' + fmt(actual - expected);
+
+  $('closeVariance').textContent = '₱' + fmt(total - expected);
 }
+
 function confirmShiftClose() {
   if(!currentShift) return;
+  const actualText = $('closeActual').value.replace(/[^0-9.]/g,'');
+  const actual = parseFloat(actualText)||0;
+  if(actual<=0) return alert('⚠️ Bilangin muna ang pera ayon sa denominasyon!');
   currentShift.endTime = new Date().toISOString();
-  currentShift.closingCash = parseFloat($('closeActual').value)||0;
+  currentShift.closingCash = actual;
   SHIFTS[SHIFTS.length-1] = currentShift;
   save('shifts', SHIFTS);
   closeShiftCloseModal();
@@ -751,7 +559,7 @@ function confirmShiftClose() {
   alert('✅ Shift natapos na!');
 }
 
-// ═══════════════════ SELL SCREEN FUNCTIONS ═══════════════════
+// ═════════════════── BENTA ═══════════════════
 function renderSellScreen() {
   const cat = selectedCategory;
   const search = $('prodSearch').value.toLowerCase().trim();
@@ -794,7 +602,7 @@ function updateCartTotal() {
 function removeCartItem(i) { cart.splice(i,1); updateCartTotal(); }
 function clearCart() { if(cart.length && confirm('Burahin ang lahat?')) { cart=[]; updateCartTotal(); } }
 
-// ═══════════════════ PAYMENT MODALS ═══════════════════
+// ═════════════════── PAGBABAYAD ═══════════════════
 function openCashPay() { if(!cart.length) return alert('⚠️ Walang laman ang order!'); $('payTotal').textContent = fmt(cart.reduce((t,it)=>t+it.price*it.qty,0)); $('cashGiven').value=''; $('changeAmt').value='₱0.00'; $('cashPayModal').classList.remove('hidden'); }
 function closeCashPayModal() { $('cashPayModal').classList.add('hidden'); }
 function computeChange() {
@@ -802,7 +610,6 @@ function computeChange() {
   const given = parseFloat($('cashGiven').value)||0;
   $('changeAmt').value = '₱' + fmt(given - total);
 }
-function setCashAmt(a) { $('cashGiven').value=a; computeChange(); }
 function confirmCashPay() {
   const total = cart.reduce((t,it)=>t+it.price*it.qty,0);
   const given = parseFloat($('cashGiven').value)||0;
@@ -815,7 +622,7 @@ function openGCashPay() { if(!cart.length) return alert('⚠️ Walang laman ang
 function closeGCashModal() { $('gcashPayModal').classList.add('hidden'); }
 function confirmGCashPay() {
   const total = cart.reduce((t,it)=>t+it.price*it.qty,0);
-  if(!$('gcashRef').value.trim()) return alert('⚠️ Ilagay ang Reference #!');
+  if(!$('gcashRef').value.trim()) return alert('⚠️ Ilagay ang Numero ng Sanggunian!');
   completeSale('GCASH', total, 0, $('gcashRef').value.trim(), $('gcashName').value.trim());
   closeGCashModal();
 }
@@ -837,18 +644,16 @@ function confirmSplitPay() {
   const cash = parseFloat($('splitCash').value)||0;
   const gcash = parseFloat($('splitGCash').value)||0;
   if(Math.abs((cash+gcash)-total)>0.02) return alert('⚠️ Hindi tugma ang halaga!');
-  if(!$('splitRef').value.trim()) return alert('⚠️ Ilagay ang GCash Reference #!');
+  if(!$('splitRef').value.trim()) return alert('⚠️ Ilagay ang Numero ng Sanggunian — GCash!');
   completeSale('SPLIT', total, parseFloat($('splitCashGiven').value)-cash, $('splitRef').value.trim(), '', cash, gcash);
   closeSplitModal();
 }
 
-// ═══════════════════ ✅ KUMPLETUHIN ANG BENTA ═══════════════════
+// ═════════════════── KUMPLETUHIN ANG BENTA ═══════════════════
 function completeSale(payMethod, total, change=0, ref='', payName='', cashPortion=0, gcashPortion=0) {
   const ticket = getNewTicketNumber();
-  // Ibawas sa stock
   cart.forEach(it=>{ STOCKS[it.id] = (STOCKS[it.id]||0) - it.qty; });
   save('stocks', STOCKS);
-  // I-save ang benta
   const sale = {
     ticket, storeId: user.storeId, storeName: user.storeName,
     datetime: new Date().toISOString(), items: [...cart], total,
@@ -857,9 +662,7 @@ function completeSale(payMethod, total, change=0, ref='', payName='', cashPortio
   };
   SALES.push(sale);
   save('sales', SALES);
-  // Ipakita ang resibo
   showReceipt(sale);
-  // Linisin ang cart
   cart=[];
   updateCartTotal();
 }
@@ -867,27 +670,30 @@ function completeSale(payMethod, total, change=0, ref='', payName='', cashPortio
 function showReceipt(sale) {
   const r = $('receiptContent');
   r.innerHTML = `
-    <h3>🏪 ${sale.storeName}</h3>
-    <p>Ticket #: ${sale.ticket}</p>
-    <p>${new Date(sale.datetime).toLocaleString('en-PH')}</p>
+    <h3 style="text-align:center">🏪 ${sale.storeName}</h3>
+    <p style="text-align:center">Ticket #: ${sale.ticket}</p>
+    <p style="text-align:center">${new Date(sale.datetime).toLocaleString('en-PH')}</p>
     <div class="line"></div>
-    ${sale.items.map(it=>`<div class="item"><span>${it.name} × ${it.qty}</span><span>₱${fmt(it.price*it.qty)}</span></div>`).join('')}
+    ${sale.items.map(it=>`<div class="item" style="display:flex;justify-content:space-between"><span>${it.name} × ${it.qty}</span><span>₱${fmt(it.price*it.qty)}</span></div>`).join('')}
     <div class="line"></div>
     <div class="total">KABUUAN: ₱${fmt(sale.total)}</div>
-    <div class="paymethod">Bayad: ${sale.payMethod}</div>
-    ${sale.ref?`<div class="paymethod">Ref: ${sale.ref}</div>`:''}
+    <div class="paymethod">Paraan ng Pagbabayad: ${sale.payMethod}</div>
+    ${sale.ref?`<div class="paymethod">Sanggunian: ${sale.ref}</div>`:''}
     ${sale.change>0?`<div class="paymethod">Sukli: ₱${fmt(sale.change)}</div>`:''}
     <div class="line"></div>
-    <p>✅ Salamat po!</p>
+    <p style="text-align:center">✅ Salamat po!</p>
   `;
   $('receiptModal').classList.remove('hidden');
 }
 function printReceipt() { window.print(); }
 function closeReceiptModal() { $('receiptModal').classList.add('hidden'); }
 
-// ═══════════════════ SALES REPORT ═══════════════════
+// ═════════════════── ULAT NG BENTA ═══════════════════
 function renderSalesReport() {
   const d = $('salesDateSel').value;
+  $('rptDate').textContent = d;
+  let list = SAL
+    const d = $('salesDateSel').value;
   $('rptDate').textContent = d;
   let list = SALES.filter(s=>s.datetime.startsWith(d) && !s.voided && !s.deleted);
   if(user.storeId!=='ALL') list = list.filter(s=>s.storeId===user.storeId);
@@ -914,7 +720,7 @@ function renderSalesReport() {
     </tr>`).join('');
 }
 
-// ═══════════════════ PRODUCTS & STORES ═══════════════════
+// ═══════════════════ PRODUKTO ═══════════════════
 function addProduct() {
   const cat = $('newCat').value.trim();
   const name = $('newProdName').value.trim();
@@ -941,6 +747,7 @@ function renderProductsTab() {
 }
 function delProduct(id) { if(confirm('Burahin ang produkto?')) { PRODUCTS=PRODUCTS.filter(p=>p.id!==id); save('products',PRODUCTS); renderProductsTab(); } }
 
+// ═════════════════── TINDAHAN ═══════════════════
 function addStore() {
   const code = $('newStoreCode').value.trim().toUpperCase();
   const name = $('newStoreName').value.trim();
@@ -955,6 +762,7 @@ function addStore() {
 }
 function delStore(code) { if(confirm('Burahin ang tindahan?')) { STORES=STORES.filter(s=>s.code!==code); save('stores',STORES); $('storeBody').innerHTML = STORES.map(s=>`<tr><td>${s.code}</td><td>${s.name}</td><td><button class="btn-sm btn-red" onclick="delStore('${s.code}')">Burahin</button></td></tr>`).join(''); renderStoreSelects(); } }
 
+// ═════════════════── IMBENTARYO / STOCK ═══════════════════
 function stockIn() {
   const storeId = $('stockInStore').value;
   const prodId = $('stockInProd').value;
@@ -989,7 +797,7 @@ function renderStockTab() {
   }).join('');
 }
 
-// ═══════════════════ SETTINGS ═══════════════════
+// ═════════════════── MGA SETTING ═══════════════════
 function changeCashierPass() {
   const cur = $('curCashierPass').value.trim();
   const newP = $('newCashierPass').value.trim();
@@ -1009,11 +817,15 @@ function deleteSalesByDate() {
   toDel.forEach(s=>{ DELETED_SALES.push({when:new Date().toISOString(), type:'DELETE', saleDate:d, ticket:s.ticket, storeId:s.storeId, amount:s.total, reason}); s.deleted=true; });
   save('deleted_sales', DELETED_SALES);
   save('sales', SALES);
-  alert(`✅ ${toDel.length} benta naitago sa log. Tingnan sa Binurang Benta.`);
+  alert(`✅ ${toDel.length} benta naitago sa talaan. Tingnan sa Talaan ng Pagbura.`);
   $('delSaleDate').value=''; $('delSaleReason').value='';
+  renderDeletedLog();
+}
+function renderDeletedLog() {
+  $('deletedBody').innerHTML = DELETED_SALES.map(d=>`<tr><td>${new Date(d.when).toLocaleString('en-PH')}</td><td>${d.saleDate}</td><td>${d.ticket}</td><td>${d.storeId}</td><td>₱${fmt(d.amount)}</td><td>${d.reason}</td></tr>`).join('');
 }
 
-// ═══════════════════ SERVICE PROVIDER ═══════════════════
+// ═════════════════── SERBISYO / MAY-ARI ═══════════════════
 function extendService(days,price) {
   if(!confirm(`I-activate / I-extend ng ${days} araw? ₱${price}`)) return;
   if(!SERVICE.firstUse) SERVICE.firstUse = new Date().toISOString();
@@ -1043,19 +855,20 @@ function spChangePasswords() {
   $('spNewAdminPass').value=''; $('spNewSPass').value='';
 }
 
-// ═══════════════════ PLACEHOLDER FUNCTIONS (para hindi mag-error) ═══════════════════
+// ═════════════════── PANSAMANTALA / PLACEHOLDER ═══════════════════
 function submitVoidReq(){ alert('⚠️ Tampok na ginagawa pa lamang.'); }
 function submitCashReq(){ alert('⚠️ Tampok na ginagawa pa lamang.'); }
 function submitProdOut(){ alert('⚠️ Tampok na ginagawa pa lamang.'); }
 function filterProdOutSel(){}
 
-// ═══════════════════ PAGKATAPOS MAG-LOAD ═══════════════════
+// ═════════════════── PAGKATAPOS MAG-LOAD ═══════════════════
 window.addEventListener('load', function(){
   setTimeout(()=>{
     if($('servStatus')) updateServiceDisplay();
-    if($('salesDateSel')) renderSalesReport();
+    if($('salesDateSel')) { $('salesDateSel').valueAsDate = new Date(); renderSalesReport(); }
     if($('storeBody')) $('storeBody').innerHTML = STORES.map(s=>`<tr><td>${s.code}</td><td>${s.name}</td><td><button class="btn-sm btn-red" onclick="delStore('${s.code}')">Burahin</button></td></tr>`).join('');
-  },100);
+    if($('deletedBody')) renderDeletedLog();
+  }, 100);
 });
 
 </script>
