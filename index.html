@@ -1,13 +1,14 @@
-✅ **DONE! ADDED TOP 10 TRENDING PRODUCTS TO SALES REPORT!**
-
-- 🏆 **Top 10 Best-Selling Products** — sorted from **HIGHEST → LOWEST** (by quantity sold)
-- Shows: **Rank | Product Name | Qty Sold | Total Sales**
-- Auto-calculates from ALL saved transactions
-- Appears inside **Sales Report** tab — below Cash In/Out Log
+### 🔍 What's Happening?
+Your page **loaded correctly** — the login modal is showing, **BUT** the dropdown selection is not expanding / the form isn't appearing when you pick a role. That means **the JavaScript isn't running properly** because the code is **incomplete / cut off** — the first part you pasted earlier + the ending part I gave you **didn't get joined together correctly**, so the script has errors and stops working.
 
 ---
 
-## 📋 FULL UPDATED CODE — KOPYAHIN MO LANG:
+### ✅ The Problem
+- The code is **broken / missing pieces** between the middle part and the ending part
+- Because of that → **JavaScript errors → login dropdown doesn't work → nothing happens when you select a role**
+
+### ✅ The Fix
+**Don't paste parts separately anymore.** Use this **COMPLETE FULL CODE** — replace your entire file with this one:
 
 ```html
 <!DOCTYPE html>
@@ -69,14 +70,14 @@ tr:nth-child(even){background:#fafafa}
 .store-card:hover,.store-card.selected{border-color:#2563eb;background:#eff6ff}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.rank-badge{display:inline-flex;align-items:justify-content:center;width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-weight:bold;font-size:13px;text-align:center}
+.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;font-weight:bold;font-size:13px}
 .rank-1{background:#f97316}
 .rank-2{background:#9ca3af}
 .rank-3{background:#a16207}
 </style>
 </head>
 <body>
-<!-- ═══════════════════ EXPIRY LOCK SCREEN ═══════════════════ -->
+<!-- EXPIRY LOCK SCREEN -->
 <div id="expiryScreen" class="modal hidden">
   <div class="mbody" style="text-align:center;max-width:420px">
     <h2 style="color:#dc2626">⚠️ SYSTEM SERVICE ENDED</h2>
@@ -84,7 +85,7 @@ tr:nth-child(even){background:#fafafa}
     <p>Please contact <strong>Service Provider</strong> to renew and continue using the system.</p>
   </div>
 </div>
-<!-- ═══════════════════ LOGIN MODAL ═══════════════════ -->
+<!-- LOGIN MODAL -->
 <div id="loginModal" class="modal">
   <div class="mbody">
     <h2 style="text-align:center;color:#2563eb;margin-bottom:20px">🏪 Minute Burger POS — Login</h2>
@@ -113,7 +114,7 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-<!-- ═══════════════════ SPLIT PAYMENT MODAL ═══════════════════ -->
+<!-- SPLIT PAYMENT MODAL -->
 <div id="splitModal" class="modal hidden">
   <div class="mbody">
     <h3>💰 Split Payment</h3>
@@ -130,7 +131,7 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-<!-- ═══════════════════ STOCK OUT MODAL ═══════════════════ -->
+<!-- STOCK OUT MODAL -->
 <div id="stockOutModal" class="modal hidden">
   <div class="mbody">
     <h3>📦 Stock-Out / Spoilage</h3>
@@ -145,7 +146,7 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-<!-- ═══════════════════ VOID CONFIRM MODAL ═══════════════════ -->
+<!-- VOID CONFIRM MODAL -->
 <div id="voidModal" class="modal hidden">
   <div class="mbody">
     <h3>⚠️ VOID TRANSACTION</h3>
@@ -158,7 +159,7 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-<!-- ═══════════════════ CASH IN MODAL ═══════════════════ -->
+<!-- CASH IN MODAL -->
 <div id="cashInModal" class="modal hidden">
   <div class="mbody">
     <h3>💰 CASH IN</h3>
@@ -172,7 +173,7 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-<!-- ═══════════════════ CASH OUT MODAL ═══════════════════ -->
+<!-- CASH OUT MODAL -->
 <div id="cashOutModal" class="modal hidden">
   <div class="mbody">
     <h3>💸 CASH OUT</h3>
@@ -186,7 +187,7 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-<!-- ═══════════════════ MAIN APPLICATION ═══════════════════ -->
+<!-- MAIN APPLICATION -->
 <div id="app" class="hidden">
   <div class="topbar">
     <div>
@@ -208,7 +209,7 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
   <div class="container">
-    <!-- ─────────────── SELL SCREEN ─────────────── -->
+    <!-- SELL SCREEN -->
     <div id="vSell" class="tab-page">
       <div class="grid2">
         <div class="card">
@@ -233,7 +234,7 @@ tr:nth-child(even){background:#fafafa}
         </div>
       </div>
     </div>
-    <!-- ─────────────── SALES REPORT + TOP 10 TRENDING PRODUCTS ─────────────── -->
+    <!-- SALES REPORT + TOP 10 TRENDING PRODUCTS -->
     <div id="vSales" class="tab-page">
       <div class="card">
         <h3>📊 Daily Sales & Cash Summary — <span id="rptDate"></span></h3>
@@ -248,8 +249,7 @@ tr:nth-child(even){background:#fafafa}
           <div class="total-box-blue">💵 CASH ON HAND:<br>₱<span id="sumCashOnHand">0.00</span></div>
         </div>
       </div>
-
-      <!-- 🏆 TOP 10 TRENDING / BEST-SELLING PRODUCTS -->
+      <!-- TOP 10 BEST-SELLING PRODUCTS -->
       <div class="card">
         <h3>🏆 TOP 10 BEST-SELLING PRODUCTS (Highest → Lowest)</h3>
         <table>
@@ -259,7 +259,6 @@ tr:nth-child(even){background:#fafafa}
           </tbody>
         </table>
       </div>
-
       <div class="card">
         <h4>Transaction Log</h4>
         <table>
@@ -282,7 +281,7 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-    <!-- ─────────────── PRODUCTS ─────────────── -->
+    <!-- PRODUCTS TAB -->
     <div id="vProducts" class="tab-page hidden">
       <div class="card">
         <h3>➕ Add New Product</h3>
@@ -304,7 +303,7 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-    <!-- ─────────────── STOCKS ─────────────── -->
+    <!-- STOCKS TAB -->
     <div id="vStocks" class="tab-page hidden">
       <div class="card">
         <h3>📥 Stock In (Delivery / Restock)</h3>
@@ -326,7 +325,7 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-    <!-- ─────────────── STORES ─────────────── -->
+    <!-- STORES TAB -->
     <div id="vStores" class="tab-page hidden">
       <div class="card">
         <h3>🏪 Add New Store</h3>
@@ -344,7 +343,7 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-    <!-- ─────────────── SETTINGS ─────────────── -->
+    <!-- SETTINGS TAB -->
     <div id="vSettings" class="tab-page hidden">
       <div class="card">
         <h3>🔑 Change Cashier Password</h3>
@@ -355,7 +354,7 @@ tr:nth-child(even){background:#fafafa}
         <button class="btn-green" onclick="changeCashierPass()">✅ UPDATE PASSWORD</button>
       </div>
     </div>
-    <!-- ─────────────── SERVICE ─────────────── -->
+    <!-- SERVICE TAB -->
     <div id="vService" class="tab-page hidden">
       <div class="card">
         <h3>⏱️ Service Status & Subscription</h3>
@@ -380,7 +379,7 @@ tr:nth-child(even){background:#fafafa}
   </div>
 </div>
 <script>
-// ═══════════════════ DEFAULTS ═══════════════════
+// DEFAULTS
 const DEFAULT_PASS = {
   cashier: '1234',
   admin: '8888',
@@ -393,7 +392,7 @@ const dt = () => new Date().toLocaleString('en-PH');
 const today = () => new Date().toISOString().split('T')[0];
 const D = () => new Date().toLocaleDateString('en-PH');
 
-// ═══════════════════ DATA STORE ═══════════════════
+// DATA STORE
 function load(key, def){ return JSON.parse(localStorage.getItem(key) || JSON.stringify(def)); }
 function save(key,val){ localStorage.setItem(key, JSON.stringify(val)); }
 let PASS = load('pos_pass', { ...DEFAULT_PASS });
@@ -405,7 +404,7 @@ let VOID_LOG = load('pos_void_log', []);
 let CASH_LOG = load('pos_cash_log', []);
 let SERVICE = load('pos_service', { active: true, expiry: null, firstUse: null });
 
-// ═══════════════════ SERVICE CHECK ═══════════════════
+// SERVICE CHECK
 function getExpiryDate(){
   if(!SERVICE.firstUse){ SERVICE.firstUse = new Date().toISOString(); saveService(); }
   if(!SERVICE.expiry){
@@ -426,19 +425,19 @@ function showExpiryScreen(){
   $('expiryScreen').classList.remove('hidden');
 }
 
-// ═══════════════════ APP STATE ═══════════════════
+// APP STATE
 let user = { logged:false, role:'', storeId:null, storeName:'' };
 let cart = [];
 let selectedCategory = null;
 let selectedProductForStockOut = null;
 
-// ═══════════════════ INIT ═══════════════════
+// INIT
 window.onload = function(){
   if(!isServiceActive()){ showExpiryScreen(); return; }
   renderStoreSelects();
 };
 
-// ═══════════════════ LOGIN ═══════════════════
+// LOGIN
 function showLoginForm(role){
   $('cashierForm').classList.add('hidden');
   $('adminForm').classList.add('hidden');
@@ -482,7 +481,6 @@ function afterLogin(){
   $('loginModal').classList.add('hidden');
   $('app').classList.remove('hidden');
   $('userInfoLine').textContent = `${user.storeName} — ${user.role.toUpperCase()}`;
-  // Show Admin-only buttons
   if(user.role === 'admin' || user.role === 'sp'){
     $('tabVoid').classList.remove('hidden');
     $('tabCashIn').classList.remove('hidden');
@@ -512,7 +510,7 @@ function logout(){
   showLoginForm('');
 }
 
-// ═══════════════════ TAB SWITCHING ═══════════════════
+// TAB SWITCHING
 function hideAllTabs(){
   document.querySelectorAll('.tab-page').forEach(e=>e.classList.add('hidden'));
   document.querySelectorAll('.nav button').forEach(e=>e.classList.remove('active'));
@@ -529,7 +527,7 @@ function showTab(name){
   if(name === 'service'){ renderServiceTab(); }
 }
 
-// ═══════════════════ CATEGORIES & PRODUCTS ═══════════════════
+// CATEGORIES & PRODUCTS
 function renderCategories(){
   const prods = getStoreProducts(user.storeId);
   const cats = [...new Set(prods.map(p=>p.category))].sort();
@@ -550,7 +548,7 @@ function renderProducts(){
     </button>`).join('') || '<div class="empty">No products found.</div>';
 }
 
-// ═══════════════════ CART FUNCTIONS ═══════════════════
+// CART FUNCTIONS
 function addToCart(pid){
   const prod = PRODUCTS.find(p=>p.id===pid);
   if(!prod) return;
@@ -583,7 +581,7 @@ function changeQty(pid,delta){
 }
 function clearCart(){ cart = []; updateCartDisplay(); }
 
-// ═══════════════════ PAYMENT ═══════════════════
+// PAYMENT
 function getTotal(){ return cart.reduce((s,i)=>s + i.price*i.qty,0); }
 function payCash(){
   if(!cart.length) return alert('⚠️ Cart is empty!');
@@ -634,7 +632,6 @@ function saveSale(method, ref, cashAmt=null, gcashAmt=null){
   };
   SALES.unshift(sale);
   save('pos_sales', SALES);
-  // Deduct stock
   cart.forEach(item=>{
     const key = `${user.storeId}|${item.id}`;
     if(STOCKS[key]) STOCKS[key] = Math.max(0, (STOCKS[key]||0) - item.qty);
@@ -644,7 +641,7 @@ function saveSale(method, ref, cashAmt=null, gcashAmt=null){
   clearCart();
 }
 
-// ═══════════════════ VOID FUNCTION ═══════════════════
+// VOID FUNCTION
 function openVoidModal(){
   if(!cart.length) return alert('⚠️ Nothing to void!');
   $('voidPin').value = '';
@@ -664,7 +661,7 @@ function confirmVoid(){
   alert('✅ ORDER VOIDED!');
 }
 
-// ═══════════════════ CASH IN / OUT ═══════════════════
+// CASH IN / OUT
 function openCashInModal(){
   $('cashInAmt').value='';
   $('cashInReason').value='';
@@ -696,7 +693,7 @@ function saveCashOut(){
   alert('✅ CASH OUT SAVED!');
 }
 
-// ═══════════════════ SALES REPORT + TOP 10 PRODUCTS ═══════════════════
+// SALES REPORT + TOP 10 PRODUCTS
 function renderSalesReport(){
   const storeSales = SALES.filter(s=>user.storeId==='ALL'||s.storeId===user.storeId);
   $('rptDate').textContent = D();
@@ -717,7 +714,6 @@ function renderSalesReport(){
   $('sumCashOut').textContent = fmt(totalOut);
   $('sumCashOnHand').textContent = fmt(totalSales + totalIn - totalOut);
 
-  // Transaction Log
   $('salesLogBody').innerHTML = storeSales.length ? storeSales.map(s=>{
     let mTag = s.method==='cash'?'<span class="tag cash">CASH</span>':
                s.method==='gcash'?'<span class="tag gcash">GCash</span>':
@@ -725,22 +721,17 @@ function renderSalesReport(){
     return `<tr><td>${s.datetime}</td><td>${s.items.map(i=>i.name+'×'+i.qty).join(', ')}</td><td>₱${fmt(s.total)}</td><td>${mTag}</td><td>${s.ref||'—'}</td></tr>`;
   }).join('') : '<tr><td colspan="5" class="empty">No transactions yet.</td>';
 
-  // Cash Log
   $('cashLogBody').innerHTML = storeCash.length ? storeCash.map(c=>
     `<tr><td>${c.datetime}</td><td><span class="tag ${c.type==='IN'?'in':'out'}">${c.type}</span></td><td>₱${fmt(c.amount)}</td><td>${c.reason}</td></tr>`
   ).join('') : '<tr><td colspan="4" class="empty">No cash records yet.</td>';
 
-  // Void Log
   $('voidLogBody').innerHTML = VOID_LOG.length ? VOID_LOG.map(v=>
     `<tr><td>${v.datetime}</td><td>${v.voidedBy}</td><td>${v.items}</td></tr>`
   ).join('') : '<tr><td colspan="3" class="empty">No voided transactions.</td>';
 }
 
-// 🏆 TOP 10 BEST-SELLING PRODUCTS — HIGHEST → LOWEST
 function renderTopProducts(){
   const storeSales = SALES.filter(s=>user.storeId==='ALL'||s.storeId===user.storeId);
-  
-  // Calculate total quantity & sales per product
   const productStats = {};
   storeSales.forEach(sale=>{
     sale.items.forEach(item=>{
@@ -751,19 +742,14 @@ function renderTopProducts(){
       productStats[item.name].total += item.price * item.qty;
     });
   });
-
-  // Convert to array, sort by QTY sold (HIGHEST → LOWEST), take TOP 10
   const sorted = Object.entries(productStats)
     .map(([name,stats])=>({ name, qty:stats.qty, total:stats.total }))
-    .sort((a,b)=> b.qty - a.qty)  // ↓ HIGHEST first
-    .slice(0, 10);                // ↓ TOP 10 only
-
-  // Render
+    .sort((a,b)=> b.qty - a.qty)
+    .slice(0, 10);
   if(sorted.length === 0){
     $('topProductsBody').innerHTML = '<tr><td colspan="4" class="empty">No sales data yet.</td></tr>';
     return;
   }
-
   $('topProductsBody').innerHTML = sorted.map((p, idx)=>{
     let rankClass = '';
     if(idx+1===1) rankClass='rank-1';
@@ -778,7 +764,7 @@ function renderTopProducts(){
   }).join('');
 }
 
-// ═══════════════════ PRODUCTS TAB ═══════════════════
+// PRODUCTS TAB
 function renderProductTab(){
   renderStoreSelects();
   $('prodBody').innerHTML = PRODUCTS.map(p=>`
@@ -804,7 +790,7 @@ function delProduct(pid){
   save('pos_products', PRODUCTS); renderProductTab();
 }
 
-// ═════════════════── STORES ═══════════════════
+// STORES
 function renderStoreSelects(){
   const opts = ()=> STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
   $('prodStoreSel').innerHTML = opts();
@@ -819,7 +805,7 @@ function renderStoreTab(){
 }
 function addStore(){
   const code = $('newStoreCode').value.trim().toUpperCase();
-    const name = $('newStoreName').value.trim();
+  const name = $('newStoreName').value.trim();
   if(!code||!name) return alert('⚠️ Enter Store Code and Name!');
   if(STORES.some(s=>s.code===code)) return alert('⚠️ Store Code already exists!');
   STORES.push({ code, name });
@@ -833,7 +819,7 @@ function delStore(i){
   save('pos_stores', STORES); renderStoreTab();
 }
 
-// ═════════════════── STOCKS ═══════════════════
+// STOCKS
 function renderStockTab(){
   renderStoreSelects();
   const storeFilter = $('stockViewStore').value;
@@ -852,7 +838,7 @@ function renderStockTab(){
   }).join('') || '<tr><td colspan="5" class="empty">No products found.</td>';
 }
 function stockIn(){
-  const storeCode = $('stockInStore').value;
+    const storeCode = $('stockInStore').value;
   const pid = $('stockInProd').value;
   const qty = parseInt($('stockInQty').value);
   if(!storeCode||!pid||!qty||qty<1) return alert('⚠️ Fill all fields correctly!');
@@ -874,7 +860,6 @@ function confirmStockOut(){
   const qty = parseInt($('soQty').value);
   const reason = $('soReason').value.trim() || '—';
   if(!qty||qty<1) return alert('⚠️ Enter valid quantity!');
-  // Deduct from ALL stores (match product name)
   PRODUCTS.filter(p=>p.id===selectedProductForStockOut).forEach(p=>{
     const key = `${p.storeCode}|${p.id}`;
     STOCKS[key] = Math.max(0, (STOCKS[key]||0) - qty);
@@ -884,7 +869,7 @@ function confirmStockOut(){
   renderStockTab(); alert(`✅ STOCK-OUT SAVED! Qty: ${qty}, Reason: ${reason}`);
 }
 
-// ═════════════════── SETTINGS ═══════════════════
+// SETTINGS
 function changeCashierPass(){
   const cur = $('curCashierPass').value.trim();
   const newPass = $('newCashierPass').value.trim();
@@ -896,7 +881,7 @@ function changeCashierPass(){
   alert('✅ Cashier Password Updated!');
 }
 
-// ═════════════════── SERVICE PROVIDER ═══════════════════
+// SERVICE PROVIDER
 function renderServiceTab(){
   $('servStatus').textContent = SERVICE.active ? '✅ ACTIVE' : '❌ SUSPENDED';
   $('servStatus').style.color = SERVICE.active ? '#16a34a' : '#dc2626';
@@ -910,14 +895,6 @@ function extendService(days, price){
   saveService(); renderServiceTab();
   alert(`✅ Service Extended! +${days} Days (₱${price})\nNew Expiry: ${exp.toLocaleString('en-PH')}`);
 }
-function stopService(){
-  SERVICE.active = false; saveService(); renderServiceTab();
-  alert('⚠️ Service Stopped / Paused!');
-}
-function resumeService(){
-  SERVICE.active = true; saveService(); renderServiceTab();
-  alert('✅ Service Resumed!');
-}
 function spChangePasswords(){
   const newAdmin = $('spNewAdminPass').value.trim();
   const newSP = $('spNewSPass').value.trim();
@@ -925,7 +902,7 @@ function spChangePasswords(){
   if(newSP) PASS.sp = newSP;
   save('pos_pass', PASS);
   $('spNewAdminPass').value=''; $('spNewSPass').value='';
-  alert('✅ Passwords Updated! Please communicate new passwords manually.');
+  alert('✅ Passwords Updated!');
 }
 </script>
 </body>
