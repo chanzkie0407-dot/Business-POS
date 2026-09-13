@@ -557,8 +557,6 @@ function performSync() {
   $('netBadge').textContent = '🔄 SYNCING...';
   $('netBadge').className = 'status-badge status-syncing';
   setTimeout(() => {
-    // In production: POST to SYNC_ENDPOINT with full dataset
-    // Implement conflict resolution: newer updatedAt wins
     const SYNC_TIMESTAMP = new Date().toISOString();
     SALES.forEach(tx => { if (!tx.synced) { tx.synced = true; tx.syncedAt = SYNC_TIMESTAMP; } });
     VOID_REQS.forEach(r => { if (!r.synced) { r.synced = true; r.syncedAt = SYNC_TIMESTAMP; } });
@@ -586,12 +584,14 @@ window.addEventListener('offline', () => {
   updateNetStatus();
 });
 setInterval(() => { if (IS_ONLINE) performSync(); }, SYNC_INTERVAL);
-// ═══════════════════ SECURE DEFAULTS ═══════════════════
+
+// ═══════════════════ SECURE DEFAULTS — NASET NA! ═══════════════════
 const DEFAULT_PASS = {
-  cashier: '',
-  admin: '',
-  sp: ''
+  cashier: '',           // ❌ WALANG DEFAULT — Admin ang gagawa
+  admin: '8888',         // ✅ Default Admin Password
+  sp: '19970407chan'      // ✅ Default SP Password
 };
+
 const TRIAL_DAYS = 7;
 const $ = id => document.getElementById(id);
 const fmt = n => (n||0).toFixed(2);
@@ -599,10 +599,12 @@ const dt = () => new Date().toLocaleString('en-PH');
 const today = () => new Date().toISOString().split('T')[0];
 const D = () => new Date().toLocaleDateString('en-PH');
 const tid = () => 'TXN-'+uid();
+
 // Password Strength Check
 function checkPasswordStrength(pw) {
   return pw && pw.length >= 6;
 }
+
 // ═══════════════════ LOCAL STORAGE ═══════════════════
 function load(key, def){ 
   try {
@@ -622,6 +624,7 @@ function save(key,val){
     return false;
   }
 }
+
 // ═══════════════════ DATA INIT ═══════════════════
 let PASS = load('pos_pass', { ...DEFAULT_PASS, firstLogin: true });
 let STORES = load('pos_stores', []);
@@ -634,6 +637,7 @@ let CASH_REQS = load('pos_cash_reqs', []);
 let PROD_OUT_REQS = load('pos_prodout_reqs', []);
 let DELETED_SALES = load('pos_deleted_sales', []);
 let SERVICE = load('pos_service', { active: true, expiry: null, firstUse: null });
+
 // ═══════════════════ SERVICE & EXPIRY ═══════════════════
 function getExpiryDate(){
   if(!SERVICE.firstUse){
@@ -668,17 +672,20 @@ function updateExpiryCountdown(){
     ? `<span style="color:#dc2626;font-weight:bold">⚠️ ${days} araw ${hours} oras bago matapos!</span>` 
     : `(${days} araw natitira)`;
 }
+
 // ═══════════════════ APP STATE ═══════════════════
 let user = { logged:false, role:'', storeId:null, storeName:'', name:'' };
 let cart = [];
 let selectedCategory = null;
 let productSearchQuery = '';
 let activeShift = null;
+
 // ═══════════════════ INIT ═══════════════════
 window.onload = function(){
   updateNetStatus();
   renderStoreSelects();
 };
+
 // ═══════════════════ LOGIN ═══════════════════
 function showLoginForm(role){
   ['cashierForm','adminForm','spForm'].forEach(id => $(id).classList.add('hidden'));
@@ -689,7 +696,8 @@ function showLoginForm(role){
 function renderCashierStoreList(){
   const c = $('cashierStoreList');
   if(!STORES.length){
-    c.innerHTML = '<div class="empty">⚠️ Walang tindahan. Mag-login muna bilang Admin.</div>';
+    c.innerHTML =
+          c.innerHTML = '<div class="empty">⚠️ Walang tindahan. Mag-login muna bilang Admin.</div>';
     return;
   }
   c.innerHTML = STORES.map((s,i)=>`<div class="store-card" id="cs-${i}" onclick="pickCashierStore(${i})"><strong>${s.code}</strong> — ${s.name}</div>`).join('');
@@ -713,8 +721,6 @@ function firstLoginChangePass() {
   PASS.firstLogin = false;
   save('pos_pass', PASS);
   $('firstLoginModal').classList.add('hidden');
-  alert('✅ Password na-update! Ligtas na ang iyong account.');
-    $('firstLoginModal').classList.add('hidden');
   alert('✅ Password na-update! Ligtas na ang iyong account.');
 }
 function loginCashier(){
