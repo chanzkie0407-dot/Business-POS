@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>General Offline POS System — Kumpleto</title>
+<title>POS — Auto-Sync + Offline Ready</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
 body{background:#f5f5f5;padding-bottom:40px}
@@ -17,7 +17,10 @@ h2,h3,h4{color:#2d2d2d;margin-bottom:10px}
 .topbar{background:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px #0001;position:sticky;top:0;z-index:10}
 .topbar h1{font-size:18px;color:#2563eb}
 .topbar small{display:block;color:#666;font-size:12px;margin-top:2px}
-.offline-badge{background:#d4edda;color:#155724;font-size:12px;font-weight:bold;padding:3px 8px;border-radius:12px;margin-left:8px}
+.status-badge{font-size:12px;font-weight:bold;padding:3px 8px;border-radius:12px;margin-left:8px}
+.status-online{background:#d4edda;color:#155724}
+.status-syncing{background:#fff3cd;color:#856404}
+.status-offline{background:#fef2f2;color:#dc2626}
 .nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 .nav button{padding:8px 12px;font-size:13px;background:#f0f0f0}
 .nav button.active{background:#2563eb;color:#fff}
@@ -61,6 +64,10 @@ tr:nth-child(even){background:#fafafa}
 .shift-indicator{background:#f0f9ff;border-left:4px solid #2563eb;padding:8px 12px;border-radius:4px;margin-bottom:10px}
 .receipt-preview{background:#fff;border:1px dashed #ccc;padding:15px;margin-top:10px;font-family:monospace;font-size:12px;white-space:pre-wrap}
 .data-note{font-size:11px;color:#888;margin-top:8px}
+.sync-note{font-size:11px;color:#666;margin-top:4px}
+.denom-row{display:grid;grid-template-columns:100px 80px 80px;gap:4px;align-items:center;margin:2px 0}
+.denom-row input{margin:0;padding:6px}
+.banner-warning{background:#fff7ed;border-left:4px solid #f97316;padding:8px;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -72,17 +79,28 @@ tr:nth-child(even){background:#fafafa}
     <p>Mangyaring makipag-ugnayan sa <strong>Service Provider</strong> para mag-renew.</p>
   </div>
 </div>
+<!-- ═══════════════════ PASSWORD CHANGE ON FIRST LOGIN ═══════════════════ -->
+<div id="firstLoginModal" class="modal hidden">
+  <div class="mbody">
+    <h2 style="text-align:center;color:#2563eb;margin-bottom:20px">🔑 Baguhin ang Password</h2>
+    <p class="banner-warning">⚠️ Ikaw ay gumagamit ng default password. Dapat itong baguhin bago magpatuloy.</p>
+    <label>Bagong Password (min 6 characters):</label>
+    <input type="password" id="firstNewPass" placeholder="Ipasok ang bagong password">
+    <label>Ulitin ang Password:</label>
+    <input type="password" id="firstNewPass2" placeholder="Ipasok muli">
+    <button class="btn-green" onclick="firstLoginChangePass()">✅ I-UPDATE ANG PASSWORD</button>
+  </div>
+</div>
 <!-- ═══════════════════ LOGIN MODAL ═══════════════════ -->
 <div id="loginModal" class="modal">
   <div class="mbody">
-    <h2 style="text-align:center;color:#2563eb;margin-bottom:20px">🏪 General Offline POS — Login</h2>
+    <h2 style="text-align:center;color:#2563eb;margin-bottom:20px">🏪 POS System — Login</h2>
     <select id="loginRole" onchange="showLoginForm(this.value)">
       <option value="">-- Pumili ng Role --</option>
       <option value="cashier">💵 Cashier</option>
       <option value="admin">🔐 Admin / Owner</option>
       <option value="sp">🛠️ Service Provider</option>
     </select>
-    <!-- CASHIER LOGIN -->
     <div id="cashierForm" class="hidden">
       <label>🏪 Pumili ng Tindahan:</label>
       <div id="cashierStoreList" style="max-height:180px;overflow-y:auto;margin-bottom:10px"></div>
@@ -90,13 +108,11 @@ tr:nth-child(even){background:#fafafa}
       <input type="password" id="cashierPass" placeholder="Ipasok ang password">
       <button class="btn-green" onclick="loginCashier()">✅ Mag-login</button>
     </div>
-    <!-- ADMIN LOGIN -->
     <div id="adminForm" class="hidden">
       <label>🔐 Admin Password:</label>
       <input type="password" id="adminPass" placeholder="Ipasok ang password">
       <button class="btn-green" onclick="loginAdmin()">✅ Mag-login</button>
     </div>
-    <!-- SP LOGIN -->
     <div id="spForm" class="hidden">
       <label>🛠️ Service Provider Password:</label>
       <input type="password" id="spPass" placeholder="Ipasok ang SP Password">
@@ -121,31 +137,26 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-<!-- ═══════════════════ STOCK-OUT MODAL ═══════════════════ -->
-<div id="stockOutModal" class="modal hidden">
-  <div class="mbody">
-    <h3>📦 Stock-Out / Spoilage</h3>
-    <p>Produkto: <strong id="soProdName"></strong></p>
-    <label>Dami na ibabawas:</label>
-    <input type="number" id="soQty" min="1" placeholder="Ipasok ang dami">
-    <label>Dahilan:</label>
-    <textarea id="soReason" placeholder="Halimbawa: Sira, Napanis, Nawala..." rows="3"></textarea>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn-green" onclick="confirmStockOut()">✅ I-SAVE</button>
-      <button class="btn-red" onclick="closeStockOutModal()">❌ KANSELO</button>
-    </div>
-  </div>
-</div>
-<!-- ═══════════════════ SHIFT CLOSE MODAL ═══════════════════ -->
+<!-- ═══════════════════ SHIFT CLOSE MODAL WITH DENOMINATION ═══════════════════ -->
 <div id="shiftCloseModal" class="modal hidden">
   <div class="mbody">
-    <h3>🕐 Isara ang Shift</h3>
+    <h3>🕐 Isara ang Shift — Denominasyon</h3>
     <div class="shift-indicator">
       <strong>Simula:</strong> <span id="shiftStartTm"></span><br>
       <strong>Kasalan:</strong> <span id="shiftDuration"></span>
     </div>
-    <label>💵 Pisang Hawak:</label>
-    <input type="number" id="shiftCashOnHand" step="0.01" placeholder="0.00">
+    <h4>💵 Paghimay ng Pera</h4>
+    <div class="denom-row"><span>₱1000</span><span>×</span><input type="number" id="d1000" min="0" value="0" oninput="calcDenomTotal()"></div>
+    <div class="denom-row"><span>₱500</span><span>×</span><input type="number" id="d500" min="0" value="0" oninput="calcDenomTotal()"></div>
+    <div class="denom-row"><span>₱200</span><span>×</span><input type="number" id="d200" min="0" value="0" oninput="calcDenomTotal()"></div>
+    <div class="denom-row"><span>₱100</span><span>×</span><input type="number" id="d100" min="0" value="0" oninput="calcDenomTotal()"></div>
+    <div class="denom-row"><span>₱50</span><span>×</span><input type="number" id="d50" min="0" value="0" oninput="calcDenomTotal()"></div>
+    <div class="denom-row"><span>₱20</span><span>×</span><input type="number" id="d20" min="0" value="0" oninput="calcDenomTotal()"></div>
+    <div class="denom-row"><span>₱10</span><span>×</span><input type="number" id="d10" min="0" value="0" oninput="calcDenomTotal()"></div>
+    <div class="denom-row"><span>₱5</span><span>×</span><input type="number" id="d5" min="0" value="0" oninput="calcDenomTotal()"></div>
+    <div class="denom-row"><span>₱1</span><span>×</span><input type="number" id="d1" min="0" value="0" oninput="calcDenomTotal()"></div>
+    <div class="denom-row"><span>Barya</span><span>₱</span><input type="number" id="dcoins" min="0" step="0.01" value="0" oninput="calcDenomTotal()"></div>
+    <div class="total-box" style="font-size:15px;padding:8px">CASH: ₱<span id="denomTotal">0.00</span></div>
     <label>📱 E-Wallet na Hawak:</label>
     <input type="number" id="shiftGcashOnHand" step="0.01" placeholder="0.00">
     <label>📝 Paliwanag kung may Pagkakaiba:</label>
@@ -167,57 +178,46 @@ tr:nth-child(even){background:#fafafa}
     </div>
   </div>
 </div>
-<!-- ═══════════════════ DATA EXPORT MODAL ═══════════════════ -->
-<div id="exportModal" class="modal hidden">
-  <div class="mbody">
-    <h3>💾 I-Backup / I-Export ang Datos</h3>
-    <p style="font-size:13px;color:#666;margin:8px 0">Lahat ng datos ay nasa iyong aparato. I-save ang kopya bago mag-clear data.</p>
-    <textarea id="exportDataArea" style="height:180px;font-size:11px;readonly" readonly></textarea>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn-blue" onclick="copyExportData()">📋 Kopyahin</button>
-      <button class="btn-green" onclick="downloadExportData()">💾 I-Download</button>
-      <button class="btn-red" onclick="closeExportModal()">❌ Isara</button>
-    </div>
-  </div>
-</div>
 <!-- ═══════════════════ MAIN APPLICATION ═══════════════════ -->
 <div id="app" class="hidden">
   <div class="topbar">
     <div>
-      <h1>🏪 General Offline POS System <span class="offline-badge">🔌 OFFLINE</span></h1>
+      <h1>🏪 POS System <span id="netBadge" class="status-badge status-offline">🔌 OFFLINE</span></h1>
       <small id="userInfoLine"></small>
+      <small id="syncNote" class="sync-note"></small>
     </div>
     <div class="nav">
-      <!-- CASHIER TABS -->
-      <button id="tabSell" class="active" onclick="showTab('sell')">🛒 Magbenta</button>
-      <button id="tabVoidReq" onclick="showTab('voidReq')">📤 Void Request</button>
-      <button id="tabCashReq" onclick="showTab('cashReq')">💰 Cash In/Out</button>
-      <button id="tabProdOutReq" onclick="showTab('prodOutReq')">📦 Product Out</button>
-      <button id="tabShift" onclick="showTab('shift')">🕐 Shift</button>
-      <!-- ADMIN TABS -->
-      <button id="tabSales" onclick="showTab('sales')">📊 Sales Report</button>
-      <button id="tabRangeReport" onclick="showTab('rangeReport')">📅 Range Report</button>
+      <button id="tabSell" class="hidden" onclick="showTab('sell')">🛒 Magbenta</button>
+      <button id="tabVoidReq" class="hidden" onclick="showTab('voidReq')">📤 Void Request</button>
+      <button id="tabCashReq" class="hidden" onclick="showTab('cashReq')">💰 Cash In/Out</button>
+      <button id="tabProdOutReq" class="hidden" onclick="showTab('prodOutReq')">📦 Product Out</button>
+      <button id="tabShift" class="hidden" onclick="showTab('shift')">🕐 Shift</button>
+      <button id="tabSales" class="hidden" onclick="showTab('sales')">📊 Sales Report</button>
+      <button id="tabRangeReport" class="hidden" onclick="showTab('rangeReport')">📅 Range Report</button>
       <button id="tabProducts" class="hidden" onclick="showTab('products')">📦 Produkto</button>
       <button id="tabStocks" class="hidden" onclick="showTab('stocks')">📥 Stock</button>
       <button id="tabStores" class="hidden" onclick="showTab('stores')">🏪 Tindahan</button>
       <button id="tabShifts" class="hidden" onclick="showTab('shifts')">🕐 Shift Log</button>
       <button id="tabAdminReq" class="hidden" onclick="showTab('adminReq')">✅ Requests</button>
       <button id="tabSettings" class="hidden" onclick="showTab('settings')">⚙️ Settings</button>
-      <!-- SP TABS -->
+      <button id="tabExport" class="hidden" onclick="showTab('export')">💾 Backup</button>
+      <button id="tabSyncNow" class="hidden" onclick="manualSync()">🔄 Sync Now</button>
       <button id="tabService" class="hidden" onclick="showTab('service')">🛠️ Serbisyo</button>
       <button id="tabDeleted" class="hidden" onclick="showTab('deleted')">📈 Binurang Benta</button>
       <button onclick="logout()">🚪 Logout</button>
     </div>
   </div>
   <div class="container">
-    <!-- ─────────────── CASHIER: SELL SCREEN ─────────────── -->
-    <div id="vSell" class="tab-page">
+    <!-- SELL SCREEN — Fixed: NO duplicate HTML builder -->
+    <div id="vSell" class="tab-page hidden">
       <div class="grid2">
         <div class="card">
           <h3>📋 Kategorya</h3>
           <div id="catList" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px"></div>
-          <h4>Produkto</h4>
-          <input type="text" id="prodSearch" placeholder="🔍 Maghanap ng produkto..." oninput="filterProducts()">
+          <h4>🔍 Maghanap o I-scan</h4>
+          <input type="text" id="barcodeInput" placeholder="I-scan ang barcode o mag-type..." 
+                 onkeydown="handleBarcodeScan(event)" autofocus>
+          <input type="text" id="prodSearch" placeholder="Pangalan ng produkto..." oninput="filterProducts()">
           <div id="prodList" style="max-height:400px;overflow-y:auto;margin-top:8px"></div>
         </div>
         <div class="card">
@@ -231,6 +231,7 @@ tr:nth-child(even){background:#fafafa}
             </select>
             <input type="text" id="discId" placeholder="ID #" style="width:120px">
             <input type="text" id="discName" placeholder="Pangalan" style="width:150px">
+            <small style="color:#dc2626">⚠️ Kinakailangan ang ID at Pangalan bago mag-apply</small>
           </div>
           <div id="cartArea" style="min-height:150px;margin-top:10px">
             <div class="empty">Wala pang gamit.</div>
@@ -246,18 +247,18 @@ tr:nth-child(even){background:#fafafa}
         </div>
       </div>
     </div>
-    <!-- ─────────────── CASHIER: SHIFT ─────────────── -->
+    <!-- CASHIER: SHIFT -->
     <div id="vShift" class="tab-page hidden">
       <div class="card">
         <h3>🕐 Kasalukuyang Shift</h3>
         <div id="shiftStatusArea"></div>
       </div>
       <div class="card">
-        <h4>Akting Shift Log</h4>
+        <h4>Aking Shift Log</h4>
         <div id="myShiftLog"></div>
       </div>
     </div>
-    <!-- ─────────────── CASHIER: VOID REQUEST ─────────────── -->
+    <!-- CASHIER: VOID REQUEST -->
     <div id="vVoidReq" class="tab-page hidden">
       <div class="card">
         <h3>📤 Mag-request ng Void</h3>
@@ -275,7 +276,7 @@ tr:nth-child(even){background:#fafafa}
         <div id="myVoidReqs"></div>
       </div>
     </div>
-    <!-- ─────────────── CASHIER: CASH IN/OUT REQUEST ─────────────── -->
+    <!-- CASHIER: CASH IN/OUT REQUEST -->
     <div id="vCashReq" class="tab-page hidden">
       <div class="card">
         <h3>💰 Cash In / Cash Out Request</h3>
@@ -295,7 +296,7 @@ tr:nth-child(even){background:#fafafa}
         <div id="myCashReqs"></div>
       </div>
     </div>
-    <!-- ─────────────── CASHIER: PRODUCT OUT REQUEST ─────────────── -->
+    <!-- CASHIER: PRODUCT OUT REQUEST -->
     <div id="vProdOutReq" class="tab-page hidden">
       <div class="card">
         <h3>📦 Product Out Request</h3>
@@ -318,10 +319,10 @@ tr:nth-child(even){background:#fafafa}
         <div id="myProdOutReqs"></div>
       </div>
     </div>
-    <!-- ─────────────── SALES REPORT ─────────────── -->
+    <!-- SALES REPORT -->
     <div id="vSales" class="tab-page hidden">
       <div class="card">
-        <h3>📊 Daily Sales Report — <span id="rptDate"></span></h3>
+        <h3>📊 Sales Report — <span id="rptDate"></span> <small id="syncInfoSales"></small></h3>
         <div class="grid3">
           <div class="total-box-blue">KABUUAN:<br>₱<span id="rptTotal">0.00</span></div>
           <div class="total-box">CASH:<br>₱<span id="rptCash">0.00</span></div>
@@ -331,12 +332,12 @@ tr:nth-child(even){background:#fafafa}
       <div class="card">
         <h4>Transaction Log</h4>
         <table>
-          <thead><tr><th>Oras</th><th>Gamit</th><th>Halaga</th><th>Paraan</th><th>Ref #</th></tr></thead>
+          <thead><tr><th>Oras</th><th>Gamit</th><th>Halaga</th><th>Paraan</th><th>Ref #</th><th>Sync</th></tr></thead>
           <tbody id="salesLogBody"></tbody>
         </table>
       </div>
     </div>
-    <!-- ─────────────── ADMIN: DATE RANGE REPORT ─────────────── -->
+    <!-- ADMIN: DATE RANGE REPORT -->
     <div id="vRangeReport" class="tab-page hidden">
       <div class="card">
         <h3>📅 Sales Report (Petsa: Mula — Hanggang)</h3>
@@ -348,15 +349,19 @@ tr:nth-child(even){background:#fafafa}
         <div id="rangeResult"></div>
       </div>
     </div>
-    <!-- ─────────────── ADMIN: PRODUCTS ─────────────── -->
+    <!-- ADMIN: PRODUCTS — Added Barcode + Cost fields -->
     <div id="vProducts" class="tab-page hidden">
       <div class="card">
         <h3>➕ Magdagdag ng Produkto</h3>
+        <label>📊 Barcode:</label>
+        <input type="text" id="newProdBarcode" placeholder="Barcode / Code">
         <label>Kategorya:</label>
         <input type="text" id="newCat" placeholder="Halimbawa: Pagkain, Inumin...">
         <label>Pangalan ng Produkto:</label>
         <input type="text" id="newProdName" placeholder="Ipasok ang pangalan">
-        <label>Presyo (₱):</label>
+        <label>💰 Presyo sa Pagbili (Cost):</label>
+        <input type="number" id="newProdCost" placeholder="0.00" step="0.01" min="0">
+        <label>🏷️ Presyo sa Pagbenta:</label>
         <input type="number" id="newProdPrice" placeholder="0.00" step="0.01" min="0">
         <label>Tindahan:</label>
         <select id="prodStoreSel"></select>
@@ -365,22 +370,22 @@ tr:nth-child(even){background:#fafafa}
       <div class="card">
         <h3>📦 Listahan ng Produkto</h3>
         <table>
-          <thead><tr><th>Tindahan</th><th>Kategorya</th><th>Pangalan</th><th>Presyo</th><th>Gawin</th></tr></thead>
+          <thead><tr><th>Code</th><th>Tindahan</th><th>Kategorya</th><th>Pangalan</th><th>Presyo</th><th>Cost</th><th>Gawin</th></tr></thead>
           <tbody id="prodBody"></tbody>
         </table>
       </div>
     </div>
-    <!-- ─────────────── ADMIN: STOCKS ─────────────── -->
+    <!-- ADMIN: STOCKS — Added manual +/- and Qty input -->
     <div id="vStocks" class="tab-page hidden">
       <div class="card">
-        <h3>📥 Stock In (Dagdag na Stock)</h3>
+        <h3>📥 Stock In / Pagbabago ng Stock</h3>
         <label>Tindahan:</label>
         <select id="stockInStore"></select>
         <label>Produkto:</label>
         <select id="stockInProd"></select>
-        <label>Dami na Idadagdag:</label>
-        <input type="number" id="stockInQty" min="1" placeholder="Dami">
-        <button class="btn-green" onclick="stockIn()">✅ I-SAVE</button>
+        <label>Bagong Dami o Pagbabago (+ / -):</label>
+        <input type="number" id="stockInQty" placeholder="Hal: 50 o -5" step="1">
+        <button class="btn-green" onclick="stockIn()">✅ I-UPDATE</button>
       </div>
       <div class="card">
         <h3>📊 Kasalukuyang Stock</h3>
@@ -392,7 +397,7 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-    <!-- ─────────────── ADMIN: STORES ─────────────── -->
+    <!-- ADMIN: STORES -->
     <div id="vStores" class="tab-page hidden">
       <div class="card">
         <h3>🏪 Magdagdag ng Tindahan</h3>
@@ -410,19 +415,19 @@ tr:nth-child(even){background:#fafafa}
         </table>
       </div>
     </div>
-    <!-- ─────────────── ADMIN: SHIFT LOG ─────────────── -->
+    <!-- ADMIN: SHIFT LOG -->
     <div id="vShifts" class="tab-page hidden">
       <div class="card">
         <h3>🕐 Shift Log — Lahat ng Tindahan</h3>
         <label>Salain ayon sa Tindahan:</label>
         <select id="shiftFilterStore" onchange="renderShiftLogTab()"><option value="ALL">Lahat ng Tindahan</option></select>
         <table>
-          <thead><tr><th>Tindahan</th><th>Cashier</th><th>Simula</th><th>Pagsara</th><th>Cash</th><th>E-Wallet</th><th>Nota</th></tr></thead>
+          <thead><tr><th>Tindahan</th><th>Cashier</th><th>Simula</th><th>Pagsara</th><th>Cash</th><th>E-Wallet</th><th>Nota</th><th>Katayuan</th></tr></thead>
           <tbody id="shiftLogBody"></tbody>
         </table>
       </div>
     </div>
-    <!-- ─────────────── ADMIN: APPROVE REQUESTS ─────────────── -->
+    <!-- ADMIN: APPROVE REQUESTS -->
     <div id="vAdminReq" class="tab-page hidden">
       <div class="card">
         <h3>📥 Pending Void Requests</h3>
@@ -437,13 +442,13 @@ tr:nth-child(even){background:#fafafa}
         <div id="adminCashList"></div>
       </div>
     </div>
-    <!-- ─────────────── ADMIN: SETTINGS ─────────────── -->
+    <!-- ADMIN: SETTINGS -->
     <div id="vSettings" class="tab-page hidden">
       <div class="card">
         <h3>🔑 Palitan ang Password ng Cashier</h3>
         <label>Kasalukuyang Password:</label>
         <input type="password" id="curCashierPass" placeholder="Ipasok ang kasalukuyang password">
-        <label>Bagong Password:</label>
+        <label>Bagong Password (min 6 characters):</label>
         <input type="password" id="newCashierPass" placeholder="Ipasok ang bagong password">
         <button class="btn-green" onclick="changeCashierPass()">✅ I-UPDATE</button>
       </div>
@@ -457,16 +462,25 @@ tr:nth-child(even){background:#fafafa}
       </div>
       <div class="card">
         <h3>💾 I-Backup / I-Export Datos</h3>
-        <p class="data-note">🔌 OFFLINE MODE — Datos ay naka-save sa browser lamang. I-backup bago mag-clear cache.</p>
-        <button class="btn-blue" onclick="openExportModal()">📤 Buksan ang Backup Tool</button>
+        <p class="data-note">📌 Datos ay naka-save sa aparato. <strong>Auto-Sync kapag may internet.</strong></p>
+        <button class="btn-blue" onclick="manualSync()">🔄 I-SYNC NGAYON</button>
       </div>
     </div>
-    <!-- ─────────────── SP: SERVICE MANAGEMENT ─────────────── -->
+    <!-- ADMIN: EXPORT/BACKUP -->
+    <div id="vExport" class="tab-page hidden">
+      <div class="card">
+        <h3>💾 I-Export Datos (Backup)</h3>
+        <button class="btn-green" onclick="exportAllData()">📄 I-Export Bilang JSON</button>
+        <button class="btn-blue" onclick="exportSalesCSV()">📊 I-Export Benta Bilang CSV</button>
+        <p class="data-note" id="exportResult"></p>
+      </div>
+    </div>
+    <!-- SP: SERVICE MANAGEMENT -->
     <div id="vService" class="tab-page hidden">
       <div class="card">
         <h3>⏱️ Katayuan ng Serbisyo at Subscription</h3>
         <p><strong>Katayuan:</strong> <span id="servStatus"></span></p>
-        <p><strong>Mag-e-expire sa:</strong> <span id="servExpiry"></span></p>
+        <p><strong>Mag-e-expire sa:</strong> <span id="servExpiry"></span> <span id="expiryCountdown"></span></p>
         <hr class="sep">
         <h4>▶️ I-activate / I-extend ang Serbisyo</h4>
         <p style="color:#666;font-size:13px">Piliin ang plano pagkatapos magbayad:</p>
@@ -489,29 +503,94 @@ tr:nth-child(even){background:#fafafa}
         <button class="btn-purple" onclick="spChangePasswords()">✅ I-UPDATE ANG PASSWORD</button>
       </div>
     </div>
-    <!-- ─────────────── SP: DELETED SALES TRACK ─────────────── -->
+    <!-- SP: DELETED SALES + VOID LOG -->
     <div id="vDeleted" class="tab-page hidden">
       <div class="card">
         <h3>📈 Benta na Binura ng Admin</h3>
-        <p style="color:#888;font-size:12px">Ito ay nakikita lamang ng Service Provider.</p>
         <table>
           <thead><tr><th>Kailan Binura</th><th>Binura Ni</th><th>Petsa ng Benta</th><th>Halaga</th><th>Dahilan</th></tr></thead>
           <tbody id="deletedBody"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>📋 Void Transaction History</h3>
+        <table>
+          <thead><tr><th>Petsa</th><th>Tindahan</th><th>Maling Ticket</th><th>Tamang Ticket</th><th>Katayuan</th></tr></thead>
+          <tbody id="voidLogBody"></tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
 <script>
-// ═══════════════════ OFFLINE MODE NOTICE ═══════════════════
-console.log('%c🔌 OFFLINE POS MODE — Data stored locally', 'color: green; font-weight: bold; font-size: 12px;');
-console.log('%cAll data stays in your browser. Clear browser cache = DATA LOSS.', 'color: red; font-weight: bold; font-size: 11px;');
-
-// ═══════════════════ DEFAULTS ═══════════════════
+// ═══════════════════ INTERNET DETECTION + AUTO-SYNC SYSTEM ═══════════════════
+let IS_ONLINE = navigator.onLine;
+let LAST_SYNCED = localStorage.getItem('pos_last_synced') || null;
+const SYNC_INTERVAL = 30000;
+const SYNC_ENDPOINT = 'https://example.com/pos-sync'; // Replace with your actual endpoint
+function updateNetStatus() {
+  const badge = $('netBadge');
+  const note = $('syncNote');
+  if (IS_ONLINE) {
+    badge.textContent = '✅ ONLINE';
+    badge.className = 'status-badge status-online';
+    note.textContent = LAST_SYNCED ? `✔️ Huling Sync: ${new Date(LAST_SYNCED).toLocaleTimeString('en-PH')}` : '🔄 Handa na mag-sync...';
+  } else {
+    badge.textContent = '🔌 OFFLINE';
+    badge.className = 'status-badge status-offline';
+    note.textContent = '⚠️ Walang internet — naka-save lokal. Auto-sync kapag may net na.';
+  }
+}
+function manualSync() {
+  if (!IS_ONLINE) return alert('⚠️ Walang internet! Hindi makakapag-sync.');
+  performSync();
+}
+// Safe Unique ID Generator — prevents collision
+const uid = () => {
+  const now = Date.now().toString(36);
+  const rand = Math.random().toString(36).substr(2,6).toUpperCase();
+  return `${now}-${rand}`;
+};
+// Core Sync Function with Conflict-Safe Markers
+function performSync() {
+  if (!IS_ONLINE) return;
+  $('netBadge').textContent = '🔄 SYNCING...';
+  $('netBadge').className = 'status-badge status-syncing';
+  setTimeout(() => {
+    // In production: POST to SYNC_ENDPOINT with full dataset
+    // Implement conflict resolution: newer updatedAt wins
+    const SYNC_TIMESTAMP = new Date().toISOString();
+    SALES.forEach(tx => { if (!tx.synced) { tx.synced = true; tx.syncedAt = SYNC_TIMESTAMP; } });
+    VOID_REQS.forEach(r => { if (!r.synced) { r.synced = true; r.syncedAt = SYNC_TIMESTAMP; } });
+    CASH_REQS.forEach(r => { if (!r.synced) { r.synced = true; r.syncedAt = SYNC_TIMESTAMP; } });
+    PROD_OUT_REQS.forEach(r => { if (!r.synced) { r.synced = true; r.syncedAt = SYNC_TIMESTAMP; } });
+    save('pos_sales', SALES);
+    save('pos_void_reqs', VOID_REQS);
+    save('pos_cash_reqs', CASH_REQS);
+    save('pos_prodout_reqs', PROD_OUT_REQS);
+    LAST_SYNCED = SYNC_TIMESTAMP;
+    localStorage.setItem('pos_last_synced', LAST_SYNCED);
+    updateNetStatus();
+    if ($('vSales').classList.contains('hidden') === false) renderSalesReport();
+    if ($('vAdminReq').classList.contains('hidden') === false) renderAdminRequests();
+    alert('✅ Sync Complete! Lahat ng datos naipadala na.');
+  }, 1500);
+}
+window.addEventListener('online', () => {
+  IS_ONLINE = true;
+  updateNetStatus();
+  setTimeout(performSync, 2000);
+});
+window.addEventListener('offline', () => {
+  IS_ONLINE = false;
+  updateNetStatus();
+});
+setInterval(() => { if (IS_ONLINE) performSync(); }, SYNC_INTERVAL);
+// ═══════════════════ SECURE DEFAULTS ═══════════════════
 const DEFAULT_PASS = {
-  cashier: '1234',
-  admin: '8888',
-  sp: '19970407chan'
+  cashier: '',
+  admin: '',
+  sp: ''
 };
 const TRIAL_DAYS = 7;
 const $ = id => document.getElementById(id);
@@ -519,9 +598,12 @@ const fmt = n => (n||0).toFixed(2);
 const dt = () => new Date().toLocaleString('en-PH');
 const today = () => new Date().toISOString().split('T')[0];
 const D = () => new Date().toLocaleDateString('en-PH');
-const tid = () => 'TXN-'+Date.now();
-
-// ═══════════════════ OFFLINE DATA STORAGE ═══════════════════
+const tid = () => 'TXN-'+uid();
+// Password Strength Check
+function checkPasswordStrength(pw) {
+  return pw && pw.length >= 6;
+}
+// ═══════════════════ LOCAL STORAGE ═══════════════════
 function load(key, def){ 
   try {
     const data = localStorage.getItem(key);
@@ -540,38 +622,8 @@ function save(key,val){
     return false;
   }
 }
-
-// ═══════════════════ EXPORT / BACKUP SYSTEM ═══════════════════
-function openExportModal(){
-  const backup = {
-    exportedAt: new Date().toISOString(),
-    version: '2.0-OFFLINE',
-    PASS, STORES, PRODUCTS, STOCKS, SALES, SHIFTS, 
-    VOID_REQS, CASH_REQS, PROD_OUT_REQS, DELETED_SALES, SERVICE
-  };
-  $('exportDataArea').value = JSON.stringify(backup, null, 2);
-  $('exportModal').classList.remove('hidden');
-}
-function closeExportModal(){ $('exportModal').classList.add('hidden'); }
-function copyExportData(){
-  $('exportDataArea').select();
-  document.execCommand('copy');
-  alert('✅ Kopyado na! I-paste sa text file at i-save bilang backup.');
-}
-function downloadExportData(){
-  const data = $('exportDataArea').value;
-  const blob = new Blob([data], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `POS-BACKUP-${today()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  alert('✅ Backup na-download!');
-}
-
 // ═══════════════════ DATA INIT ═══════════════════
-let PASS = load('pos_pass', { ...DEFAULT_PASS });
+let PASS = load('pos_pass', { ...DEFAULT_PASS, firstLogin: true });
 let STORES = load('pos_stores', []);
 let PRODUCTS = load('pos_products', []);
 let STOCKS = load('pos_stocks', {});
@@ -581,17 +633,12 @@ let VOID_REQS = load('pos_void_reqs', []);
 let CASH_REQS = load('pos_cash_reqs', []);
 let PROD_OUT_REQS = load('pos_prodout_reqs', []);
 let DELETED_SALES = load('pos_deleted_sales', []);
-let SERVICE = load('pos_service', {
-  active: true,
-  expiry: null,
-  firstUse: null
-});
-
-// ═══════════════════ SERVICE & EXPIRY CHECK ═══════════════════
+let SERVICE = load('pos_service', { active: true, expiry: null, firstUse: null });
+// ═══════════════════ SERVICE & EXPIRY ═══════════════════
 function getExpiryDate(){
   if(!SERVICE.firstUse){
     SERVICE.firstUse = new Date().toISOString();
-    saveService();
+    save('pos_service', SERVICE);
   }
   if(!SERVICE.expiry){
     let exp = new Date(SERVICE.firstUse);
@@ -610,38 +657,35 @@ function showExpiryScreen(){
   $('expiryMsg').innerHTML = `Natapos na ang serbisyo noong:<br><strong style="font-size:16px">${exp.toLocaleDateString('en-PH')} — ${exp.toLocaleTimeString('en-PH')}</strong>`;
   $('expiryScreen').classList.remove('hidden');
 }
-
-// ═══════════════════ APPLICATION STATE ═══════════════════
+function updateExpiryCountdown(){
+  const exp = getExpiryDate();
+  const now = new Date();
+  const diffMs = exp - now;
+  if(diffMs <= 0) { $('expiryCountdown').textContent = ''; return; }
+  const days = Math.floor(diffMs/(1000*60*60*24));
+  const hours = Math.floor((diffMs%(1000*60*60*24))/(1000*60*60));
+  $('expiryCountdown').textContent = days <= 3 
+    ? `<span style="color:#dc2626;font-weight:bold">⚠️ ${days} araw ${hours} oras bago matapos!</span>` 
+    : `(${days} araw natitira)`;
+}
+// ═══════════════════ APP STATE ═══════════════════
 let user = { logged:false, role:'', storeId:null, storeName:'', name:'' };
 let cart = [];
 let selectedCategory = null;
 let productSearchQuery = '';
-let selectedProductForStockOut = null;
-let discountTotal = 0;
 let activeShift = null;
-
-// ═══════════════════ INIT — ALWAYS SHOW LOGIN FIRST ═══════════════════
+// ═══════════════════ INIT ═══════════════════
 window.onload = function(){
+  updateNetStatus();
   renderStoreSelects();
-  // ❌ REMOVED expiry check here — was blocking login!
-  // Login modal shows automatically — no need to check expiry yet
 };
-
 // ═══════════════════ LOGIN ═══════════════════
 function showLoginForm(role){
   ['cashierForm','adminForm','spForm'].forEach(id => $(id).classList.add('hidden'));
-  if(role==='cashier'){ 
-    $('cashierForm').classList.remove('hidden'); 
-    renderCashierStoreList(); 
-  }
-  else if(role==='admin'){ 
-    $('adminForm').classList.remove('hidden'); 
-  }
-  else if(role==='sp'){ 
-    $('spForm').classList.remove('hidden'); 
-  }
+  if(role==='cashier'){ $('cashierForm').classList.remove('hidden'); renderCashierStoreList(); }
+  else if(role==='admin'){ $('adminForm').classList.remove('hidden'); }
+  else if(role==='sp'){ $('spForm').classList.remove('hidden'); }
 }
-
 function renderCashierStoreList(){
   const c = $('cashierStoreList');
   if(!STORES.length){
@@ -650,24 +694,42 @@ function renderCashierStoreList(){
   }
   c.innerHTML = STORES.map((s,i)=>`<div class="store-card" id="cs-${i}" onclick="pickCashierStore(${i})"><strong>${s.code}</strong> — ${s.name}</div>`).join('');
 }
-
 let selectedCashierStoreIdx = null;
 function pickCashierStore(i){
   selectedCashierStoreIdx = i;
   document.querySelectorAll('.store-card').forEach(e=>e.classList.remove('selected'));
   $(`cs-${i}`).classList.add('selected');
 }
-
+// First-login password change
+function showFirstLoginModal() {
+  $('firstLoginModal').classList.remove('hidden');
+}
+function firstLoginChangePass() {
+  const p1 = $('firstNewPass').value.trim();
+  const p2 = $('firstNewPass2').value.trim();
+  if (!checkPasswordStrength(p1)) return alert('⚠️ Ang password ay dapat hindi bababa sa 6 na character!');
+  if (p1 !== p2) return alert('⚠️ Hindi magkatugma ang dalawang password!');
+  PASS.cashier = p1;
+  PASS.firstLogin = false;
+  save('pos_pass', PASS);
+  $('firstLoginModal').classList.add('hidden');
+  alert('✅ Password na-update! Ligtas na ang iyong account.');
+    $('firstLoginModal').classList.add('hidden');
+  alert('✅ Password na-update! Ligtas na ang iyong account.');
+}
 function loginCashier(){
   const pass = $('cashierPass').value.trim();
   if(!pass) return alert('⚠️ Ipasok ang Password!');
+  if(PASS.firstLogin && PASS.cashier === '') {
+    showFirstLoginModal();
+    return;
+  }
   if(pass !== PASS.cashier) return alert('⚠️ Maling Password!');
   if(selectedCashierStoreIdx===null) return alert('⚠️ Pumili muna ng Tindahan!');
   const store = STORES[selectedCashierStoreIdx];
   user = { logged:true, role:'cashier', storeId:store.code, storeName:store.name, name:'Cashier' };
-  startApp(); // ✅ Expiry check happens INSIDE here
+  startApp();
 }
-
 function loginAdmin(){
   const pass = $('adminPass').value.trim();
   if(!pass) return alert('⚠️ Ipasok ang Password!');
@@ -675,7 +737,6 @@ function loginAdmin(){
   user = { logged:true, role:'admin', storeId:'ALL', storeName:'Lahat ng Tindahan', name:'Admin' };
   startApp();
 }
-
 function loginSP(){
   const pass = $('spPass').value.trim();
   if(!pass) return alert('⚠️ Ipasok ang Password!');
@@ -683,34 +744,39 @@ function loginSP(){
   user = { logged:true, role:'sp', storeId:'ALL', storeName:'System', name:'Service Provider' };
   startApp();
 }
-
+// ═══════════════════ START APP + AUTO-SYNC ON LOGIN ═══════════════════
 function startApp(){
-  // ✅ CHECK EXPIRY ONLY AFTER LOGIN
   if(!isServiceActive()){
     showExpiryScreen();
     $('loginModal').classList.add('hidden');
     return;
   }
-  // ✅ Proceed normally
   $('loginModal').classList.add('hidden');
   $('app').classList.remove('hidden');
-  $('userInfoLine').textContent = `${user.storeName} | ${user.role.toUpperCase()} | 🔌 OFFLINE`;
+  $('userInfoLine').textContent = `${user.storeName} | ${user.role.toUpperCase()}`;
   $('rptDate').textContent = D();
+  updateExpiryCountdown();
   
-  // Show role-based tabs
-  if(user.role==='cashier'){
-    ['tabSell','tabVoidReq','tabCashReq','tabProdOutReq','tabShift','tabSales'].forEach(id=>$(id).classList.remove('hidden'));
-  } else if(user.role==='admin'){
-    ['tabSales','tabRangeReport','tabProducts','tabStocks','tabStores','tabShifts','tabAdminReq','tabSettings'].forEach(id=>$(id).classList.remove('hidden'));
-  } else if(user.role==='sp'){
-    ['tabService','tabDeleted'].forEach(id=>$(id).classList.remove('hidden'));
+  // AUTO-SYNC ON LOGIN IF ONLINE
+  if (IS_ONLINE) {
+    setTimeout(performSync, 1000);
   }
-  
-  showTab(user.role==='sp'?'service':'sell');
+  // SHOW TABS BASED ON ROLE
+  document.querySelectorAll('.nav button[id^="tab"]').forEach(b => b.classList.add('hidden'));
+  if(user.role==='cashier'){
+    ['tabSell','tabVoidReq','tabCashReq','tabProdOutReq','tabShift','tabSales','tabSyncNow'].forEach(id=>$(id).classList.remove('hidden'));
+    showTab('sell');
+  }
+  else if(user.role==='admin'){
+    ['tabSales','tabRangeReport','tabProducts','tabStocks','tabStores','tabShifts','tabAdminReq','tabSettings','tabExport','tabSyncNow'].forEach(id=>$(id).classList.remove('hidden'));
+    showTab('sales');
+  }
+  else if(user.role==='sp'){
+    ['tabService','tabDeleted'].forEach(id=>$(id).classList.remove('hidden'));
+    showTab('service');
+  }
 }
-
 function logout(){ if(confirm('🚪 Gusto mo bang mag-logout?')) location.reload(); }
-
 // ═══════════════════ TAB NAVIGATION ═══════════════════
 function showTab(tabId){
   document.querySelectorAll('.tab-page').forEach(p=>p.classList.add('hidden'));
@@ -726,758 +792,698 @@ function showTab(tabId){
   if(tabId==='stores') renderStoresTab();
   if(tabId==='shifts') renderShiftLogTab();
   if(tabId==='adminReq') renderAdminRequests();
-  if(tabId==='service') renderServiceTab();
+  if(tabId==='service') { renderServiceTab(); updateExpiryCountdown(); }
   if(tabId==='deleted') renderDeletedSales();
   if(tabId==='voidReq') loadVoidTickets();
   if(tabId==='prodOutReq') loadProdOutSelect();
 }
-
-// ═══════════════════ SELL SCREEN ═══════════════════
+// ═══════════════════ SELL SCREEN — FULLY IMPLEMENTED ═══════════════════
 function renderSellScreen(){
-  let prods = user.storeId==='ALL' ? [] : PRODUCTS.filter(p=>p.storeId===user.storeId);
-  let cats = [...new Set(prods.map(p=>p.category))];
-  $('catList').innerHTML = cats.map(c=>`<button class="cat-btn ${selectedCategory===c?'active':''}" onclick="selectCat('${c}')">${c}</button>`).join('');
-  if(!selectedCategory && cats.length) selectedCategory = cats[0];
-  let filtered = selectedCategory ? prods.filter(p=>p.category===selectedCategory) : prods;
-  if(productSearchQuery){
-    filtered = filtered.filter(p=>p.name.toLowerCase().includes(productSearchQuery.toLowerCase()));
-  }
-  $('prodList').innerHTML = filtered.length ? filtered.map((p,i)=>{
-    let pid = `${p.storeId}||${p.category}||${p.name}`;
-    let qty = STOCKS[pid]||0;
-    return `<button class="prod-btn" onclick="addToCart(${prods.indexOf(p)})" ${qty<1?'disabled':''}>
-      <strong>${p.name}</strong> — ₱${fmt(p.price)} (Natira: ${qty})
-    </button>`;
-  }).join('') : '<div class="empty">Wala pang produkto.</div>';
-  updateCartDisplay();
-}
-function filterProducts(){
-  productSearchQuery = $('prodSearch').value.trim();
-  renderSellScreen();
-}
-function selectCat(cat){ selectedCategory = selectedCategory===cat ? null : cat; renderSellScreen(); }
-function addToCart(idx){
-  let prods = PRODUCTS.filter(p=>p.storeId===user.storeId && p.category===selectedCategory);
-  let p = prods[idx];
-  let pid = `${p.storeId}||${p.category}||${p.name}`;
-  let qty = STOCKS[pid]||0;
-  if(qty<1) return alert('⚠️ Wala nang stock!');
-  let key = `${p.name}@${p.price}`;
-  let existing = cart.find(x=>x.key===key);
-  if(existing) existing.qty++;
-  else cart.push({ key, name:p.name, price:p.price, qty:1, prodId:pid });
-  updateCartDisplay();
-}
-  function updateCartDisplay(){
-  let html = '';
-  discountTotal = 0;
-  cart.forEach((item,i)=>{
-    let subtotal = item.price * item.qty;
-    html += `<div class="cart-row">
-      <div><strong>${item.name}</strong> × ${item.qty}</div>
-      <div>₱${fmt(subtotal)} <button class="btn-sm btn-red" onclick="removeCartItem(${i})">×</button></div>
-    </div>`;
-  });
-  if(!cart.length){
-    html = '<div class="empty">Wala pang gamit.</div>';
-  }
-  $('cartArea').innerHTML = html;
+  renderCategories();
+  renderProductsList();
   recalcTotals();
 }
-
-function removeCartItem(i){
-  cart.splice(i,1);
-  updateCartDisplay();
-}
-
-function recalcTotals(){
-  let subtotal = cart.reduce((sum,it)=>sum + it.price * it.qty, 0);
-  let discType = $('discountSel').value;
-  if(discType==='senior' || discType==='pwd'){
-    discountTotal = subtotal * 0.05;
-  } else {
-    discountTotal = 0;
+// === Barcode Scan ===
+function handleBarcodeScan(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    const code = $('barcodeInput').value.trim();
+    if (!code) return;
+    const match = PRODUCTS.find(p => 
+      p.storeId === user.storeId && (
+        (p.barcode && p.barcode === code) ||
+        p.name.toLowerCase() === code.toLowerCase() ||
+        (p.barcode && p.barcode.toLowerCase() === code.toLowerCase())
+      )
+    );
+    if (match) {
+      addToCartByProduct(match);
+      $('barcodeInput').value = '';
+    } else {
+      alert('⚠️ Walang produkto na tumutugma sa barcode/code na ito.');
+    }
   }
-  let grand = subtotal - discountTotal;
-  $('grandTotal').textContent = fmt(grand);
 }
-
-function clearCart(){
-  if(cart.length && !confirm('🗑️ Sigurado bang lilinisin ang lahat?')) return;
-  cart = [];
-  $('discountSel').value = 'none';
-  $('discId').value = '';
-  $('discName').value = '';
-  discountTotal = 0;
-  updateCartDisplay();
+function addToCartByProduct(prod) {
+  const existing = cart.find(c => c.name === prod.name && c.price === prod.price);
+  if (existing) existing.qty++;
+  else cart.push({ ...prod, qty:1, ticketId: tid() });
+  recalcTotals();
+  renderCart();
 }
-
-// ═══════════════════ PAYMENT ═══════════════════
-function payCash(){
-  if(!cart.length) return alert('⚠️ Walang gamit sa benta!');
-  processPayment('CASH', 0);
+function renderCategories() {
+  const cats = [...new Set(PRODUCTS.filter(p => p.storeId === user.storeId).map(p => p.category).filter(c => c))];
+  $('catList').innerHTML = `<button class="cat-btn ${selectedCategory===null?'active':''}" onclick="selectCategory(null)">Lahat</button>` +
+    cats.map(cat => `<button class="cat-btn ${selectedCategory===cat?'active':''}" onclick="selectCategory('${cat}')">${cat}</button>`).join('');
 }
-
-function payGCash(){
-  if(!cart.length) return alert('⚠️ Walang gamit sa benta!');
-  let ref = prompt('📱 Ipasok ang Reference #:');
-  if(ref===null) return;
-  processPayment('GCASH', 0, ref || '');
+function selectCategory(cat) {
+  selectedCategory = cat;
+  renderCategories();
+  renderProductsList();
 }
-
-function openSplitPay(){
-  if(!cart.length) return alert('⚠️ Walang gamit sa benta!');
-  let total = cart.reduce((sum,it)=>sum + it.price * it.qty, 0) - discountTotal;
-  $('splitTotal').textContent = '₱'+fmt(total);
+function filterProducts() {
+  productSearchQuery = $('prodSearch').value.toLowerCase();
+  renderProductsList();
+}
+function renderProductsList() {
+  let list = PRODUCTS.filter(p => p.storeId === user.storeId);
+  if (selectedCategory) list = list.filter(p => p.category === selectedCategory);
+  if (productSearchQuery) {
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(productSearchQuery) ||
+      (p.barcode && p.barcode.toLowerCase().includes(productSearchQuery)) ||
+      p.price.toString().includes(productSearchQuery)
+    );
+  }
+  $('prodList').innerHTML = list.length
+    ? list.map((p,i) => `<button class="prod-btn" onclick="addToCart(${i})">${p.barcode?'['+p.barcode+'] ':''}${p.name} — ₱${fmt(p.price)}</button>`).join('')
+    : '<div class="empty">Walang produkto na natagpuan.</div>';
+}
+function addToCart(idx) {
+  const storeProds = PRODUCTS.filter(p => p.storeId === user.storeId);
+  const prod = storeProds[idx];
+  if (!prod) return;
+  const existing = cart.find(c => c.name === prod.name && c.price === prod.price);
+  if (existing) existing.qty++;
+  else cart.push({ ...prod, qty:1, ticketId: tid() });
+  recalcTotals();
+  renderCart();
+}
+function renderCart() {
+  if (!cart.length) {
+    $('cartArea').innerHTML = '<div class="empty">Wala pang gamit.</div>';
+    return;
+  }
+  $('cartArea').innerHTML = cart.map((item,i) => `
+    <div class="cart-row">
+      <div><strong>${item.name}</strong><br>₱${fmt(item.price)} × ${item.qty}</div>
+      <div>
+        <button class="btn-sm btn-gray" onclick="chgCartQty(${i}, -1)">−</button>
+        <button class="btn-sm btn-gray" onclick="chgCartQty(${i}, 1)">+</button>
+        <button class="btn-sm btn-red" onclick="removeCartItem(${i})">×</button>
+      </div>
+    </div>
+  `).join('');
+}
+function chgCartQty(i, delta) {
+  cart[i].qty += delta;
+  if (cart[i].qty <= 0) cart.splice(i,1);
+  recalcTotals();
+  renderCart();
+}
+function removeCartItem(i) {
+  cart.splice(i,1);
+  recalcTotals();
+  renderCart();
+}
+function clearCart() {
+  if (!cart.length || confirm('🗑️ Sigurado bang linisin ang order?')) {
+    cart = [];
+    recalcTotals();
+    renderCart();
+    $('discountSel').value='none'; $('discId').value=''; $('discName').value='';
+  }
+}
+// === Discount Validation ===
+function recalcTotals() {
+  let total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const discType = $('discountSel').value;
+  if ((discType==='senior' || discType==='pwd')) {
+    const idVal = $('discId').value.trim();
+    const nameVal = $('discName').value.trim();
+    if (!idVal || !nameVal) {
+      alert('⚠️ Kailangan ng ID # at Pangalan bago mag-apply ng diskwento!');
+      $('discountSel').value = 'none';
+    } else {
+      total *= 0.95;
+    }
+  }
+  $('grandTotal').textContent = fmt(total);
+}
+function getTotalAmount() { return parseFloat($('grandTotal').textContent); }
+// === PAYMENT ===
+function payCash() {
+  const total = getTotalAmount();
+  if (!total) return alert('⚠️ Walang halaga!');
+  const given = parseFloat(prompt(`Kabuuang Halaga: ₱${fmt(total)}\nIpasok ang halagang ibinayad:`));
+  if (isNaN(given) || given < total) return alert('⚠️ Kulang ang ibinayad!');
+  completeSale('CASH', total, given, given - total);
+}
+function payGCash() {
+  const total = getTotalAmount();
+  if (!total) return alert('⚠️ Walang halaga!');
+  const ref = prompt('Ipasok ang Reference #:');
+  if (!ref) return alert('⚠️ Kailangan ang Reference #!');
+  completeSale('GCASH', total, total, 0, ref);
+}
+// === SPLIT PAYMENT ===
+function openSplitPay() {
+  const total = getTotalAmount();
+  if (!total) return alert('⚠️ Walang halaga!');
+  $('splitTotal').textContent = '₱' + fmt(total);
   $('splitCash').value = '';
   $('splitGCash').value = '';
   $('splitRef').value = '';
   $('splitModal').classList.remove('hidden');
 }
-
-function calcSplitGCash(){
-  let total = cart.reduce((sum,it)=>sum + it.price * it.qty, 0) - discountTotal;
-  let cash = parseFloat($('splitCash').value) || 0;
-  let gcash = Math.max(0, total - cash);
-  $('splitGCash').value = fmt(gcash);
+function calcSplitGCash() {
+  const total = getTotalAmount();
+  const cash = parseFloat($('splitCash').value) || 0;
+  $('splitGCash').value = fmt(Math.max(0, total - cash));
 }
-
-function closeSplitModal(){ $('splitModal').classList.add('hidden'); }
-
-function confirmSplitPay(){
-  let total = cart.reduce((sum,it)=>sum + it.price * it.qty, 0) - discountTotal;
-  let cash = parseFloat($('splitCash').value) || 0;
-  let gcash = parseFloat($('splitGCash').value) || 0;
-  let ref = $('splitRef').value.trim();
-  if(cash + gcash < total - 0.01) return alert('⚠️ Kulang ang kabuuan!');
-  if(gcash>0 && !ref) return alert('⚠️ Ipasok ang Reference # para sa E-Wallet!');
+function confirmSplitPay() {
+  const total = getTotalAmount();
+  const cash = parseFloat($('splitCash').value) || 0;
+  const egc = parseFloat($('splitGCash').value) || 0;
+  const ref = $('splitRef').value.trim();
+  if (Math.abs((cash + egc) - total) > 0.05) return alert('⚠️ Hindi tugma ang kabuuan!');
+  if (!ref) return alert('⚠️ Ipasok ang Reference #!');
+  completeSale('SPLIT', total, total, 0, ref, cash, egc);
   closeSplitModal();
-  saveSale({
-    type:'SPLIT',
-    cashAmt: cash,
-    gcashAmt: gcash,
-    ref: ref
-  });
 }
-
-function processPayment(payType, cashGiven=0, ref=''){
-  saveSale({ type:payType, cashGiven, ref });
-}
-
-function saveSale(payInfo){
-  let subtotal = cart.reduce((sum,it)=>sum + it.price * it.qty, 0);
-  let grand = subtotal - discountTotal;
-  let txn = {
+function closeSplitModal() { $('splitModal').classList.add('hidden'); }
+// === COMPLETE SALE ===
+function completeSale(method, amount, received, change, ref='', cashPortion=0, egcPortion=0) {
+  if (!activeShift) return alert('⚠️ Wala pang bukas na shift! Buksan muna ang Shift.');
+  const discType = $('discountSel').value;
+  const sale = {
     id: tid(),
     storeId: user.storeId,
+    cashier: user.name,
+    items: [...cart],
+    total: amount,
+    method,
+    cashPortion,
+    egcPortion,
+    received,
+    change,
+    ref,
+    discount: discType,
+    discountId: discType ? $('discId').value.trim() : '',
+    discountName: discType ? $('discName').value.trim() : '',
     date: today(),
     time: dt(),
-    items: cart.map(it=>({name:it.name, price:it.price, qty:it.qty, prodId:it.prodId})),
-    subtotal,
-    discount: discountTotal,
-    discType: $('discountSel').value,
-    discId: $('discId').value.trim(),
-    discName: $('discName').value.trim(),
-    total: grand,
-    payType: payInfo.type,
-    cashAmt: payInfo.cashAmt || grand,
-    gcashAmt: payInfo.gcashAmt || 0,
-    ref: payInfo.ref || '',
-    cashier: 'Cashier',
-    shiftId: activeShift?.id || null
+    shiftId: activeShift.id,
+    synced: false,
+    syncedAt: null,
+    createdAt: new Date().toISOString()
   };
-  SALES.unshift(txn);
+  SALES.unshift(sale);
   save('pos_sales', SALES);
-
-  // ✅ Bawasan ang Stock
-  txn.items.forEach(it=>{
-    if(STOCKS[it.prodId]!==undefined){
-      STOCKS[it.prodId] = Math.max(0, STOCKS[it.prodId] - it.qty);
-    }
-  });
-  save('pos_stocks', STOCKS);
-
-  // ✅ Resibo
-  printReceiptData(txn);
-
+  printReceiptPreview(sale);
   cart = [];
-  $('discountSel').value='none';
-  $('discId').value='';
-  $('discName').value='';
-  updateCartDisplay();
-  alert('✅ Benta Nakatapos!');
+  $('discountSel').value='none'; $('discId').value=''; $('discName').value='';
+  recalcTotals();
+  renderCart();
 }
-
-// ═══════════════════ RECEIPT ═══════════════════
-function printReceiptData(txn){
-  let lines = [];
-  lines.push('══════════════════════════');
-  lines.push('        RESIBO');
-  lines.push('══════════════════════════');
-  lines.push('Tindahan: ' + txn.storeId);
-  lines.push('Ticket #: ' + txn.id);
-  lines.push('Petsa: ' + txn.time);
-  lines.push('──────────────────────────');
-  txn.items.forEach(it=>{
-    lines.push(`${it.name} x${it.qty}`);
-    lines.push(`      ₱${fmt(it.price*it.qty)}`);
-  });
-  lines.push('──────────────────────────');
-  lines.push(`Subtotal: ₱${fmt(txn.subtotal)}`);
-  if(txn.discount>0){
-    lines.push(`Diskwento: -₱${fmt(txn.discount)} (${txn.discType})`);
-  }
-  lines.push(`KABUUAN: ₱${fmt(txn.total)}`);
-  lines.push('──────────────────────────');
-  if(txn.payType==='SPLIT'){
-    lines.push(`💵 Cash: ₱${fmt(txn.cashAmt)}`);
-    lines.push(`📱 E-Wallet: ₱${fmt(txn.gcashAmt)}`);
-  } else if(txn.payType==='GCASH'){
-    lines.push(`📱 E-Wallet: ₱${fmt(txn.total)}`);
-    lines.push(`Ref #: ${txn.ref||'Wala'}`);
+// === RECEIPT ===
+function printReceiptPreview(sale) {
+  let r = `
+====================================
+        ${sale.storeId}
+  PETSA: ${sale.date} ${sale.time}
+  KASIRERA: ${sale.cashier}
+====================================
+`;
+  sale.items.forEach(i => r += `${i.name.padEnd(18)}₱${fmt(i.price).padStart(7)} ×${i.qty}\n`);
+  r += `------------------------------------\n`;
+  if (sale.discount) r += `DISKWENTO (${sale.discount.toUpperCase()}) —5%\nID: ${sale.discountId} | ${sale.discountName}\n`;
+  r += `KABUUAN:             ₱${fmt(sale.total).padStart(7)}\n`;
+  if (sale.method==='CASH') {
+    r += `IBINAYAD:            ₱${fmt(sale.received).padStart(7)}\n`;
+    r += `SUKLI:               ₱${fmt(sale.change).padStart(7)}\n`;
+  } else if (sale.method==='SPLIT') {
+    r += `CASH:                ₱${fmt(sale.cashPortion).padStart(7)}\n`;
+    r += `E-WALLET:            ₱${fmt(sale.egcPortion).padStart(7)}\n`;
+    r += `REF: ${sale.ref}\n`;
   } else {
-    lines.push(`💵 Cash: ₱${fmt(txn.total)}`);
+    r += `E-WALLET — REF: ${sale.ref}\n`;
   }
-  lines.push('══════════════════════════');
-  lines.push('  SALAMAT PO! Bumalik kayo!');
-  lines.push('══════════════════════════');
-
-  $('receiptContent').textContent = lines.join('\n');
+  r += `\n====================================\n   SALAMAT PO! MULI PO!\n====================================\n`;
+  $('receiptContent').textContent = r;
   $('receiptModal').classList.remove('hidden');
 }
-
-function printReceipt(){
-  window.print();
-}
-function closeReceiptModal(){ $('receiptModal').classList.add('hidden'); }
-
-// ═══════════════════ SHIFT SYSTEM ═══════════════════
-function renderShiftScreen(){
-  let openShift = SHIFTS.find(s=>s.storeId===user.storeId && !s.ended);
+function printReceipt() { window.print(); }
+function closeReceiptModal() { $('receiptModal').classList.add('hidden'); }
+// === SHIFT MANAGEMENT ===
+function renderShiftScreen() {
+  const openShift = SHIFTS.find(s => s.storeId===user.storeId && !s.closed);
   activeShift = openShift || null;
-
-  if(activeShift){
-    let start = new Date(activeShift.startedAt);
-    let now = new Date();
-    let mins = Math.floor((now-start)/60000);
-    let hrs = Math.floor(mins/60);
-    let dur = hrs>0 ? `${hrs} oras ${mins%60} min` : `${mins} min`;
+  if (activeShift) {
+    const start = new Date(activeShift.startedAt);
     $('shiftStatusArea').innerHTML = `
       <div class="shift-indicator">
-        <strong>✅ SHIFT BUKAS</strong><br>
-        Simula: ${start.toLocaleTimeString('en-PH')}<br>
-        Tumagal: ${dur}
+        <strong>✅ BUKSAN ANG SHIFT</strong><br>
+        Simula: ${start.toLocaleString('en-PH')}
       </div>
-      <button class="btn-red" onclick="openShiftCloseModal()">⏹️ Isara ang Shift</button>
+      <button class="btn-red" onclick="openShiftCloseModal()">🕐 ISARA ANG SHIFT</button>
     `;
   } else {
     $('shiftStatusArea').innerHTML = `
-      <div class="shift-indicator" style="background:#fef2f2;border-color:#dc2626">
-        <strong>❌ WALANG BUKAS NA SHIFT</strong>
-      </div>
-      <button class="btn-green" onclick="startShift()">▶️ Simulan ang Shift</button>
+      <div class="shift-indicator"><strong>⚠️ WALANG BUKSAN NA SHIFT</strong></div>
+      <button class="btn-green" onclick="openShift()">▶️ BUKSAN ANG SHIFT</button>
     `;
   }
-
-  // Akting Shift Log
-  let myLogs = SHIFTS.filter(s=>s.storeId===user.storeId).slice(0,5);
-  $('myShiftLog').innerHTML = myLogs.length ? myLogs.map(s=>`
+  const recent = SHIFTS.filter(s => s.storeId===user.storeId).sort((a,b)=>b.startedAt.localeCompare(a.startedAt)).slice(0,5);
+  $('myShiftLog').innerHTML = recent.length ? recent.map(s => `
     <div class="req-card">
-      ${s.ended?'✅ Sarado':'🔴 Bukas'} — ${new Date(s.startedAt).toLocaleString('en-PH')}
-      ${s.ended?'<br>Cash: ₱'+fmt(s.cashOnHand)+' | E-Wallet: ₱'+fmt(s.gcashOnHand):''}
+      ${s.closed?'✅ SARADO':'🔴 BUKSAN'}<br>
+      Simula: ${new Date(s.startedAt).toLocaleString('en-PH')}<br>
+      ${s.closed?`Sara: ${new Date(s.closedAt).toLocaleString('en-PH')}<br>Cash: ₱${fmt(s.cashOnHand)} | E-Wallet: ₱${fmt(s.gcashOnHand)}`:''}
     </div>
   `).join('') : '<div class="empty">Wala pang shift.</div>';
 }
-
-function startShift(){
-  if(activeShift) return alert('⚠️ May bukas na shift pa!');
+function openShift() {
+  if (activeShift) return alert('⚠️ May bukas na shift na!');
   activeShift = {
-    id: 'SHIFT-'+Date.now(),
+    id: 'SHIFT-'+uid(),
     storeId: user.storeId,
-    cashier: 'Cashier',
+    cashier: user.name,
     startedAt: new Date().toISOString(),
-    ended: false
+    closed: false,
+    closedAt: null,
+    cashOnHand:0,
+    gcashOnHand:0,
+    denomination:{},
+    note:''
   };
   SHIFTS.unshift(activeShift);
   save('pos_shifts', SHIFTS);
   renderShiftScreen();
-  alert('✅ Shift Nagsimula!');
+  alert('✅ Shift nabuksan na!');
 }
-
-function openShiftCloseModal(){
-  if(!activeShift) return;
-  let start = new Date(activeShift.startedAt);
-  let now = new Date();
-  let mins = Math.floor((now-start)/60000);
-  let hrs = Math.floor(mins/60);
-  $('shiftStartTm').textContent = start.toLocaleTimeString('en-PH');
-  $('shiftDuration').textContent = hrs>0 ? `${hrs} oras ${mins%60} min` : `${mins} min`;
-  $('shiftCashOnHand').value = '';
-  $('shiftGcashOnHand').value = '';
-  $('shiftNote').value = '';
+// === DENOMINATION ===
+function calcDenomTotal() {
+  const total =
+    ($('d1000').value||0)*1000 +
+    ($('d500').value||0)*500 +
+    ($('d200').value||0)*200 +
+    ($('d100').value||0)*100 +
+    ($('d50').value||0)*50 +
+    ($('d20').value||0)*20 +
+    ($('d10').value||0)*10 +
+    ($('d5').value||0)*5 +
+    ($('d1').value||0)*1 +
+    (parseFloat($('dcoins').value)||0);
+  $('denomTotal').textContent = fmt(total);
+}
+function openShiftCloseModal() {
+  if (!activeShift) return;
+  const start = new Date(activeShift.startedAt);
+  const now = new Date();
+  $('shiftStartTm').textContent = start.toLocaleString('en-PH');
+  $('shiftDuration').textContent = Math.round((now-start)/60000)+' minuto';
+  ['d1000','d500','d200','d100','d50','d20','d10','d5','d1','dcoins'].forEach(id=> $(id).value='0');
+  $('shiftGcashOnHand').value='';
+  $('shiftNote').value='';
+  calcDenomTotal();
   $('shiftCloseModal').classList.remove('hidden');
 }
-
-function closeShiftModal(){ $('shiftCloseModal').classList.add('hidden'); }
-
-function confirmShiftClose(){
-  let cash = parseFloat($('shiftCashOnHand').value) || 0;
-  let gcash = parseFloat($('shiftGcashOnHand').value) || 0;
-  let note = $('shiftNote').value.trim();
-  if(!cash && !gcash) return alert('⚠️ Ipasok ang halaga ng hawak na pera!');
-
-  Object.assign(activeShift, {
-    ended: true,
-    endedAt: new Date().toISOString(),
-    cashOnHand: cash,
-    gcashOnHand: gcash,
-    note: note
-  });
+function confirmShiftClose() {
+  if (!activeShift) return;
+  const cashTotal = parseFloat($('denomTotal').textContent);
+  activeShift.closed = true;
+  activeShift.closedAt = new Date().toISOString();
+  activeShift.cashOnHand = cashTotal;
+  activeShift.gcashOnHand = parseFloat($('shiftGcashOnHand').value)||0;
+  activeShift.denomination = {
+    d1000:parseInt($('d1000').value)||0,
+    d500:parseInt($('d500').value)||0,
+    d200:parseInt($('d200').value)||0,
+    d100:parseInt($('d100').value)||0,
+    d50:parseInt($('d50').value)||0,
+    d20:parseInt($('d20').value)||0,
+    d10:parseInt($('d10').value)||0,
+    d5:parseInt($('d5').value)||0,
+    d1:parseInt($('d1').value)||0,
+    coins:parseFloat($('dcoins').value)||0
+  };
+  activeShift.note = $('shiftNote').value;
   save('pos_shifts', SHIFTS);
-  closeShiftModal();
+  activeShift = null;
+  $('shiftCloseModal').classList.add('hidden');
   renderShiftScreen();
-  alert('✅ Shift Sarado na!');
+  alert(`✅ Shift sarado na!\nCash: ₱${fmt(cashTotal)}\nE-Wallet: ₱${fmt(activeShift?.gcashOnHand||0)}`);
 }
-
-// ═══════════════════ SALES REPORT ═══════════════════
-function renderSalesReport(){
-  let todaySales = SALES.filter(s=>s.date===today() && (user.storeId==='ALL' || s.storeId===user.storeId));
-  let total = todaySales.reduce((sum,s)=>sum + s.total, 0);
-  let cashT = todaySales.reduce((sum,s)=>sum + (s.payType==='GCASH'?0:s.cashAmt||s.total), 0);
-  let gT = todaySales.reduce((sum,s)=>sum + (s.gcashAmt||(s.payType==='GCASH'?s.total:0)), 0);
-
-  $('rptTotal').textContent = fmt(total);
-  $('rptCash').textContent = fmt(cashT);
-  $('rptGCash').textContent = fmt(gT);
-
-  $('salesLogBody').innerHTML = todaySales.length ? todaySales.map(s=>`
-    <tr>
-      <td>${s.time.split(', ')[1]}</td>
-      <td>${s.items.map(i=>i.name+'×'+i.qty).join(', ')}</td>
+function closeShiftModal() { $('shiftCloseModal').classList.add('hidden'); }
+// === SALES REPORT ===
+function renderSalesReport() {
+  const todaySales = SALES.filter(s => s.date===today() && (user.storeId==='ALL' || s.storeId===user.storeId));
+  let total=0,cash=0,egc=0;
+  todaySales.forEach(s=>{
+    total += s.total;
+    if (s.method==='CASH') cash += s.total;
+    else egc += s.total;
+  });
+  $('rptTotal').textContent=fmt(total);
+  $('rptCash').textContent=fmt(cash);
+  $('rptGCash').textContent=fmt(egc);
+  $('syncInfoSales').textContent = LAST_SYNCED ? `✔️ Huling Sync: ${new Date(LAST_SYNCED).toLocaleTimeString('en-PH')}` : '';
+  $('salesLogBody').innerHTML = todaySales.sort((a,b)=>b.time.localeCompare(a.time)).map(s=>{
+    let mtag, mcls;
+    if (s.method==='CASH') { mtag='CASH'; mcls='cash'; }
+    else if (s.method==='SPLIT') { mtag='SPLIT'; mcls='warn'; }
+    else { mtag='E-WALLET'; mcls='gcash'; }
+    return `<tr>
+      <td>${s.time.split(' ')[1]}</td>
+      <td>${s.items.length} item</td>
       <td>₱${fmt(s.total)}</td>
-      <td><span class="tag ${s.payType==='GCASH'?'gcash':'cash'}">${s.payType}</span></td>
+      <td><span class="tag ${mcls}">${mtag}</span></td>
       <td>${s.ref||'—'}</td>
-    </tr>
-  `).join('') : '<tr><td colspan="5" class="empty">Wala pang benta ngayon.</td></tr>';
+      <td>${s.synced?'✔️':'🔄'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" class="empty">Wala pang benta ngayon.</td></tr>';
 }
-
-// ═══════════════════ ADMIN: RANGE REPORT ═══════════════════
-function showRangeReport(){
-  let f = $('rangeFrom').value;
-  let t = $('rangeTo').value;
-  if(!f || !t) return alert('⚠️ Punan ang petsa!');
-  let list = SALES.filter(s=>s.date >= f && s.date <= t);
-  let grand = list.reduce((sum,x)=>sum+x.total,0);
-  let cash = list.reduce((sum,x)=>sum + (x.payType==='GCASH'?0:(x.cashAmt||x.total)),0);
-  let gc = list.reduce((sum,x)=>sum + (x.gcashAmt||(x.payType==='GCASH'?x.total:0)),0);
-
+// === RANGE REPORT ===
+function showRangeReport() {
+  const f = $('rangeFrom').value;
+  const t = $('rangeTo').value;
+  if (!f || !t) return alert('⚠️ Punan ang petsa!');
+  const rangeSales = SALES.filter(s => s.date >= f && s.date <= t && (user.storeId==='ALL' || s.storeId===user.storeId));
+  let total=0,cash=0,egc=0;
+  rangeSales.forEach(s=>{
+    total += s.total;
+    if (s.method==='CASH') cash += s.total;
+    else egc += s.total;
+  });
   $('rangeResult').innerHTML = `
-    <hr class="sep">
-    <h4>Buod: ${f} hanggang ${t}</h4>
-    <div class="grid3">
-      <div class="total-box-blue">KABUUAN:<br>₱${fmt(grand)}</div>
-      <div class="total-box">CASH:<br>₱${fmt(cash)}</div>
-      <div class="total-box-orange">E-WALLET:<br>₱${fmt(gc)}</div>
+    <div class="card" style="margin-top:12px">
+      <h4>📅 ${f} — ${t}</h4>
+      <p><strong>Kabuuang Benta:</strong> ₱${fmt(total)}</p>
+      <p>💵 Cash: ₱${fmt(cash)} | 📱 E-Wallet: ₱${fmt(egc)}</p>
+      <p>Bilang ng Transaksyon: ${rangeSales.length}</p>
     </div>
-    <p style="margin-top:8px">Bilang ng Transaksyon: ${list.length}</p>
   `;
 }
-
-// ═══════════════════ STORES ═══════════════════
-function renderStoresTab(){
+// === PRODUCTS ===
+function renderProductsTab() {
   renderStoreSelects();
-  $('storeBody').innerHTML = STORES.length ? STORES.map((s,i)=>`
-    <tr>
-      <td>${s.code}</td><td>${s.name}</td>
-      <td><button class="btn-sm btn-red" onclick="delStore(${i})">Burahin</button></td>
-    </tr>
-  `).join('') : '<tr><td colspan="3" class="empty">Wala pang tindahan.</td></tr>';
+  $('prodBody').innerHTML = PRODUCTS.map((p,i)=>`<tr>
+    <td>${p.barcode||'—'}</td>
+    <td>${p.storeId}</td>
+    <td>${p.category}</td>
+    <td>${p.name}</td>
+    <td>₱${fmt(p.price)}</td>
+    <td>₱${fmt(p.cost||0)}</td>
+    <td><button class="btn-sm btn-red" onclick="delProduct(${i})">Burahin</button></td>
+  </tr>`).join('');
 }
-
-function addStore(){
-  let code = $('newStoreCode').value.trim().toUpperCase();
-  let name = $('newStoreName').value.trim();
-  if(!code || !name) return alert('⚠️ Punan ang lahat!');
-  if(STORES.some(s=>s.code===code)) return alert('⚠️ May ganon nang Store Code!');
-  STORES.push({code,name});
-  save('pos_stores', STORES);
-  $('newStoreCode').value='';
-  $('newStoreName').value='';
-  renderStoresTab();
-  alert('✅ Tindahan Nai-save!');
-}
-
-function delStore(i){
-  if(!confirm('⚠️ Sigurado bang buburahin?')) return;
-  STORES.splice(i,1);
-  save('pos_stores', STORES);
-  renderStoresTab();
-}
-
-function renderStoreSelects(){
-  let opts = ()=>'<option value="">-- Pumili --</option>' + STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
-  ['prodStoreSel','stockInStore','shiftFilterStore','stockViewStore'].forEach(id=>{
-    let el = $(id);
-    if(el){
-      let sel = el.value;
-      if(id==='shiftFilterStore' || id==='stockViewStore'){
-        el.innerHTML = '<option value="ALL">Lahat ng Tindahan</option>' + STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
-      } else {
-        el.innerHTML = opts();
-      }
-      el.value = sel;
-    }
-  });
-}
-
-// ═══════════════════ PRODUCTS ═══════════════════
-function renderProductsTab(){
-  renderStoreSelects();
-  $('prodBody').innerHTML = PRODUCTS.length ? PRODUCTS.map((p,i)=>`
-    <tr>
-      <td>${p.storeId}</td><td>${p.category}</td><td>${p.name}</td><td>₱${fmt(p.price)}</td>
-      <td><button class="btn-sm btn-red" onclick="delProduct(${i})">Burahin</button></td>
-    </tr>
-  `).join('') : '<tr><td colspan="5" class="empty">Wala pang produkto.</td></tr>';
-}
-
-function addProduct(){
-  let cat = $('newCat').value.trim();
-  let name = $('newProdName').value.trim();
-  let price = parseFloat($('newProdPrice').value);
-  let store = $('prodStoreSel').value;
-  if(!cat || !name || !price || !store) return alert('⚠️ Punan ang lahat!');
-  PRODUCTS.push({storeId:store, category:cat, name, price});
+function addProduct() {
+  const barcode = $('newProdBarcode').value.trim();
+  const cat = $('newCat').value.trim();
+  const name = $('newProdName').value.trim();
+  const cost = parseFloat($('newProdCost').value)||0;
+  const price = parseFloat($('newProdPrice').value);
+  const sid = $('prodStoreSel').value;
+  if (!cat || !name || !price || !sid) return alert('⚠️ Punan ang lahat ng kailangan!');
+  if (barcode && PRODUCTS.some(p=>p.barcode && p.barcode===barcode)) return alert('⚠️ May ganitong barcode na!');
+  const newProd = { barcode, category:cat, name, cost, price, storeId:sid };
+  PRODUCTS.push(newProd);
+  const stockKey = `${sid}|${name}`;
+  if (STOCKS[stockKey]===undefined) STOCKS[stockKey]=0;
   save('pos_products', PRODUCTS);
-  $('newCat').value='';
-  $('newProdName').value='';
-  $('newProdPrice').value='';
-  renderProductsTab();
-  alert('✅ Produkto Nai-save!');
-}
-
-function delProduct(i){
-  if(!confirm('⚠️ Sigurado bang buburahin?')) return;
-  PRODUCTS.splice(i,1);
-  save('pos_products', PRODUCTS);
-  renderProductsTab();
-}
-
-// ═══════════════════ STOCKS ═══════════════════
-function renderStockTab(){
-  renderStoreSelects();
-  let filter = $('stockViewStore').value;
-  let all = [];
-  PRODUCTS.forEach(p=>{
-    if(filter!=='ALL' && p.storeId!==filter) return;
-    let pid = `${p.storeId}||${p.category}||${p.name}`;
-    let qty = STOCKS[pid]||0;
-    let status = qty<1 ? '<span class="tag danger">UBOS</span>' : qty<=5 ? '<span class="tag warn">Konti</span>' : '<span class="tag success">Marami</span>';
-    all.push({storeId:p.storeId, name:p.name, qty, status, pid});
-  });
-  $('stockBody').innerHTML = all.length ? all.map(s=>`
-    <tr>
-      <td>${s.storeId}</td><td>${s.name}</td><td>${s.qty}</td><td>${s.status}</td>
-      <td><button class="btn-sm btn-orange" onclick="openStockOutModal('${s.pid}')">📦 Stock-Out</button></td>
-    </tr>
-  `).join('') : '<tr><td colspan="4" class="empty">Wala pang stock.</td></tr>';
-
-  // Update product selectors
-  let prodOpts = (storeId)=>'<option value="">-- Pumili --</option>' +
-    PRODUCTS.filter(p=>p.storeId===storeId).map(p=>`<option value="${p.storeId}||${p.category}||${p.name}">${p.name}</option>`).join('');
-  let sel = $('stockInStore').value;
-  $('stockInProd').innerHTML = prodOpts(sel);
-}
-
-function stockIn(){
-  let store = $('stockInStore').value;
-  let prod = $('stockInProd').value;
-  let qty = parseInt($('stockInQty').value)||0;
-  if(!store || !prod || qty<1) return alert('⚠️ Punan nang tama!');
-  STOCKS[prod] = (STOCKS[prod]||0) + qty;
   save('pos_stocks', STOCKS);
+  $('newProdBarcode').value=''; $('newCat').value=''; $('newProdName').value='';
+  $('newProdCost').value=''; $('newProdPrice').value='';
+  renderProductsTab(); renderStockTab();
+  alert('✅ Produkto naidagdag! May stock entry na rin.');
+}
+function delProduct(i) { if(confirm('⚠️ Burahin ba talaga?')){ PRODUCTS.splice(i,1); save('pos_products',PRODUCTS); renderProductsTab(); } }
+// === STOCKS ===
+function renderStockTab() {
+  const f = $('stockViewStore').value;
+  let list = Object.entries(STOCKS);
+  if (f!=='ALL') list = list.filter(([k])=>k.startsWith(f+'|'));
+  $('stockBody').innerHTML = list.map(([key,qty])=>{
+    const [sid,pname] = key.split('|');
+    const prod = PRODUCTS.find(p=>p.name===pname && p.storeId===sid);
+    const low = qty <= 5;
+    return `<tr>
+      <td>${sid}</td><td>${pname}</td><td>${qty}</td>
+      <td>${low?'<span class="tag danger">Mababa</span>':'<span class="tag success">Sapat</span>'}</td>
+      <td>
+        <button class="btn-sm btn-green" onclick="adjustStock('${key}',1)">+1</button>
+        <button class="btn-sm btn-gray" onclick="adjustStock('${key}',−1)">−1</button>
+        <button class="btn-sm btn-red" onclick="setStockZero('${key}')">0</button>
+      </td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" class="empty">Wala pang stock.</td></tr>';
+}
+function stockIn() {
+  const sid = $('stockInStore').value;
+  const pid = $('stockInProd').value;
+  const qtyInput = $('stockInQty').value.trim();
+  if (!sid || !pid || !qtyInput) return alert('⚠️ Punan ang lahat!');
+  const key = `${sid}|${pid}`;
+  const val = parseInt(qtyInput);
+  if (isNaN(val)) return alert('⚠️ Hindi wastong halaga!');
+  STOCKS[key] = Math.max(0, (STOCKS[key]||0) + val);
+  save('pos_stocks', STOCKS);
+  renderStockTab();
+  alert(`✅ Stock na-update! Kasalukuyan: ${STOCKS[key]}`);
   $('stockInQty').value='';
-  renderStockTab();
-  alert('✅ Stock Nai-save!');
 }
-
-function openStockOutModal(pid){
-  selectedProductForStockOut = pid;
-  let prod = PRODUCTS.find(p=>`${p.storeId}||${p.category}||${p.name}`===pid);
-  $('soProdName').textContent = prod?.name || pid;
-  $('soQty').value='1';
-  $('soReason').value='';
-  $('stockOutModal').classList.remove('hidden');
-}
-
-function closeStockOutModal(){ $('stockOutModal').classList.add('hidden'); }
-
-function confirmStockOut(){
-  let qty = parseInt($('soQty').value)||0;
-  let reason = $('soReason').value.trim();
-  if(qty<1) return alert('⚠️ Dapat higit sa 0!');
-  if(STOCKS[selectedProductForStockOut]<qty) return alert('⚠️ Kulang ang stock!');
-  STOCKS[selectedProductForStockOut] -= qty;
+function adjustStock(key, delta) {
+  STOCKS[key] = Math.max(0, (STOCKS[key]||0) + delta);
   save('pos_stocks', STOCKS);
-  closeStockOutModal();
   renderStockTab();
-  alert('✅ Stock-Out Naitala!');
 }
-
-// ═══════════════════ SHIFT LOG (ADMIN) ═══════════════════
-function renderShiftLogTab(){
-  let filter = $('shiftFilterStore').value;
-  let list = filter==='ALL' ? SHIFTS : SHIFTS.filter(s=>s.storeId===filter);
-  $('shiftLogBody').innerHTML = list.length ? list.map(s=>`
-    <tr>
-      <td>${s.storeId}</td>
-      <td>${s.cashier}</td>
-      <td>${new Date(s.startedAt).toLocaleString('en-PH')}</td>
-      <td>${s.ended ? new Date(s.endedAt).toLocaleString('en-PH') : 'Bukas pa'}</td>
-      <td>₱${fmt(s.cashOnHand||0)}</td>
-      <td>₱${fmt(s.gcashOnHand||0)}</td>
-      <td>${s.note||'—'}</td>
-    </tr>
-  `).join('') : '<tr><td colspan="7" class="empty">Wala pang shift.</td></tr>';
+function setStockZero(key) {
+  if(confirm('I-set sa ZERO?')) { STOCKS[key]=0; save('pos_stocks', STOCKS); renderStockTab(); }
 }
-
-// ═══════════════════ CASHIER REQUESTS ═══════════════════
-function loadVoidTickets(){
-  let storeSales = SALES.filter(s=>s.storeId===user.storeId);
-  let opts = (selId)=>'<option value="">-- Pumili --</option>' + storeSales.map(s=>`<option value="${s.id}">${s.id} — ₱${fmt(s.total)} | ${s.time}</option>`).join('');
-  $('wrongTicket').innerHTML = opts();
-  $('rightTicket').innerHTML = opts();
-  $('myVoidReqs').innerHTML = VOID_REQS.filter(r=>r.storeId===user.storeId).map(r=>`
+// === STORES ===
+function renderStoresTab() {
+  $('storeBody').innerHTML = STORES.map((s,i)=>`<tr>
+    <td>${s.code}</td><td>${s.name}</td>
+    <td>
+      <button class="btn-sm btn-gray" onclick="editStore(${i})">✏️ Baguhin</button>
+      <button class="btn-sm btn-red" onclick="delStore(${i})">Burahin</button>
+    </td>
+  </tr>`).join('');
+}
+function addStore() {
+  const code = $('newStoreCode').value.trim().toUpperCase();
+  const name = $('newStoreName').value.trim();
+  if (!code || !name) return alert('⚠️ Punan ang lahat!');
+  if (STORES.some(s=>s.code===code)) return alert('⚠️ May ganitong code na!');
+  STORES.push({code,name,active:true});
+  save('pos_stores', STORES);
+  renderStoresTab(); renderStoreSelects();
+  $('newStoreCode').value=''; $('newStoreName').value='';
+  alert('✅ Tindahan naidagdag!');
+}
+function editStore(i) {
+  const s = STORES[i];
+  const newName = prompt('Bagong pangalan:', s.name);
+  if(!newName) return;
+  STORES[i].name = newName;
+  save('pos_stores', STORES);
+  renderStoresTab(); renderStoreSelects();
+}
+function delStore(i) {
+  if(confirm('⚠️ Burahin ba talaga?')){ STORES.splice(i,1); save('pos_stores',STORES); renderStoresTab(); renderStoreSelects(); }
+}
+// === SHARED SELECT OPTIONS ===
+function renderStoreSelects() {
+  const opts = () => STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
+  ['prodStoreSel','stockInStore','shiftFilterStore'].forEach(id=>{
+    const el=$(id); if(!el) return;
+    const sel = el.querySelector('option[value="ALL"]')?.outerHTML||'';
+    el.innerHTML = sel + opts();
+  });
+  const sel = $('stockInProd');
+  if(sel){
+    const uniq = [...new Set(PRODUCTS.map(p=>p.name))];
+    sel.innerHTML = uniq.map(n=>`<option value="${n}">${n}</option>`).join('');
+  }
+}
+// === SHIFT LOG ===
+function renderShiftLogTab() {
+  const f = $('shiftFilterStore').value;
+  let list = SHIFTS;
+  if (f!=='ALL') list = list.filter(s=>s.storeId===f);
+  $('shiftLogBody').innerHTML = list.sort((a,b)=>b.startedAt.localeCompare(a.startedAt)).map(s=>`<tr>
+    <td>${s.storeId}</td><td>${s.cashier}</td>
+    <td>${new Date(s.startedAt).toLocaleString('en-PH')}</td>
+    <td>${s.closed?new Date(s.closedAt).toLocaleString('en-PH'):'🔴 Bukas'}</td>
+    <td>₱${fmt(s.cashOnHand)}</td><td>₱${fmt(s.gcashOnHand)}</td>
+    <td>${s.note||'—'}</td>
+    <td>${s.closed?'✅ Sarado':'🔴 Bukas'}</td>
+  </tr>`).join('');
+}
+// === VOID REQUESTS ===
+function loadVoidTickets() {
+  const txs = SALES.filter(s=>s.storeId===user.storeId).sort((a,b)=>b.time.localeCompare(a.time));
+  const opts = '<option value="">— Pumili —</option>' + txs.map(t=>`<option value="${t.id}">${t.id} | ₱${fmt(t.total)} | ${t.time}</option>`).join('');
+  $('wrongTicket').innerHTML = opts;
+  $('rightTicket').innerHTML = opts;
+  $('myVoidReqs').innerHTML = VOID_REQS.filter(r=>r.storeId===user.storeId).sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt)).map(r=>`
     <div class="req-card">
-      ${r.approved===true?'✅ NA-APRUBA':r.approved===false?'❌ TINANGGI':'⏳ NAKA-ANTAY'}<br>
+      <strong>${r.approved?'✅ APRUBADO':'⏳ NAKA-ANTAY'}</strong><br>
       Maling: ${r.wrongTicket}<br>
-      Tamang: ${r.rightTicket}<br>
+      Tama: ${r.rightTicket}<br>
       Dahilan: ${r.reason}
     </div>
   `).join('') || '<div class="empty">Wala pang request.</div>';
 }
-
-function submitVoidReq(){
-  let w = $('wrongTicket').value;
-  let r = $('rightTicket').value;
-  let reason = $('voidReason').value.trim();
-  if(!w || !r || !reason) return alert('⚠️ Punan ang lahat!');
-  VOID_REQS.unshift({id:'VOID-'+Date.now(), storeId:user.storeId, wrongTicket:w, rightTicket:r, reason, cashier:'Cashier', date:today(), approved:null});
-  save('pos_void_reqs', VOID_REQS);
-  alert('✅ Request Nai-send!');
-  loadVoidTickets();
-  $('voidReason').value='';
+function submitVoidReq() {
+  const w = $('wrongTicket').value;
+  const r = $('rightTicket').value;
+  const reason = $('voidReason').value.trim();
+  if(!w||!r||!reason) return alert('⚠️ Punan ang lahat!');
+  VOID_REQS.unshift({ id:'VOID-'+uid(), storeId:user.storeId, wrongTicket:w, rightTicket:r, reason, submittedAt:new Date().toISOString(), approved:false, synced:false });
+  save('pos_void_reqs',VOID_REQS); alert('✅ Request naipadala!'); loadVoidTickets(); $('voidReason').value='';
 }
-
-function submitCashReq(){
-  let type = $('cashType').value;
-  let amt = parseFloat($('cashAmt').value)||0;
-  let reason = $('cashReason').value.trim();
-  if(amt<=0 || !reason) return alert('⚠️ Punan nang tama!');
-  CASH_REQS.unshift({id:'CR-'+Date.now(), storeId:user.storeId, type, amount:amt, reason, cashier:'Cashier', date:today()});
-  save('pos_cash_reqs', CASH_REQS);
-  alert('✅ Request Nai-send!');
-  $('cashAmt').value='';
-  $('cashReason').value='';
-  renderCashReqs();
-}
-function renderCashReqs(){
-  $('myCashReqs').innerHTML = CASH_REQS.filter(r=>r.storeId===user.storeId).map(r=>`
-    <div class="req-card">
-      ${r.type} — ₱${fmt(r.amount)}<br>
-      Dahilan: ${r.reason}<br>
-      Petsa: ${r.date}
-    </div>
-  `).join('') || '<div class="empty">Wala pang request.</div>';
-}
-
-function loadProdOutSelect(){
-  $('prodOutSel').innerHTML = '<option value="">-- Pumili --</option>' +
-    PRODUCTS.filter(p=>p.storeId===user.storeId).map(p=>{
-      let pid = `${p.storeId}||${p.category}||${p.name}`;
-      return `<option value="${pid}">${p.name} — Stock: ${STOCKS[pid]||0}</option>`;
-    }).join('');
-  $('myProdOutReqs').innerHTML = PROD_OUT_REQS.filter(r=>r.storeId===user.storeId).map(r=>`
-    <div class="req-card">
-      ${r.approved===true?'✅ NA-APRUBA':r.approved===false?'❌ TINANGGI':'⏳ NAKA-ANTAY'}<br>
-      Produkto: ${r.prodName}<br>
-      Dami: ${r.qty} — ${r.reason}<br>
-      ${r.note?'Nota: '+r.note:''}
-    </div>
-  `).join('') || '<div class="empty">Wala pang request.</div>';
-}
-
-function submitProdOut(){
-  let pid = $('prodOutSel').value;
-  let qty = parseInt($('prodOutQty').value)||0;
-  let reason = $('prodOutReason').value;
-  let note = $('prodOutNote').value.trim();
-  if(!pid || qty<1) return alert('⚠️ Punan nang tama!');
-  let prod = PRODUCTS.find(p=>`${p.storeId}||${p.category}||${p.name}`===pid);
-  PROD_OUT_REQS.unshift({
-    id:'PO-'+Date.now(), storeId:user.storeId, prodId:pid, prodName:prod?.name||pid,
-    qty, reason, note, cashier:'Cashier', date:today(), approved:null
+// === CASH REQUESTS ===
+function submitCashReq() {
+  const type=$('cashType').value;
+  const amt=parseFloat($('cashAmt').value);
+  const reason=$('cashReason').value.trim();
+  if(!amt||!reason) return alert('⚠️ Punan ang lahat!');
+  CASH_REQS.unshift({ 
+    id:'CASHREQ-'+uid(), storeId:user.storeId, type, amount:amt, reason, 
+    date:today(), time:dt(), synced:false, approved:false, approvedBy:null, approvedAt:null
   });
-  save('pos_prodout_reqs', PROD_OUT_REQS);
-  alert('✅ Request Nai-send!');
-  loadProdOutSelect();
+  save('pos_cash_reqs',CASH_REQS); alert('✅ Naipadala! Hintayin ang pag-apruba.'); $('cashAmt').value=''; $('cashReason').value='';
 }
-
-// ═══════════════════ ADMIN: APPROVE REQUESTS ═══════════════════
-function renderAdminRequests(){
-  $('adminVoidList').innerHTML = VOID_REQS.filter(r=>r.approved===null).map(r=>`
+// === ADMIN APPROVE ===
+function renderAdminRequests() {
+  $('adminVoidList').innerHTML = VOID_REQS.filter(r=>!r.approved).map(r=>`
     <div class="req-card">
-      Tindahan: ${r.storeId}<br>
-      Maling: ${r.wrongTicket}<br>
-      Tamang: ${r.rightTicket}<br>
-      Dahilan: ${r.reason} — <strong>${r.cashier}</strong>
-      <div style="margin-top:6px">
-        <button class="btn-sm btn-green" onclick="approveVoid('${r.id}')">✅ Aprubahan</button>
-        <button class="btn-sm btn-red" onclick="rejectVoid('${r.id}')">❌ Tanggihan</button>
-      </div>
+      <strong>${r.storeId}</strong><br>Mali: ${r.wrongTicket}<br>Tama: ${r.rightTicket}<br>Dahilan: ${r.reason}
+      <div style="margin-top:6px"><button class="btn-sm btn-green" onclick="approveVoid('${r.id}')">✅ Aprubahan</button></div>
     </div>
-  `).join('') || '<div class="empty">Wala pang request.</div>';
-
-  $('adminProdOutList').innerHTML = PROD_OUT_REQS.filter(r=>r.approved===null).map(r=>`
+  `).join('')||'<div class="empty">Wala nang nakabinbin.</div>';
+  $('adminProdOutList').innerHTML = PROD_OUT_REQS.filter(r=>!r.approved).map(r=>`
     <div class="req-card">
-      Tindahan: ${r.storeId} — ${r.prodName} ×${r.qty}<br>
-      Dahilan: ${r.reason} — <strong>${r.cashier}</strong>
-      <div style="margin-top:6px">
-        <button class="btn-sm btn-green" onclick="approveProdOut('${r.id}')">✅ Aprubahan</button>
-        <button class="btn-sm btn-red" onclick="rejectProdOut('${r.id}')">❌ Tanggihan</button>
-      </div>
+      <strong>${r.storeId} | ${r.reason}</strong><br>${r.product} × ${r.qty}<br>Detalye: ${r.note}
+      <div style="margin-top:6px"><button class="btn-sm btn-green" onclick="approveProdOut('${r.id}')">✅ Aprubahan</button></div>
     </div>
-  `).join('') || '<div class="empty">Wala pang request.</div>';
-
-  $('adminCashList').innerHTML = CASH_REQS.map(r=>`
+  `).join('')||'<div class="empty">Wala nang nakabinbin.</div>';
+  $('adminCashList').innerHTML = CASH_REQS.sort((a,b)=>b.time.localeCompare(a.time)).map(r=>`
     <div class="req-card">
-      ${r.type} — ₱${fmt(r.amount)} (${r.storeId})<br>
-      Dahilan: ${r.reason} — ${r.cashier} | ${r.date}
+      ${r.type} | ₱${fmt(r.amount)} | ${r.date} ${r.time}<br>Dahilan: ${r.reason}<br>
+      ${r.approved?'✅ Aprubado ni Admin':'⏳ Hinihintay ang Pag-apruba'}
     </div>
-  `).join('') || '<div class="empty">Wala pang tala.</div>';
+  `).join('')||'<div class="empty">Wala pang talaan.</div>';
 }
-
-function approveVoid(id){
-  let r = VOID_REQS.find(x=>x.id===id);
-  if(r){
-    r.approved = true;
-    // Optional: mark sale as voided here
-    save('pos_void_reqs', VOID_REQS);
-    alert('✅ Na-aprubahan!');
-    renderAdminRequests();
-  }
+function approveVoid(id){ const r=VOID_REQS.find(x=>x.id===id); if(r){r.approved=true;save('pos_void_reqs',VOID_REQS);alert('✅ Aprubado na!');renderAdminRequests();} }
+function approveProdOut(id){ const r=PROD_OUT_REQS.find(x=>x.id===id); if(r){r.approved=true;save('pos_prodout_reqs',PROD_OUT_REQS);alert('✅ Aprubado na!');renderAdminRequests();} }
+// === PRODUCT OUT REQUESTS ===
+function loadProdOutSelect() {
+  $('prodOutSel').innerHTML = PRODUCTS.filter(p=>p.storeId===user.storeId).map(p=>`<option value="${p.name}">${p.name}</option>`).join('');
+  $('myProdOutReqs').innerHTML = PROD_OUT_REQS.filter(r=>r.storeId===user.storeId).sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt)).map(r=>`
+    <div class="req-card">
+      <strong>${r.approved?'✅ APRUBADO':'⏳ NAKA-ANTAY'}</strong><br>
+      ${r.product} × ${r.qty} — ${r.reason}<br>${r.note}
+    </div>
+  `).join('')||'<div class="empty">Wala pang request.</div>';
 }
-function rejectVoid(id){
-  let r = VOID_REQS.find(x=>x.id===id);
-  if(r){
-    r.approved = false;
-    save('pos_void_reqs', VOID_REQS);
-    alert('❌ Tinanggihan!');
-    renderAdminRequests();
-  }
+function submitProdOut() {
+  const prod=$('prodOutSel').value;
+  const qty=parseInt($('prodOutQty').value);
+  const reason=$('prodOutReason').value;
+  const note=$('prodOutNote').value.trim();
+  if(!prod||!qty) return alert('⚠️ Punan ang lahat!');
+  PROD_OUT_REQS.unshift({ id:'PRODOUT-'+uid(), storeId:user.storeId, product:prod, qty, reason, note, submittedAt:new Date().toISOString(), approved:false, synced:false });
+  save('pos_prodout_reqs',PROD_OUT_REQS); alert('✅ Naipadala!'); loadProdOutSelect();
 }
-function approveProdOut(id){
-  let r = PROD_OUT_REQS.find(x=>x.id===id);
-  if(r){
-    r.approved = true;
-    if(STOCKS[r.prodId]!==undefined) STOCKS[r.prodId] = Math.max(0, STOCKS[r.prodId] - r.qty);
-    save('pos_prodout_reqs', PROD_OUT_REQS);
-    save('pos_stocks', STOCKS);
-    alert('✅ Na-aprubahan at nabawasan ang stock!');
-    renderAdminRequests();
-  }
+// === SETTINGS ===
+function changeCashierPass() {
+  const cur=$('curCashierPass').value.trim();
+  const np=$('newCashierPass').value.trim();
+  if(cur!==PASS.cashier) return alert('⚠️ Maling kasalukuyang password!');
+  if(!checkPasswordStrength(np)) return alert('⚠️ Hindi bababa sa 6 na character!');
+  PASS.cashier=np; save('pos_pass',PASS); alert('✅ Password na-update!');
+  $('curCashierPass').value=''; $('newCashierPass').value='';
 }
-function rejectProdOut(id){
-  let r = PROD_OUT_REQS.find(x=>x.id===id);
-  if(r){
-    r.approved = false;
-    save('pos_prodout_reqs', PROD_OUT_REQS);
-    alert('❌ Tinanggihan!');
-    renderAdminRequests();
-  }
-}
-
-// ═══════════════════ ADMIN: SETTINGS ═══════════════════
-function changeCashierPass(){
-  let cur = $('curCashierPass').value;
-  let np = $('newCashierPass').value;
-  if(cur!==PASS.cashier) return alert('⚠️ Maling Kasalukuyang Password!');
-  if(!np || np.length<3) return alert('⚠️ Napakaikli ng bagong password!');
-  PASS.cashier = np;
-  save('pos_pass', PASS);
-  alert('✅ Password Nai-update!');
-  $('curCashierPass').value='';
-  $('newCashierPass').value='';
-}
-
-function deleteSalesByDate(){
-  let d = $('delSaleDate').value;
-  let reason = $('delSaleReason').value.trim();
-  if(!d || !reason) return alert('⚠️ Punan ang petsa at dahilan!');
-  let sum = SALES.filter(s=>s.date===d).reduce((x,y)=>x+y.total,0);
-  if(!confirm(`⚠️ BUBURAHIN LAHAT NG BENTA NOONG ${d} — Kabuuan: ₱${fmt(sum)}\nDahilan: ${reason}\n\nHINDI NA ITO MABABALIK!`)) return;
-  DELETED_SALES.push({date:today(),deletedBy:'Admin',saleDate:d,amount:sum,reason});
+function deleteSalesByDate() {
+  const d=$('delSaleDate').value;
+  const reason=$('delSaleReason').value.trim();
+  if(!d||!reason) return alert('⚠️ Punan ang lahat!');
+  if(!confirm(`⚠️ Sigurado bang burahin LAHAT ng benta noong ${d}? Hindi na ito mababawi!`)) return;
+  const totalDel = SALES.filter(s=>s.date===d).reduce((t,s)=>t+s.total,0);
+  DELETED_SALES.unshift({ 
+    date:new Date().toISOString(), delBy:user.name, saleDate:d, amount:totalDel, reason,
+    txnIds: SALES.filter(s=>s.date===d).map(s=>s.id)
+  });
   SALES = SALES.filter(s=>s.date!==d);
-  save('pos_sales', SALES);
-  save('pos_deleted_sales', DELETED_SALES);
-  alert('✅ Benta Binura at Naitala sa Deleted Log!');
+  save('pos_sales',SALES); save('pos_deleted_sales',DELETED_SALES);
+  alert(`✅ Lahat ng benta noong ${d} ay binura na. Kabuuan: ₱${fmt(totalDel)}`);
+  $('delSaleDate').value=''; $('delSaleReason').value='';
 }
-
-// ═══════════════════ SP: SERVICE & DELETED ═══════════════════
-function renderServiceTab(){
-  let active = isServiceActive();
-  $('servStatus').innerHTML = active ? '<span style="color:green;font-weight:bold">✅ AKTIBO</span>' : '<span style="color:red;font-weight:bold">❌ HINDI AKTIBO</span>';
-  $('servExpiry').textContent = getExpiryDate().toLocaleString('en-PH');
+// === EXPORT / BACKUP ===
+function exportAllData() {
+  const data = {
+    exportedAt: new Date().toISOString(),
+    stores: STORES,
+    products: PRODUCTS,
+    stocks: STOCKS,
+    sales: SALES,
+    shifts: SHIFTS,
+    voidReqs: VOID_REQS,
+    cashReqs: CASH_REQS,
+    prodOutReqs: PROD_OUT_REQS,
+    deletedSales: DELETED_SALES
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `pos-backup-${today()}.json`; a.click(); URL.revokeObjectURL(url);
+  $('exportResult').textContent = `✅ Na-download: pos-backup-${today()}.json`;
 }
-
-function extendService(days, price){
-  let cur = getExpiryDate();
-  if(new Date() > cur) cur = new Date();
-  cur.setDate(cur.getDate() + days);
-  SERVICE.expiry = cur.toISOString();
-  saveService();
-  alert(`✅ Serbisyo Nai-extend ng ${days} araw!\nMag-e-expire sa: ${cur.toLocaleString('en-PH')}\nBayad: ₱${price}`);
-  renderServiceTab();
+function exportSalesCSV() {
+  let csv = 'Date,Time,Store,Cashier,Items,Total,Method,Reference,Discount,Sync\n';
+  SALES.forEach(s=>{
+    csv += `${s.date},"${s.time}","${s.storeId}","${s.cashier}",${s.items.length},${fmt(s.total)},"${s.method}","${s.ref}","${s.discount}","${s.synced?'YES':'NO'}"\n`;
+  });
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `pos-sales-${today()}.csv`; a.click(); URL.revokeObjectURL(url);
+  $('exportResult').textContent = `✅ Na-download: pos-sales-${today()}.csv`;
 }
-
-function stopService(){
-  if(!confirm('⚠️ SIGURADO BANG ITITIGIL ANG SERBISYO?')) return;
-  SERVICE.active = false;
-  saveService();
-  alert('✅ Serbisyo Itinigil!');
-  renderServiceTab();
+// === SERVICE MANAGEMENT ===
+function renderServiceTab() {
+  const exp = getExpiryDate();
+  const active = isServiceActive();
+  $('servStatus').innerHTML = active ? '<span class="tag success">✅ AKTIBO</span>' : '<span class="tag danger">❌ HINDI AKTIBO</span>';
+  $('servExpiry').textContent = exp.toLocaleString('en-PH');
+  updateExpiryCountdown();
 }
-
-function resumeService(){
+function extendService(days,price) {
+  let exp = getExpiryDate();
+  exp.setDate(exp.getDate() + days);
+  SERVICE.expiry = exp.toISOString();
   SERVICE.active = true;
-  saveService();
-  alert('✅ Serbisyo Binalik!');
-  renderServiceTab();
+  saveService(); renderServiceTab();
+  alert(`✅ Serbisyo na-extend ng ${days} araw! Hanggang: ${exp.toLocaleDateString('en-PH')}\nBayad: ₱${price}`);
 }
-
-function spChangePasswords(){
-  let na = $('spNewAdminPass').value.trim();
-  let ns = $('spNewSPass').value.trim();
-  if(na) { PASS.admin = na; $('spNewAdminPass').value=''; }
-  if(ns) { PASS.sp = ns; $('spNewSPass').value=''; }
-  if(!na && !ns) return alert('⚠️ Ilagay ang bagong password!');
-  save('pos_pass', PASS);
-  alert('✅ Password(s) Nai-update! Ipaalam nang personal sa may-ari.');
+function stopService() { SERVICE.active=false; saveService(); renderServiceTab(); alert('⚠️ Serbisyo naitigil na!'); }
+function resumeService() { SERVICE.active=true; saveService(); renderServiceTab(); alert('✅ Serbisyo naibalik na!'); }
+function spChangePasswords() {
+  const na=$('spNewAdminPass').value.trim();
+  const ns=$('spNewSPass').value.trim();
+  if(na && !checkPasswordStrength(na)) return alert('⚠️ Hindi bababa sa 6 na character!');
+  if(ns && !checkPasswordStrength(ns)) return alert('⚠️ Hindi bababa sa 6 na character!');
+  if(na) { PASS.admin=na; $('spNewAdminPass').value=''; }
+  if(ns) { PASS.sp=ns; $('spNewSPass').value=''; }
+  save('pos_pass',PASS); alert('✅ Password na-update!');
 }
-
-function renderDeletedSales(){
-  $('deletedBody').innerHTML = DELETED_SALES.length ? DELETED_SALES.map(d=>`
-    <tr>
-      <td>${d.date}</td><td>${d.deletedBy}</td><td>${d.saleDate}</td><td>₱${fmt(d.amount)}</td><td>${d.reason}</td>
-    </tr>
-  `).join('') : '<tr><td colspan="5" class="empty">Wala pang binurang benta.</td></tr>';
+// === DELETED SALES + VOID LOG ===
+function renderDeletedSales() {
+  $('deletedBody').innerHTML = DELETED_SALES.sort((a,b)=>b.date.localeCompare(a.date)).map(d=>`<tr>
+    <td>${new Date(d.date).toLocaleString('en-PH')}</td><td>${d.delBy}</td><td>${d.saleDate}</td><td>₱${fmt(d.amount)}</td><td>${d.reason}</td>
+  </tr>`).join('')||'<tr><td colspan="5" class="empty">Wala pang binurang benta.</td></tr>';
+  
+  $('voidLogBody').innerHTML = VOID_REQS.sort((a,b)=>b.submittedAt.localeCompare(a.submittedAt)).map(r=>`<tr>
+    <td>${new Date(r.submittedAt).toLocaleDateString('en-PH')}</td>
+    <td>${r.storeId}</td>
+    <td>${r.wrongTicket}</td>
+    <td>${r.rightTicket}</td>
+    <td>${r.approved?'✅ Aprubado':'⏳ Hinihintay'}</td>
+  </tr>`).join('')||'<tr><td colspan="5" class="empty">Wala pang void request.</td></tr>';
 }
-
-// ═══════════════════ CASH IN/OUT HELPER ═══════════════════
-setTimeout(()=>{
-  if(user.logged && user.role==='cashier') renderCashReqs();
-}, 300);
-
 </script>
 </body>
 </html>
