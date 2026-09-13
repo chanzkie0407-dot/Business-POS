@@ -1,207 +1,202 @@
 <!DOCTYPE html>
-<html lang="tl-PH">
+<html lang="tl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POS System — Offline Ready</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>POS — Auto-Sync + Offline Ready</title>
 <style>
-:root {
-  --prim: #2563eb; --suc: #16a34a; --wrn: #f59e0b; --drg: #dc2626;
-  --bg: #f8fafc; --card: #fff; --txt: #1e293b; --muted: #64748b; --bor: #e2e8f0;
-}
-* { box-sizing: border-box; margin:0; padding:0; font-family: system-ui,Segoe UI,sans-serif; }
-body { background:var(--bg); color:var(--txt); padding:8px; font-size:14px; }
-.hidden { display: none !important; }
-button { cursor:pointer; border:none; border-radius:6px; padding:8px 10px; font-size:14px; }
-.btn-sm { padding:3px 7px; font-size:12px; margin:0 2px; }
-.btn-green { background:var(--suc); color:#fff; }
-.btn-red { background:var(--drg); color:#fff; }
-.btn-blue { background:var(--prim); color:#fff; }
-.btn-purple { background:#9333ea; color:#fff; }
-.btn-gray { background:var(--bor); color:var(--txt); }
-input, select, textarea { padding:7px 9px; border:1px solid var(--bor); border-radius:5px; font-size:14px; margin:3px; width:100%; }
-table { width:100%; border-collapse:collapse; margin-top:8px; }
-th, td { padding:7px 9px; text-align:left; border-bottom:1px solid var(--bor); font-size:13px; }
-th { background:#f1f5f9; font-weight:600; }
-.nav { display:flex; flex-wrap:wrap; gap:4px; margin:8px 0; }
-.nav button { background:var(--card); border:1px solid var(--bor); }
-.nav button.active { background:var(--prim); color:#fff; border-color:var(--prim); }
-.card { background:var(--card); border-radius:8px; padding:12px; margin-bottom:10px; box-shadow:0 1px 3px #0001; }
-.req-card { background:var(--card); border-left:3px solid var(--prim); border-radius:6px; padding:10px; margin:6px 0; }
-.empty { color:var(--muted); text-align:center; padding:16px; font-style:italic; }
-.tag { display:inline-block; padding:2px 6px; border-radius:4px; font-size:12px; font-weight:500; }
-.tag.success { background:#dcfce7; color:#166534; }
-.tag.danger { background:#fee2e2; color:#991b1b; }
-.tag.cash { background:#e8f5e9; color:#15803d; }
-.tag.gcash { background:#dbeafe; color:#1e40af; }
-.tag.warn { background:#fff7ed; color:#c2410c; }
-.modal { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:100; padding:10px; }
-.modal > div { background:#fff; border-radius:10px; padding:16px; max-width:500px; width:100%; max-height:90vh; overflow:auto; }
-.store-card { border:2px solid var(--bor); border-radius:6px; padding:10px; margin:4px; cursor:pointer; }
-.store-card.selected { border-color:var(--prim); background:#eff6ff; }
-.prod-btn { display:block; width:100%; text-align:left; padding:8px 10px; margin:3px 0; background:var(--card); border:1px solid var(--bor); border-left:3px solid var(--prim); border-radius:6px; }
-.cat-btn { margin:2px; }
-.cart-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--bor); }
-.shift-indicator { padding:10px; border-radius:6px; background:#f0fdf4; color:#166534; margin-bottom:8px; }
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
-.totals { font-size:18px; font-weight:700; text-align:right; padding:10px; background:#f1f5f9; border-radius:6px; margin:8px 0; }
-.denom-row { display:flex; gap:6px; align-items:center; margin:4px 0; }
-.denom-row input { width:80px; text-align:right; }
-.status-badge { font-size:12px; font-weight:bold; padding:3px 8px; border-radius:12px; margin-left:8px; }
-.status-online { background:#d4edda; color:#155724; }
-.status-offline { background:#fef2f2; color:#dc2626; }
-.receipt-preview { font-family:monospace; white-space:pre; font-size:12px; line-height:1.4; background:#fff; border:1px dashed #ccc; padding:15px; margin-top:10px; }
-.actions { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
-.sep { border:none; border-top:1px dashed #ddd; margin:16px 0; }
-@media print {
-  body * { visibility:hidden; }
-  #receiptModal, #receiptModal * { visibility:visible; }
-  #receiptModal { position:absolute; left:0; top:0; width:80mm; margin:0; padding:0; }
-  button { display:none !important; }
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+body{background:#f5f5f5;padding-bottom:40px}
+.hidden{display:none !important}
+button{border:none;border-radius:6px;padding:10px 14px;cursor:pointer;font-size:14px;font-weight:500}
+input,select,textarea{border:2px solid #ddd;border-radius:6px;padding:10px 12px;width:100%;margin:4px 0 8px;font-size:15px}
+label{font-size:13px;color:#444;font-weight:bold}
+h2,h3,h4{color:#2d2d2d;margin-bottom:10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:15px;z-index:999}
+.mbody{background:#fff;border-radius:10px;padding:24px;max-width:450px;width:100%;max-height:90vh;overflow-y:auto}
+.topbar{background:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px #0001;position:sticky;top:0;z-index:10}
+.topbar h1{font-size:18px;color:#2563eb}
+.topbar small{display:block;color:#666;font-size:12px;margin-top:2px}
+.status-badge{font-size:12px;font-weight:bold;padding:3px 8px;border-radius:12px;margin-left:8px}
+.status-online{background:#d4edda;color:#155724}
+.status-syncing{background:#fff3cd;color:#856404}
+.status-offline{background:#fef2f2;color:#dc2626}
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.nav button{padding:8px 12px;font-size:13px;background:#f0f0f0}
+.nav button.active{background:#2563eb;color:#fff}
+.container{max-width:1100px;margin:16px auto;padding:0 12px}
+.card{background:#fff;border-radius:8px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px #0001}
+.btn-green{background:#16a34a;color:#fff;font-weight:bold}
+.btn-green:hover{background:#15803d}
+.btn-red{background:#dc2626;color:#fff}
+.btn-blue{background:#2563eb;color:#fff}
+.btn-orange{background:#f97316;color:#fff}
+.btn-purple{background:#9333ea;color:#fff}
+.btn-sm{padding:5px 8px;font-size:12px;width:auto;margin:2px}
+.btn-gray{background:#6b7280;color:#fff}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid #eee;font-size:14px}
+th{background:#f9f9f9;font-weight:bold;color:#333}
+tr:nth-child(even){background:#fafafa}
+.total-box{background:#e8f5e9;padding:12px;border-radius:6px;text-align:right;font-size:18px;font-weight:bold;color:#15803d;margin-top:10px}
+.total-box-blue{background:#eff6ff;padding:12px;border-radius:6px;text-align:right;font-size:18px;font-weight:bold;color:#2563eb;margin-top:10px}
+.total-box-orange{background:#fff7ed;padding:12px;border-radius:6px;text-align:right;font-size:18px;font-weight:bold;color:#c2410c;margin-top:10px}
+.empty{text-align:center;color:#888;padding:24px}
+.tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:bold}
+.tag.cash{background:#e8f5e9;color:#15803d}
+.tag.gcash{background:#eff6ff;color:#2563eb}
+.tag.warn{background:#fff7ed;color:#c2410c}
+.tag.danger{background:#fef2f2;color:#dc2626}
+.tag.success{background:#d4edda;color:#155724}
+.sep{border:none;border-top:1px dashed #ddd;margin:16px 0}
+.cat-btn{background:#e5e7eb;padding:10px 14px;margin:4px;border-radius:6px;font-weight:bold}
+.cat-btn.active{background:#2563eb;color:#fff}
+.prod-btn{background:#f3f4f6;padding:10px 12px;margin:3px;border-radius:6px;text-align:left;border-left:3px solid #16a34a}
+.prod-btn:hover{background:#e8f5e9}
+.prod-btn:disabled{opacity:0.5;cursor:not-allowed}
+.cart-row{display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px solid #f0f0f0}
+.expiry-banner{background:#fef2f2;border:2px solid #fecaca;color:#dc2626;padding:12px;border-radius:8px;margin-bottom:16px;font-weight:bold;text-align:center}
+.store-card{border:2px solid #ddd;border-radius:8px;padding:12px;margin:8px;cursor:pointer;transition:all 0.2s}
+.store-card:hover,.store-card.selected{border-color:#2563eb;background:#eff6ff}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.req-card{border:1px solid #ddd;padding:12px;border-radius:6px;margin:8px 0}
+.shift-indicator{background:#f0f9ff;border-left:4px solid #2563eb;padding:8px 12px;border-radius:4px;margin-bottom:10px}
+.receipt-preview{background:#fff;border:1px dashed #ccc;padding:15px;margin-top:10px;font-family:monospace;font-size:12px;white-space:pre-wrap}
+.data-note{font-size:11px;color:#888;margin-top:8px}
+.sync-note{font-size:11px;color:#666;margin-top:4px}
+.low-stock{color:#dc2626;font-weight:bold}
 </style>
 </head>
 <body>
-
-<!-- ═══════════════ LOGIN MODAL ═══════════════ -->
-<div id="loginModal" class="modal">
-  <div>
-    <h2 style="margin-bottom:12px">🔐 Mag-Login</h2>
-    <div style="display:flex; gap:6px; margin-bottom:12px;">
-      <button onclick="showLoginForm('cashier')">Kasirera</button>
-      <button onclick="showLoginForm('admin')">Admin</button>
-      <button onclick="showLoginForm('sp')">Service Provider</button>
-    </div>
-    <div id="cashierForm" class="hidden">
-      <h3>Kasirera</h3>
-      <div id="cashierStoreList"></div>
-      <div style="margin-top:8px">
-        <input type="password" id="cashierPass" placeholder="Ipasok ang Password">
-        <button onclick="loginCashier()">➡️ Mag-Login</button>
-      </div>
-    </div>
-    <div id="adminForm" class="hidden">
-      <h3>Admin</h3>
-      <input type="password" id="adminPass" placeholder="Admin Password">
-      <button onclick="loginAdmin()">➡️ Mag-Login</button>
-    </div>
-    <div id="spForm" class="hidden">
-      <h3>Service Provider</h3>
-      <input type="password" id="spPass" placeholder="SP Password">
-      <button onclick="loginSP()">➡️ Mag-Login</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════ FIRST LOGIN CHANGE PASSWORD ═══════════════ -->
-<div id="firstLoginModal" class="modal hidden">
-  <div>
-    <h3>⚠️ Bagong User — Palitan ang Password</h3>
-    <p style="margin:8px 0">Ang default password ay ginagamit pa. Palitan ito bago magpatuloy.</p>
-    <input type="password" id="firstNewPass" placeholder="Bagong Password (min. 6 na letra)">
-    <input type="password" id="firstNewPass2" placeholder="I-ulit ang Password">
-    <button class="btn-green" onclick="firstLoginChangePass()">✅ I-update ang Password</button>
-  </div>
-</div>
-
-<!-- ═══════════════ EXPIRY SCREEN ═══════════════ -->
+<!-- ═══════════════════ EXPIRY LOCK SCREEN ═══════════════════ -->
 <div id="expiryScreen" class="modal hidden">
-  <div style="text-align:center">
-    <h2 style="color:#dc2626">⏰ Panahon na ng Pagsubok</h2>
+  <div class="mbody" style="text-align:center;max-width:420px">
+    <h2 style="color:#dc2626">⚠️ SERBISYO NATAPOS NA</h2>
     <p id="expiryMsg" style="margin:16px 0;line-height:1.5"></p>
-    <p>Makipag-ugnayan sa Service Provider para sa pagpapatuloy.</p>
-    <button onclick="location.reload()">🔄 Subukan Muli</button>
+    <p>Mangyaring makipag-ugnayan sa <strong>Service Provider</strong> para mag-renew.</p>
   </div>
 </div>
 
-<!-- ═══════════════ HOLD ORDER MODAL ═══════════════ -->
-<div id="holdModal" class="modal hidden">
-  <div>
-    <h3>📋 Itabi ang Order</h3>
-    <input type="text" id="holdOrderName" placeholder="Pangalan ng Order (opsyonal)">
-    <div style="margin-top:8px">
-      <button class="btn-green" onclick="saveHeldOrder()">✅ Itabi</button>
-      <button class="btn-gray" onclick="closeHoldModal()">❌ Kanselahin</button>
+<!-- ═══════════════════ PASSWORD CHANGE MODAL ═══════════════════ -->
+<div id="firstPassModal" class="modal">
+  <div class="mbody">
+    <h2 style="text-align:center;color:#2563eb;margin-bottom:20px">🔐 Baguhin ang Password</h2>
+    <p style="text-align:center;margin-bottom:12px">Ikaw ay unang nag-login — kailangang palitan ang password.</p>
+    <label>Lumang Password:</label>
+    <input type="password" id="oldPass">
+    <label>Bagong Password:</label>
+    <input type="password" id="newPass1">
+    <label>Ulitin ang Bagong Password:</label>
+    <input type="password" id="newPass2">
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-green" onclick="saveNewPassword()">✅ I-SAVE</button>
+      <button class="btn-red" onclick="logout()">❌ KANSELO</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ PRICE LOOKUP MODAL ═══════════════ -->
-<div id="priceLookupModal" class="modal hidden">
-  <div>
-    <h3>🔍 Hanapin ang Presyo</h3>
-    <input type="text" id="priceLookupInput" placeholder="I-type o i-scan..." oninput="doPriceLookup()">
-    <div id="priceLookupResult" style="margin-top:12px;padding:10px;background:#f9f9f9;border-radius:6px"></div>
-    <button class="btn-gray" onclick="closePriceLookupModal()">❌ Isara</button>
-  </div>
-</div>
-
-<!-- ═══════════════ RETURN MODAL ═══════════════ -->
-<div id="returnModal" class="modal hidden">
-  <div>
-    <h3>↩️ Itala ang Pagbabalik</h3>
-    <div>Transaksyon: <select id="returnTxn"></select></div>
-    <div>Produkto: <select id="returnItem"></select></div>
-    <div>Dami: <input type="number" id="returnQty" min="1" value="1"></div>
-    <div>Dahilan: <select id="returnReason">
-      <option value="WRONG">Maling Item</option>
-      <option value="DAMAGED">Sira</option>
-      <option value="EXPIRED">Napanis</option>
-      <option value="OTHER">Iba pa</option>
-    </select></div>
-    <div>Tandaan: <textarea id="returnNote" rows="2"></textarea></div>
-    <div style="margin-top:8px">
-      <button class="btn-green" onclick="confirmReturn()">✅ I-Itala</button>
-      <button class="btn-gray" onclick="closeReturnModal()">❌ Kanselahin</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════ SHIFT CLOSE MODAL ═══════════════ -->
-<div id="shiftCloseModal" class="modal hidden">
-  <div>
-    <h3>🕐 Isara ang Shift — Denominasyon</h3>
-    <p>Simula: <span id="shiftStartTm"></span> — <span id="shiftDuration"></span></p>
-    <h4>💵 Pagbibilang ng Cash</h4>
-    <div class="denom-row">₱1000 × <input type="number" id="d1000" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <div class="denom-row">₱500 × <input type="number" id="d500" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <div class="denom-row">₱200 × <input type="number" id="d200" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <div class="denom-row">₱100 × <input type="number" id="d100" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <div class="denom-row">₱50 × <input type="number" id="d50" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <div class="denom-row">₱20 × <input type="number" id="d20" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <div class="denom-row">₱10 × <input type="number" id="d10" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <div class="denom-row">₱5 × <input type="number" id="d5" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <div class="denom-row">₱1 × <input type="number" id="d1" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <div class="denom-row">Barya: <input type="number" step="0.01" id="dcoins" min="0" value="0" oninput="calcDenomTotal()"></div>
-    <p style="font-weight:bold; margin:6px 0;">Kabuuang Cash: ₱<span id="denomTotal">0.00</span></p>
-    <div>📱 E-Wallet na Hawak: <input type="number" step="0.01" id="shiftGcashOnHand" placeholder="0.00"></div>
-    <div>📝 Paliwanag: <textarea id="shiftNote" rows="2"></textarea></div>
-    <div style="margin-top:8px">
-      <button class="btn-green" onclick="confirmShiftClose()">✅ Isara ang Shift</button>
-      <button class="btn-gray" onclick="closeShiftModal()">❌ Kanselahin</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════ SPLIT PAYMENT MODAL ═══════════════ -->
+<!-- ═══════════════════ SPLIT PAYMENT MODAL ═══════════════════ -->
 <div id="splitModal" class="modal hidden">
-  <div>
-    <h3>💰 Hatian ng Pagbabayad</h3>
+  <div class="mbody">
+    <h3>💰 Split Payment (Cash + E-Wallet)</h3>
     <p>Kabuuan: <strong id="splitTotal">₱0.00</strong></p>
-    <div>💵 Cash: <input type="number" step="0.01" id="splitCash" oninput="calcSplitGCash()"></div>
-    <div>📱 E-Wallet: <input type="number" step="0.01" id="splitGCash" readonly></div>
-    <div>📱 Reference #: <input type="text" id="splitRef"></div>
-    <div style="margin-top:8px">
-      <button class="btn-green" onclick="confirmSplitPay()">✅ Bayaran</button>
-      <button class="btn-gray" onclick="closeSplitModal()">❌ Kanselahin</button>
+    <label>💵 Halaga ng Cash:</label>
+    <input type="number" id="splitCash" placeholder="0.00" step="0.01" min="0" oninput="calcSplitGCash()">
+    <label>📱 Halaga ng E-Wallet:</label>
+    <input type="number" id="splitGCash" placeholder="0.00" step="0.01" min="0" readonly>
+    <label>📱 Reference #:</label>
+    <input type="text" id="splitRef" placeholder="Ipasok ang Ref #">
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-green" onclick="confirmSplitPay()">✅ KUMPIRMA</button>
+      <button class="btn-red" onclick="closeSplitModal()">❌ KANSELO</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════ RECEIPT MODAL ═══════════════ -->
+<!-- ═══════════════════ SHIFT CLOSE MODAL ═══════════════════ -->
+<div id="shiftCloseModal" class="modal hidden">
+  <div class="mbody">
+    <h3>🕐 Isara ang Shift</h3>
+    <div class="shift-indicator">
+      <strong>Simula:</strong> <span id="shiftStartTm"></span><br>
+      <strong>Kasalan:</strong> <span id="shiftDuration"></span>
+    </div>
+    <label>💵 Denominasyon / Pisang Hawak:</label>
+    <textarea id="shiftCashDenom" placeholder="Hal: 1k×2, 500×3..." rows="2"></textarea>
+    <label>💵 Kabuuang Cash:</label>
+    <input type="number" id="shiftCashOnHand" step="0.01" placeholder="0.00">
+    <label>📱 E-Wallet na Hawak:</label>
+    <input type="number" id="shiftGcashOnHand" step="0.01" placeholder="0.00">
+    <label>📝 Paliwanag kung may Pagkakaiba:</label>
+    <textarea id="shiftNote" placeholder="Kung may pagkakaiba sa halaga..." rows="2"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-green" onclick="confirmShiftClose()">✅ I-SARA ANG SHIFT</button>
+      <button class="btn-red" onclick="closeShiftModal()">❌ KANSELO</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ RETURN / REFUND MODAL ═══════════════════ -->
+<div id="returnModal" class="modal hidden">
+  <div class="mbody">
+    <h3>↩️ Pagbabalik ng Produkto</h3>
+    <label>Ticket # ng Transaksyon:</label>
+    <input type="text" id="retTicket" placeholder="Hal: T20260913001">
+    <label>Produkto na Ibabalik:</label>
+    <select id="retProd"></select>
+    <label>Dami na Ibabalik:</label>
+    <input type="number" id="retQty" min="1" value="1">
+    <label>Dahilan:</label>
+    <textarea id="retReason" placeholder="Ilagay ang dahilan..." rows="2"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-green" onclick="confirmReturn()">✅ IBALIK + I-STOCK</button>
+      <button class="btn-red" onclick="closeReturnModal()">❌ KANSELO</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ HOLD ORDER MODAL ═══════════════════ -->
+<div id="holdOrderModal" class="modal hidden">
+  <div class="mbody">
+    <h3>⏸️ Itabi ang Order</h3>
+    <label>Pangalan/Tandaan:</label>
+    <input type="text" id="holdLabel" placeholder="Hal: Order ni Juan">
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-green" onclick="saveHoldOrder()">✅ I-TABI</button>
+      <button class="btn-red" onclick="closeHoldModal()">❌ KANSELO</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PRICE LOOKUP MODAL ═══════════════════ -->
+<div id="priceLookupModal" class="modal hidden">
+  <div class="mbody">
+    <h3>🔍 Hanapin ang Presyo</h3>
+    <label>Produkto o Scan Code:</label>
+    <input type="text" id="priceLookupInput" placeholder="I-type o I-scan..." oninput="doPriceLookup()">
+    <div id="priceResult" style="margin-top:12px"></div>
+    <button class="btn-blue" style="margin-top:10px" onclick="closePriceLookupModal()">✅ TAPOS</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ BACKUP / EXPORT MODAL ═══════════════════ -->
+<div id="backupModal" class="modal hidden">
+  <div class="mbody">
+    <h3>💾 Backup / Export Data</h3>
+    <p>Ang lahat ng datos ay ilalabas bilang tekstong maaaring i-save.</p>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn-green" onclick="exportAllData()">📤 I-EXPORT LAHAT</button>
+      <button class="btn-blue" onclick="downloadBackup()">💾 I-DOWNLOAD</button>
+      <button class="btn-red" onclick="closeBackupModal()">❌ TAPOS</button>
+    </div>
+    <textarea id="exportDataArea" readonly style="margin-top:12px;height:180px;font-size:11px"></textarea>
+  </div>
+</div>
+
+<!-- ═══════════════════ RECEIPT PREVIEW MODAL ═══════════════════ -->
 <div id="receiptModal" class="modal hidden">
-  <div>
+  <div class="mbody">
     <h3>🧾 Resibo</h3>
     <div id="receiptContent" class="receipt-preview"></div>
     <div style="display:flex;gap:8px;margin-top:10px">
@@ -211,51 +206,83 @@ th { background:#f1f5f9; font-weight:600; }
   </div>
 </div>
 
-<!-- ═══════════════ MAIN APP ═══════════════ -->
-<div id="app" class="hidden">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-    <div>
-      <div style="display:flex;align-items:center">
-        <strong>🏪 POS System</strong>
-        <span id="netBadge" class="status-badge status-offline">🔌 OFFLINE</span>
-      </div>
-      <div id="userInfoLine"></div>
-      <div id="expiryCountdown" style="font-size:12px"></div>
-      <div id="syncNote" style="font-size:11px;color:#666"></div>
+<!-- ═══════════════════ LOGIN MODAL ═══════════════════ -->
+<div id="loginModal" class="modal">
+  <div class="mbody">
+    <h2 style="text-align:center;color:#2563eb;margin-bottom:20px">🏪 POS System — Login</h2>
+    <select id="loginRole" onchange="showLoginForm(this.value)">
+      <option value="">-- Pumili ng Role --</option>
+      <option value="cashier">💵 Cashier</option>
+      <option value="admin">🔐 Admin / May-ari</option>
+      <option value="sp">🛠️ Service Provider</option>
+    </select>
+    <div id="cashierForm" class="hidden">
+      <label>🏪 Pumili ng Tindahan:</label>
+      <div id="cashierStoreList" style="max-height:180px;overflow-y:auto;margin-bottom:10px"></div>
+      <label>🔑 Password:</label>
+      <input type="password" id="cashierPass" placeholder="Ipasok ang password">
+      <button class="btn-green" onclick="loginCashier()">✅ Mag-login</button>
     </div>
-    <button class="btn-red" onclick="logout()">🚪 Logout</button>
+    <div id="adminForm" class="hidden">
+      <label>🔐 Admin Password:</label>
+      <input type="password" id="adminPass" placeholder="Ipasok ang password">
+      <button class="btn-green" onclick="loginAdmin()">✅ Mag-login</button>
+    </div>
+    <div id="spForm" class="hidden">
+      <label>🛠️ Service Provider Password:</label>
+      <input type="password" id="spPass" placeholder="Ipasok ang SP Password">
+      <button class="btn-purple" onclick="loginSP()">✅ Mag-login</button>
+    </div>
   </div>
+</div>
 
-  <div class="nav">
-    <button id="tabSell" class="hidden" onclick="showTab('sell')">🛒 Benta</button>
-    <button id="tabHeldOrders" class="hidden" onclick="showTab('heldOrders')">⏸️ Itinabi</button>
-    <button id="tabReturn" class="hidden" onclick="showTab('return')">↩️ Pagbabalik</button>
-    <button id="tabPriceLookup" class="hidden" onclick="openPriceLookup()">🔍 Presyo</button>
-    <button id="tabShift" class="hidden" onclick="showTab('shift')">🕐 Shift</button>
-    <button id="tabSales" class="hidden" onclick="showTab('sales')">📊 Benta</button>
-    <button id="tabRangeReport" class="hidden" onclick="showTab('rangeReport')">📅 Panahon</button>
-    <button id="tabProducts" class="hidden" onclick="showTab('products')">📦 Produkto</button>
-    <button id="tabStocks" class="hidden" onclick="showTab('stocks')">📥 Stock</button>
-    <button id="tabStores" class="hidden" onclick="showTab('stores')">🏪 Tindahan</button>
-    <button id="tabShifts" class="hidden" onclick="showTab('shifts')">🕐 Shift Log</button>
-    <button id="tabAuditLog" class="hidden" onclick="showTab('auditLog')">📝 Talaan</button>
-    <button id="tabSettings" class="hidden" onclick="showTab('settings')">⚙️ Setting</button>
-    <button id="tabExport" class="hidden" onclick="exportData()">💾 Backup</button>
-    <button id="tabSyncNow" class="hidden" onclick="manualSync()">🔄 Sync</button>
-    <button id="tabService" class="hidden" onclick="showTab('service')">ℹ️ Serbisyo</button>
-    <button id="tabDeleted" class="hidden" onclick="showTab('deleted')">🗑️ Naibura</button>
+<!-- ═══════════════════ MAIN APPLICATION ═══════════════════ -->
+<div id="app" class="hidden">
+  <div class="topbar">
+    <div>
+      <h1>🏪 POS System <span id="netBadge" class="status-badge status-offline">🔌 OFFLINE</span></h1>
+      <small id="userInfoLine"></small>
+      <small id="syncNote" class="sync-note"></small>
+    </div>
+    <div class="nav">
+      <!-- CASHIER TABS -->
+      <button id="tabSell" class="hidden" onclick="showTab('sell')">🛒 Magbenta</button>
+      <button id="tabHoldOrders" class="hidden" onclick="showTab('holdOrders')">⏸️ Itinabing Order</button>
+      <button id="tabReturn" class="hidden" onclick="showTab('return')">↩️ Pagbabalik</button>
+      <button id="tabPriceLookup" class="hidden" onclick="showTab('priceLookup')">🔍 Hanap Presyo</button>
+      <button id="tabVoidReq" class="hidden" onclick="showTab('voidReq')">📤 Void Request</button>
+      <button id="tabCashReq" class="hidden" onclick="showTab('cashReq')">💰 Cash In/Out</button>
+      <button id="tabProdOutReq" class="hidden" onclick="showTab('prodOutReq')">📦 Product Out</button>
+      <button id="tabShift" class="hidden" onclick="showTab('shift')">🕐 Shift</button>
+      <!-- SHARED TAB -->
+      <button id="tabSales" class="hidden" onclick="showTab('sales')">📊 Arawang Benta</button>
+      <!-- ADMIN TABS -->
+      <button id="tabRangeReport" class="hidden" onclick="showTab('rangeReport')">📅 Petsa Report</button>
+      <button id="tabProducts" class="hidden" onclick="showTab('products')">📦 Produkto</button>
+      <button id="tabStocks" class="hidden" onclick="showTab('stocks')">📥 Stock</button>
+      <button id="tabStores" class="hidden" onclick="showTab('stores')">🏪 Tindahan</button>
+      <button id="tabShifts" class="hidden" onclick="showTab('shifts')">🕐 Shift Log</button>
+      <button id="tabAdminReq" class="hidden" onclick="showTab('adminReq')">✅ Requests</button>
+      <button id="tabAudit" class="hidden" onclick="showTab('audit')">📝 Audit Log</button>
+      <button id="tabBackup" class="hidden" onclick="showTab('backup')">💾 Backup</button>
+      <button id="tabSettings" class="hidden" onclick="showTab('settings')">⚙️ Settings</button>
+      <!-- SP TABS -->
+      <button id="tabService" class="hidden" onclick="showTab('service')">🛠️ Serbisyo</button>
+      <button id="tabDeleted" class="hidden" onclick="showTab('deleted')">🗑️ Naibura/Void</button>
+      <button onclick="logout()">🚪 Logout</button>
+    </div>
   </div>
-
   <div class="container">
-    <!-- SELL SCREEN -->
+
+    <!-- CASHIER: SELL SCREEN -->
     <div id="vSell" class="tab-page hidden">
       <div class="grid2">
         <div class="card">
-          <h3>🔍 Maghanap / I-scan</h3>
-          <input type="text" id="barcodeInput" placeholder="Barcode o Pangalan..." onkeydown="handleBarcodeScan(event)" autofocus>
-          <input type="text" id="prodSearch" placeholder="Salain..." oninput="filterProducts()">
-          <div id="catList" style="margin:6px 0"></div>
-          <div id="prodList" style="max-height:400px;overflow-y:auto"></div>
+          <h3>📋 Kategorya</h3>
+          <div id="catList" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px"></div>
+          <h4>Produkto / Scan</h4>
+          <input type="text" id="prodSearch" placeholder="🔍 I-type o I-scan..." oninput="filterProducts()">
+          <div id="prodList" style="max-height:400px;overflow-y:auto;margin-top:8px"></div>
         </div>
         <div class="card">
           <h3>🛒 Kasalukuyang Order</h3>
@@ -263,892 +290,1252 @@ th { background:#f1f5f9; font-weight:600; }
             <label>Diskwento:</label>
             <select id="discountSel" onchange="recalcTotals()">
               <option value="none">Wala</option>
-              <option value="senior">Senior Citizen —5%</option>
-              <option value="pwd">PWD —5%</option>
+              <option value="senior">Senior Citizen (5%)</option>
+              <option value="pwd">PWD (5%)</option>
             </select>
-            <input type="text" id="discId" placeholder="ID #" style="width:100px">
-            <input type="text" id="discName" placeholder="Pangalan" style="width:120px">
+            <input type="text" id="discId" placeholder="ID #" style="width:120px">
+            <input type="text" id="discName" placeholder="Pangalan" style="width:150px">
           </div>
-          <div id="cartArea" style="min-height:120px;margin-top:8px">
+          <div id="cartArea" style="min-height:150px;margin-top:10px">
             <div class="empty">Wala pang gamit.</div>
           </div>
           <hr class="sep">
-          <div class="totals">KABUUAN: ₱<span id="grandTotal">0.00</span></div>
-          <div class="actions">
-            <button class="btn-gray" onclick="openHoldModal()">⏸️ ITABI</button>
+          <div class="total-box">KABUUAN: ₱<span id="grandTotal">0.00</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px">
+            <button class="btn-gray" onclick="clearCart()">🗑️ LINISIN</button>
             <button class="btn-green" onclick="payCash()">💵 CASH</button>
-            <button class="btn-blue" onclick="payGCash()">📱 GCash</button>
-            <button class="btn-purple" onclick="openSplitPay()">💳 HATI</button>
-            <button class="btn-red" onclick="clearCart()">🗑️ LINIS</button>
+            <button class="btn-blue" onclick="payGCash()">📱 E-WALLET</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+            <button class="btn-orange" onclick="openSplitPay()">💳 SPLIT PAYMENT</button>
+            <button class="btn-gray" onclick="openHoldModal()">⏸️ ITABI</button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- HELD ORDERS -->
-    <div id="vHeldOrders" class="tab-page hidden">
+    <div id="vHoldOrders" class="tab-page hidden">
       <div class="card">
-        <h3>⏸️ Mga Itinabing Order</h3>
-        <div id="heldOrdersList"></div>
+        <h3>⏸️ Itinabing Order</h3>
+        <div id="holdOrderList"></div>
       </div>
     </div>
 
-    <!-- RETURN -->
+    <!-- RETURN / REFUND -->
     <div id="vReturn" class="tab-page hidden">
       <div class="card">
-        <button class="btn-green" onclick="openReturnModal()">➕ BAGONG PAGBABALIK</button>
-        <h4>Kasaysayan ng Pagbabalik</h4>
-        <div id="returnHistoryList"></div>
+        <h3>↩️ Pagbabalik ng Produkto</h3>
+        <button class="btn-blue" onclick="openReturnModal()">➕ Bagong Pagbabalik</button>
+      </div>
+      <div class="card">
+        <h4>Log ng Pagbabalik</h4>
+        <div id="returnLog"></div>
       </div>
     </div>
 
-    <!-- SHIFT -->
+    <!-- PRICE LOOKUP -->
+    <div id="vPriceLookup" class="tab-page hidden">
+      <div class="card">
+        <h3>🔍 Hanapin ang Presyo</h3>
+        <input type="text" id="priceLookupInput2" placeholder="I-type o I-scan ang pangalan/code..." oninput="doPriceLookup2()">
+        <div id="priceResult2" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- CASHIER: SHIFT -->
     <div id="vShift" class="tab-page hidden">
       <div class="card">
         <h3>🕐 Kasalukuyang Shift</h3>
         <div id="shiftStatusArea"></div>
+      </div>
+      <div class="card">
         <h4>Aking Shift Log</h4>
         <div id="myShiftLog"></div>
       </div>
     </div>
 
-    <!-- SALES REPORT -->
+    <!-- CASHIER: VOID REQUEST -->
+    <div id="vVoidReq" class="tab-page hidden">
+      <div class="card">
+        <h3>📤 Mag-request ng Void</h3>
+        <p>Pumili ng <strong>Maling Transaksyon</strong> at <strong>Tamang Transaksyon</strong>.</p>
+        <label>Maling Ticket #:</label>
+        <select id="wrongTicket"></select>
+        <label>Tamang Ticket #:</label>
+        <select id="rightTicket"></select>
+        <label>Dahilan:</label>
+        <textarea id="voidReason" placeholder="Ilagay ang dahilan..." rows="3"></textarea>
+        <button class="btn-green" onclick="submitVoidReq()">✅ Ipadala Request</button>
+      </div>
+      <div class="card">
+        <h4>Aking mga Request</h4>
+        <div id="myVoidReqs"></div>
+      </div>
+    </div>
+
+    <!-- CASHIER: CASH IN/OUT REQUEST -->
+    <div id="vCashReq" class="tab-page hidden">
+      <div class="card">
+        <h3>💰 Cash In / Cash Out Request</h3>
+        <label>Uri:</label>
+        <select id="cashType">
+          <option value="CASHIN">💰 Cash In</option>
+          <option value="CASHOUT">💸 Cash Out</option>
+        </select>
+        <label>Halaga:</label>
+        <input type="number" step="0.01" id="cashAmt" placeholder="0.00">
+        <label>Dahilan:</label>
+        <textarea id="cashReason" placeholder="Ilagay ang dahilan..." rows="3"></textarea>
+        <button class="btn-green" onclick="submitCashReq()">✅ Ipadala</button>
+      </div>
+      <div class="card">
+        <h4>Aking mga Request</h4>
+        <div id="myCashReqs"></div>
+      </div>
+    </div>
+
+    <!-- CASHIER: PRODUCT OUT REQUEST -->
+    <div id="vProdOutReq" class="tab-page hidden">
+      <div class="card">
+        <h3>📦 Product Out Request</h3>
+        <label>Produkto:</label>
+        <select id="prodOutSel"></select>
+        <label>Dami:</label>
+        <input type="number" id="prodOutQty" min="1" value="1">
+        <label>Dahilan:</label>
+        <select id="prodOutReason">
+          <option value="TRANSFER">🚚 Ipadala sa ibang tindahan</option>
+          <option value="DAMAGED">🔴 Sira</option>
+          <option value="EXPIRED">🟡 Napanis</option>
+        </select>
+        <label>Karagdagang Detalye:</label>
+        <textarea id="prodOutNote" placeholder="Pangalan ng tindahan / iba pang detalye..." rows="2"></textarea>
+        <button class="btn-green" onclick="submitProdOut()">✅ Ipadala Request</button>
+      </div>
+      <div class="card">
+        <h4>Aking mga Request</h4>
+        <div id="myProdOutReqs"></div>
+      </div>
+    </div>
+
+    <!-- SALES REPORT / DAILY -->
     <div id="vSales" class="tab-page hidden">
       <div class="card">
-        <h3>📊 Benta Ngayon — <span id="rptDate"></span> <small id="syncInfoSales"></small></h3>
+        <h3>📊 Arawang Benta — <span id="rptDate"></span> <small id="syncInfoSales"></small></h3>
         <div class="grid3">
-          <div class="totals" style="font-size:16px">KABUUAN:<br>₱<span id="rptTotal">0.00</span></div>
-          <div class="totals" style="font-size:16px;background:#e8f5e9">CASH:<br>₱<span id="rptCash">0.00</span></div>
-          <div class="totals" style="font-size:16px;background:#eff6ff">GCASH:<br>₱<span id="rptGCash">0.00</span></div>
+          <div class="total-box-blue">KABUUAN:<br>₱<span id="rptTotal">0.00</span></div>
+          <div class="total-box">CASH:<br>₱<span id="rptCash">0.00</span></div>
+          <div class="total-box-orange">E-WALLET:<br>₱<span id="rptGCash">0.00</span></div>
         </div>
+      </div>
+      <div class="card">
+        <h4>Transaction Log</h4>
         <table>
-          <thead><tr><th>Ticket #</th><th>Oras</th><th>Gamit</th><th>Halaga</th><th>Paraan</th><th>Ref</th><th>Sync</th></tr></thead>
+          <thead><tr><th>Oras</th><th>Gamit</th><th>Halaga</th><th>Paraan</th><th>Ref #</th><th>Katayuan</th></tr></thead>
           <tbody id="salesLogBody"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- RANGE REPORT -->
+    <!-- ADMIN: DATE RANGE REPORT -->
     <div id="vRangeReport" class="tab-page hidden">
       <div class="card">
-        <h3>📅 Ulat sa Panahon</h3>
-        <label>Mula:</label><input type="date" id="rangeFrom">
-        <label>Hanggang:</label><input type="date" id="rangeTo">
-        <button class="btn-blue" onclick="showRangeReport()">✅ Ipakita</button>
+        <h3>📅 Report (Petsa: Mula — Hanggang)</h3>
+        <label>Mula:</label>
+        <input type="date" id="rangeFrom">
+        <label>Hanggang:</label>
+        <input type="date" id="rangeTo">
+        <button class="btn-blue" onclick="showRangeReport()">✅ Ipakita Report</button>
         <div id="rangeResult"></div>
       </div>
     </div>
 
-    <!-- PRODUCTS -->
+    <!-- ADMIN: PRODUCTS -->
     <div id="vProducts" class="tab-page hidden">
       <div class="card">
         <h3>➕ Magdagdag ng Produkto</h3>
-        <label>Barcode:</label><input type="text" id="newProdBarcode">
-        <label>Kategorya:</label><input type="text" id="newCat">
-        <label>Pangalan:</label><input type="text" id="newProdName">
-        <label>Cost:</label><input type="number" step="0.01" id="newProdCost">
-        <label>Presyo:</label><input type="number" step="0.01" id="newProdPrice">
-        <label>Tindahan:</label><select id="prodStoreSel"></select>
+        <label>Kategorya:</label>
+        <input type="text" id="newCat" placeholder="Halimbawa: Pagkain, Inumin...">
+        <label>Pangalan ng Produkto:</label>
+        <input type="text" id="newProdName" placeholder="Ipasok ang pangalan">
+        <label>Presyo (₱):</label>
+        <input type="number" id="newProdPrice" placeholder="0.00" step="0.01" min="0">
+        <label>Tindahan:</label>
+        <select id="prodStoreSel"></select>
         <button class="btn-green" onclick="addProduct()">✅ I-SAVE</button>
       </div>
       <div class="card">
-        <h3>📦 Listahan</h3>
-        <table><thead><tr><th>Code</th><th>Tindahan</th><th>Kategorya</th><th>Pangalan</th><th>Presyo</th><th>Cost</th><th>—</th></tr></thead><tbody id="prodBody"></tbody></table>
+        <h3>📦 Listahan ng Produkto</h3>
+        <table>
+          <thead><tr><th>Tindahan</th><th>Kategorya</th><th>Pangalan</th><th>Presyo</th><th>Gawin</th></tr></thead>
+          <tbody id="prodBody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- STOCKS -->
+    <!-- ADMIN: STOCKS -->
     <div id="vStocks" class="tab-page hidden">
       <div class="card">
-        <h3>📥 Stock In</h3>
-        <label>Tindahan:</label><select id="stockInStore"></select>
-        <label>Produkto:</label><select id="stockInProd"></select>
-        <label>Dami (+ / -):</label><input type="number" id="stockInQty">
-        <button class="btn-green" onclick="stockIn()">✅ I-UPDATE</button>
+        <h3>📥 Stock In (Dagdag na Stock)</h3>
+        <label>Tindahan:</label>
+        <select id="stockInStore"></select>
+        <label>Produkto:</label>
+        <select id="stockInProd"></select>
+        <label>Dami na Idadagdag:</label>
+        <input type="number" id="stockInQty" min="1" placeholder="Dami">
+        <button class="btn-green" onclick="stockIn()">✅ I-SAVE</button>
       </div>
       <div class="card">
         <h3>📊 Kasalukuyang Stock</h3>
-        <label>Salain:</label><select id="stockViewStore" onchange="renderStockTab()"><option value="ALL">Lahat ng Tindahan</option></select>
-        <table><thead><tr><th>Tindahan</th><th>Produkto</th><th>Natira</th><th>Katayuan</th><th>Pagkilos</th></tr></thead><tbody id="stockBody"></tbody></table>
+        <label>Salain ayon sa Tindahan:</label>
+        <select id="stockViewStore" onchange="renderStockTab()"><option value="ALL">Lahat ng Tindahan</option></select>
+        <table>
+          <thead><tr><th>Tindahan</th><th>Produkto</th><th>Natira</th><th>Katayuan</th><th>Gawin</th></tr></thead>
+          <tbody id="stockBody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- STORES -->
+    <!-- ADMIN: STORES -->
     <div id="vStores" class="tab-page hidden">
       <div class="card">
         <h3>🏪 Magdagdag ng Tindahan</h3>
-        <label>Code:</label><input type="text" id="newStoreCode">
-        <label>Pangalan:</label><input type="text" id="newStoreName">
-        <label>Address:</label><input type="text" id="newStoreAddr">
+        <label>Store Code:</label>
+        <input type="text" id="newStoreCode" placeholder="Halimbawa: DVO01">
+        <label>Pangalan ng Tindahan:</label>
+        <input type="text" id="newStoreName" placeholder="Halimbawa: Tindahan sa Davao">
         <button class="btn-green" onclick="addStore()">✅ I-SAVE</button>
       </div>
       <div class="card">
         <h3>🏬 Listahan ng Tindahan</h3>
-        <table><thead><tr><th>Code</th><th>Pangalan</th><th>Address</th><th>—</th></tr></thead><tbody id="storesBody"></tbody></table>
+        <table>
+          <thead><tr><th>Code</th><th>Pangalan</th><th>Gawin</th></tr></thead>
+          <tbody id="storeBody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- SHIFT LOG -->
+    <!-- ADMIN: SHIFT LOG -->
     <div id="vShifts" class="tab-page hidden">
       <div class="card">
-        <h3>🕐 Shift Log</h3>
-        <table><thead><tr><th>Tindahan</th><th>Cashier</th><th>Simula</th><th>Pagsara</th><th>Cash</th><th>GCash</th></tr></thead><tbody id="shiftLogBody"></tbody></table>
+        <h3>🕐 Shift Log — Lahat ng Tindahan</h3>
+        <label>Salain ayon sa Tindahan:</label>
+        <select id="shiftFilterStore" onchange="renderShiftLogTab()"><option value="ALL">Lahat ng Tindahan</option></select>
+        <table>
+          <thead><tr><th>Tindahan</th><th>Cashier</th><th>Simula</th><th>Pagsara</th><th>Cash</th><th>E-Wallet</th><th>Nota</th><th>Katayuan</th></tr></thead>
+          <tbody id="shiftLogBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ADMIN: APPROVE REQUESTS -->
+    <div id="vAdminReq" class="tab-page hidden">
+      <div class="card">
+        <h3>📥 Mga Kahilingan</h3>
+        <h4>Void Requests</h4>
+        <div id="appVoidReqs"></div>
+        <h4>Cash In/Out Requests</h4>
+        <div id="appCashReqs"></div>
+        <h4>Product Out Requests</h4>
+        <div id="appProdOutReqs"></div>
       </div>
     </div>
 
     <!-- AUDIT LOG -->
-    <div id="vAuditLog" class="tab-page hidden">
+    <div id="vAudit" class="tab-page hidden">
       <div class="card">
-        <h3>📋 Talaan ng Sistema</h3>
-        <table><thead><tr><th>Oras</th><th>User</th><th>Tindahan</th><th>Pagkilos</th><th>Detalye</th></tr></thead><tbody id="auditLogBody"></tbody></table>
+        <h3>📝 Audit Log — Lahat ng Kilos</h3>
+        <table>
+          <thead><tr><th>Oras</th><th>Gumagamit</th><th>Tindahan</th><th>Kilos</th></tr></thead>
+          <tbody id="auditBody"></tbody>
+        </table>
       </div>
     </div>
 
-    <!-- SETTINGS -->
+    <!-- BACKUP / EXPORT -->
+    <div id="vBackup" class="tab-page hidden">
+      <div class="card">
+        <h3>💾 Backup at I-export</h3>
+        <button class="btn-green" onclick="openBackupModal()">📤 Buksan ang Backup Tool</button>
+        <p class="data-note" style="margin-top:8px">I-save ang datos upang hindi mawala kapag binago ang telepono.</p>
+      </div>
+    </div>
+
+    <!-- SETTINGS / CHANGE PASSWORD -->
     <div id="vSettings" class="tab-page hidden">
       <div class="card">
         <h3>⚙️ Palitan ang Password</h3>
-        <label>Bagong Cashier Password:</label><input type="password" id="setCashierPass">
-        <label>Bagong Admin Password:</label><input type="password" id="setAdminPass">
-        <label>Bagong SP Password:</label><input type="password" id="setSPPass">
-        <button class="btn-green" onclick="changePasswords()">✅ I-UPDATE</button>
+        <label>Lumang Password:</label>
+        <input type="password" id="settOldPass">
+        <label>Bagong Password:</label>
+        <input type="password" id="settNewPass1">
+        <label>Ulitin ang Bagong Password:</label>
+        <input type="password" id="settNewPass2">
+        <button class="btn-green" onclick="changePassword()">✅ PALITAN</button>
       </div>
     </div>
 
-    <!-- SERVICE -->
+    <!-- SP: SERVICE STATUS -->
     <div id="vService" class="tab-page hidden">
       <div class="card">
         <h3>ℹ️ Katayuan ng Serbisyo</h3>
+        <p><strong>Petsa ng Pagsisimula:</strong> <span id="servStart"></span></p>
+        <p><strong>Panahon ng Pagsubok:</strong> 7 Araw</p>
+        <p><strong>Natatagal na Araw:</strong> <span id="servDaysLeft"></span></p>
         <p><strong>Katayuan:</strong> <span id="servStatus"></span></p>
-        <p><strong>Mag-e-expire sa:</strong> <span id="servExpiry"></span></p>
+        <hr class="sep">
+        <h4>Palawigin ang Panahon</h4>
+        <label>Bagong Petsa ng Pagtatapos:</label>
+        <input type="date" id="newExpiry">
+        <button class="btn-purple" onclick="extendService()">✅ I-UPDATE</button>
       </div>
     </div>
 
-    <!-- DELETED SALES -->
+    <!-- SP: DELETED / VOID LOG -->
     <div id="vDeleted" class="tab-page hidden">
       <div class="card">
-        <h3>🗑️ Naibura / Na-Void</h3>
-        <table><thead><tr><th>Ticket #</th><th>Tindahan</th><th>Kasirera</th><th>Halaga</th><th>Dahilan</th><th>Oras</th></tr></thead><tbody id="deletedBody"></tbody></table>
+        <h3>🗑️ Log ng Nabura at Void</h3>
+        <table>
+          <thead><tr><th>Oras</th><th>Uri</th><th>Detalye</th><th>Pinagbura</th></tr></thead>
+          <tbody id="deletedBody"></tbody>
+        </table>
       </div>
     </div>
+
   </div>
 </div>
 
 <script>
-// ═══════════════════ HELPERS & UTILS ═══════════════════
-const $ = id => document.getElementById(id);
-const fmt = n => (n||0).toFixed(2);
-const dt = () => new Date().toLocaleString('en-PH');
-const today = () => new Date().toISOString().split('T')[0];
-const D = () => new Date().toLocaleDateString('en-PH');
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
-let TICKET_COUNTER = parseInt(localStorage.getItem('pos_ticket_counter') || '0');
-const getNextTicketNumber = () => {
-  TICKET_COUNTER++;
-  localStorage.setItem('pos_ticket_counter', String(TICKET_COUNTER));
-  return `TXN-${String(TICKET_COUNTER).padStart(5,'0')}`;
-};
+// ═══════════════════ GLOBAL CONSTANTS ═══════════════════
+const DAYS_TRIAL = 7;
+const DEF_ADMIN_PASS = "admin123";
+const DEF_SP_PASS = "sp123";
+const DEF_CASHIER_PASS = "123456";
+const LS = localStorage;
 
-// ═══════════════════ STORAGE ═══════════════════
-function load(key, def){ try { const d=localStorage.getItem(key); return d?JSON.parse(d):JSON.parse(JSON.stringify(def)); } catch(e){ return def; } }
-function save(key,val){ try { localStorage.setItem(key,JSON.stringify(val)); return true; } catch(e){ alert('⚠️ Storage puno!'); return false; } }
+// ═══════════════════ HELPERS ═══════════════════
+function $(id){return document.getElementById(id)}
+function fmt(n)=>(n||0).toFixed(2)
+function fmtDate(d){return d?new Date(d).toLocaleDateString('tl-PH'):'—'}
+function fmtTime(d){return d?new Date(d).toLocaleString('tl-PH'):'—'}
+function today(){return new Date().toISOString().slice(0,10)}
+function genTicket(){return 'T'+new Date().toISOString().replace(/\D/g,'').slice(0,12)}
 
-// ═══════════════════ DEFAULTS ═══════════════════
-const DEFAULT_PASS = { cashier:'1234', admin:'8888', sp:'19970407chan' };
-const TRIAL_DAYS = 7;
-function checkPasswordStrength(pw){ return pw && pw.length >= 6; }
-
-// ═══════════════════ DATA INIT ═══════════════════
-let PASS = load('pos_pass', {...DEFAULT_PASS,firstLogin:true});
-let STORES = load('pos_stores', []);
-let PRODUCTS = load('pos_products', []);
-let STOCKS = load('pos_stocks', {});
-let SALES = load('pos_sales', []);
-let SHIFTS = load('pos_shifts', []);
-let RETURN_RECORDS = load('pos_returns', []);
-let DELETED_SALES = load('pos_deleted_sales', []);
-let AUDIT_LOG = load('pos_audit_log', []);
-let SERVICE = load('pos_service', {active:true,expiry:null,firstUse:null});
-let IS_ONLINE = navigator.onLine;
-let LAST_SYNCED = localStorage.getItem('pos_last_synced');
-
-// ═══════════════════ SERVICE & EXPIRY ═══════════════════
-function getExpiryDate(){
-  if(!SERVICE.firstUse){ SERVICE.firstUse=new Date().toISOString(); save('pos_service',SERVICE); }
-  if(!SERVICE.expiry){ let e=new Date(SERVICE.firstUse); e.setDate(e.getDate()+TRIAL_DAYS); return e; }
-  return new Date(SERVICE.expiry);
-}
-function isServiceActive(){ return SERVICE.active && new Date() < getExpiryDate(); }
-function showExpiryScreen(){
-  const e=getExpiryDate();
-  $('expiryMsg').innerHTML = `Natapos na:<br><strong>${e.toLocaleDateString('en-PH')} — ${e.toLocaleTimeString('en-PH')}</strong>`;
-  $('expiryScreen').classList.remove('hidden');
-}
-function updateExpiryCountdown(){
-  const e=getExpiryDate(), n=new Date(), d=e-n;
-  if(d<=0) return;
-  const days=Math.floor(d/(1000*60*60*24)), hrs=Math.floor((d%(1000*60*60*24))/(1000*60*60));
-  $('expiryCountdown').textContent = days<=3 ? `⚠️ ${days} araw ${hrs} oras natitira` : `(${days} araw natitira)`;
+// ═══════════════════ INITIALIZE DATA ═══════════════════
+function initData(){
+  if(!LS.getItem('pos_initialized')){
+    const now=new Date();
+    LS.setItem('pos_serviceStart',now.toISOString());
+    LS.setItem('pos_serviceExpiry',new Date(now.getTime()+DAYS_TRIAL*864e5).toISOString());
+    LS.setItem('pos_adminPass',DEF_ADMIN_PASS);
+    LS.setItem('pos_spPass',DEF_SP_PASS);
+    LS.setItem('pos_stores',JSON.stringify([{id:'DVO01',name:'Tindahan sa Davao'}]));
+    LS.setItem('pos_products',JSON.stringify([]));
+    LS.setItem('pos_stocks',JSON.stringify([]));
+    LS.setItem('pos_transactions',JSON.stringify([]));
+    LS.setItem('pos_shifts',JSON.stringify([]));
+    LS.setItem('pos_holdOrders',JSON.stringify([]));
+    LS.setItem('pos_returnLog',JSON.stringify([]));
+    LS.setItem('pos_voidRequests',JSON.stringify([]));
+    LS.setItem('pos_cashRequests',JSON.stringify([]));
+    LS.setItem('pos_prodOutRequests',JSON.stringify([]));
+    LS.setItem('pos_auditLog',JSON.stringify([]));
+    LS.setItem('pos_deletedLog',JSON.stringify([]));
+    LS.setItem('pos_initialized','1');
+  }
 }
 
-// ═══════════════════ AUDIT LOG ═══════════════════
-function addAuditLog(action, details){
-  AUDIT_LOG.unshift({time:new Date().toISOString(),user:user.name,storeId:user.storeId,action,details});
-  save('pos_audit_log',AUDIT_LOG);
-}
-function renderAuditLog(){
-  $('auditLogBody').innerHTML = AUDIT_LOG.map(l=>`<tr><td>${new Date(l.time).toLocaleString('en-PH')}</td><td>${l.user}</td><td>${l.storeId}</td><td><strong>${l.action}</strong></td><td>${l.details}</td></tr>`).join('') || '<tr><td colspan="5" class="empty">Wala pang talaan.</td></tr>';
+// ═══════════════════ AUDIT LOGGER ═══════════════════
+function auditLog(action){
+  const log=JSON.parse(LS.getItem('pos_auditLog')||'[]');
+  log.unshift({time:new Date().toISOString(),user:LS.getItem('pos_userName')||'—',store:LS.getItem('pos_currentStoreName')||'—',action});
+  LS.setItem('pos_auditLog',JSON.stringify(log.slice(0,500)));
 }
 
-// ═══════════════════ APP STATE ═══════════════════
-let user={logged:false,role:'',storeId:null,storeName:'',name:''};
-let cart=[], selectedCategory=null, productSearchQuery='', activeShift=null;
+// ═══════════════════ SERVICE EXPIRY CHECK ═══════════════════
+function checkExpiry(){
+  const exp=LS.getItem('pos_serviceExpiry');
+  if(!exp)return true;
+  if(new Date()>new Date(exp)){
+    $('expiryScreen').classList.remove('hidden');
+    $('expiryMsg').textContent = `Ang serbisyo ay natapos noong ${fmtDate(exp)}`;
+    $('loginModal').classList.add('hidden');
+    return false;
+  }
+  return true;
+}
+
+// ═══════════════════ ONLINE/OFFLINE INDICATOR + SYNC ═══════════════════
+function updateNetStatus(){
+  const online=navigator.onLine;
+  $('netBadge').className='status-badge '+(online?'status-online':'status-offline');
+  $('netBadge').textContent=online?'✅ ONLINE':'🔌 OFFLINE';
+  $('syncNote').textContent=online?'Naka-sync':'Naka-lokal — awto-sync kapag may internet';
+}
 
 // ═══════════════════ LOGIN ═══════════════════
+let gRole='',gStoreId='',gStoreName='',gShiftId='';
+
 function showLoginForm(role){
   ['cashierForm','adminForm','spForm'].forEach(id=>$(id).classList.add('hidden'));
-  if(role==='cashier'){$('cashierForm').classList.remove('hidden');renderCashierStoreList();}
-  else if(role==='admin'){$('adminForm').classList.remove('hidden');}
-  else if(role==='sp'){$('spForm').classList.remove('hidden');}
+  if(role==='cashier'){
+    renderStoreList();
+    $('cashierForm').classList.remove('hidden');
+  }
+  else if(role==='admin')$('adminForm').classList.remove('hidden');
+  else if(role==='sp')$('spForm').classList.remove('hidden');
 }
-function renderCashierStoreList(){
-  const c=$('cashierStoreList');
-  if(!STORES.length){c.innerHTML='<div class="empty">⚠️ Walang tindahan. Mag-login muna bilang Admin.</div>';return;}
-  c.innerHTML=STORES.map((s,i)=>`<div class="store-card" id="cs-${i}" onclick="pickCashierStore(${i})"><strong>${s.code}</strong> — ${s.name}</div>`).join('');
+
+function renderStoreList(){
+  const s=JSON.parse(LS.getItem('pos_stores')||'[]'),h=s.map(x=>
+    `<label class="store-card" data-sid="${x.id}" onclick="selectStore('${x.id}','${x.name}')">${x.id} — ${x.name}</label>`
+  ).join('');
+  $('cashierStoreList').innerHTML=h||'<p>Walang tindahan</p>';
 }
-let selectedCashierStoreIdx=null;
-function pickCashierStore(i){
-  selectedCashierStoreIdx=i;
-  document.querySelectorAll('.store-card').forEach(e=>e.classList.remove('selected'));
-  $(`cs-${i}`).classList.add('selected');
-}
-function firstLoginChangePass(){
-  const p1=$('firstNewPass').value.trim(), p2=$('firstNewPass2').value.trim();
-  if(!checkPasswordStrength(p1))return alert('⚠️ Min 6 characters!');
-  if(p1!==p2)return alert('⚠️ Hindi tugma!');
-  PASS.cashier=p1; PASS.firstLogin=false; save('pos_pass',PASS);
-  $('firstLoginModal').classList.add('hidden'); alert('✅ Password na-update!');
-}
+function selectStore(id,name){gStoreId=id;gStoreName=name;document.querySelectorAll('.store-card').forEach(e=>e.classList.remove('selected'));event.currentTarget.classList.add('selected');}
+
 function loginCashier(){
-  const pass=$('cashierPass').value.trim();
-  if(!pass)return alert('⚠️ Ipasok ang Password!');
-  if(PASS.firstLogin && PASS.cashier===DEFAULT_PASS.cashier)return $('firstLoginModal').classList.remove('hidden');
-  if(pass!==PASS.cashier)return alert('⚠️ Maling Password!');
-  if(selectedCashierStoreIdx===null)return alert('⚠️ Pumili ng Tindahan!');
-  const s=STORES[selectedCashierStoreIdx];
-  user={logged:true,role:'cashier',storeId:s.code,storeName:s.name,name:'Cashier'};
-  addAuditLog('LOGIN','Cashier nag-login'); startApp();
+  const pass=$('cashierPass').value;
+  const st=JSON.parse(LS.getItem('pos_shifts')||'[]').find(x=>x.storeId===gStoreId && !x.ended);
+  if(!gStoreId)return alert('Pumili muna ng tindahan');
+  if(pass!==DEF_CASHIER_PASS)return alert('Maling Password');
+  gRole='cashier';LS.setItem('pos_role',gRole);LS.setItem('pos_currentStoreId',gStoreId);LS.setItem('pos_currentStoreName',gStoreName);LS.setItem('pos_userName','Cashier');
+  if(!st)return showFirstPassModal();
+  finishLogin();
 }
 function loginAdmin(){
-  const pass=$('adminPass').value.trim();
-  if(!pass)return alert('⚠️ Ipasok ang Password!');
-  if(pass!==PASS.admin)return alert('⚠️ Maling Admin Password!');
-  user={logged:true,role:'admin',storeId:'ALL',storeName:'Lahat ng Tindahan',name:'Admin'};
-  addAuditLog('LOGIN','Admin nag-login'); startApp();
+  if($('adminPass').value!==LS.getItem('pos_adminPass'))return alert('Maling Password');
+  gRole='admin';LS.setItem('pos_role',gRole);LS.setItem('pos_userName','Admin');
+  finishLogin();
 }
 function loginSP(){
-  const pass=$('spPass').value.trim();
-  if(!pass)return alert('⚠️ Ipasok ang Password!');
-  if(pass!==PASS.sp)return alert('⚠️ Maling SP Password!');
-  user={logged:true,role:'sp',storeId:'ALL',storeName:'System',name:'Service Provider'};
-  addAuditLog('LOGIN','SP nag-login'); startApp();
+  if($('spPass').value!==LS.getItem('pos_spPass'))return alert('Maling Password');
+  gRole='sp';LS.setItem('pos_role',gRole);LS.setItem('pos_userName','Service Provider');
+  finishLogin();
 }
-function logout(){ if(confirm('🚪 Mag-logout?')){ addAuditLog('LOGOUT','User nag-logout'); location.reload(); } }
 
-// ═══════════════════ START APP ═══════════════════
-function startApp(){
-  if(!isServiceActive()){ showExpiryScreen(); return; }
-  $('loginModal').classList.add('hidden'); $('app').classList.remove('hidden');
-  $('userInfoLine').textContent = `${user.storeName} | ${user.role.toUpperCase()}`;
-  $('rptDate').textContent = D();
-  updateExpiryCountdown();
-  document.querySelectorAll('.nav button[id^="tab"]').forEach(b=>b.classList.add('hidden'));
-  if(user.role==='cashier'){
-    ['tabSell','tabHeldOrders','tabReturn','tabPriceLookup','tabShift','tabSales','tabSyncNow'].forEach(id=>$(id).classList.remove('hidden'));
-    showTab('sell');
-  } else if(user.role==='admin'){
-    ['tabSales','tabRangeReport','tabProducts','tabStocks','tabStores','tabShifts','tabAuditLog','tabSettings','tabExport','tabSyncNow'].forEach(id=>$(id).classList.remove('hidden'));
-    showTab('sales');
-  } else if(user.role==='sp'){
-    ['tabService','tabDeleted','tabAuditLog'].forEach(id=>$(id).classList.remove('hidden'));
-    showTab('service');
-  }
+function showFirstPassModal(){
+  $('loginModal').classList.add('hidden');
+  $('firstPassModal').classList.remove('hidden');
+}
+function saveNewPassword(){
+  if($('newPass1').value!==$('newPass2').value)return alert('Hindi magkatugma ang password');
+  if(!$('newPass1').value.trim())return alert('Walang laman ang bagong password');
+  LS.setItem('pos_cashierPass_'+gStoreId,$('newPass1').value);
+  auditLog('Binago ang password');
+  alert('Matagumpay! Maaari ka nang mag-login gamit ang bagong password.');
+  $('firstPassModal').classList.add('hidden');
+  startShift();
+}
+
+function finishLogin(){
+  $('loginModal').classList.add('hidden');
+  $('app').classList.remove('hidden');
   updateNetStatus();
+  buildUI();
+  refreshAll();
+  auditLog('Nag-login');
 }
 
-// ═══════════════════ TAB NAV ═══════════════════
-function showTab(tabId){
-  document.querySelectorAll('.tab-page').forEach(p=>p.classList.add('hidden'));
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  $(`v${tabId.charAt(0).toUpperCase()+tabId.slice(1)}`).classList.remove('hidden');
-  $(`tab${tabId.charAt(0).toUpperCase()+tabId.slice(1)}`).classList.add('active');
-  if(tabId==='sell')renderSellScreen();
-  if(tabId==='sales')renderSalesReport();
-  if(tabId==='shift'&&user.role==='cashier')renderShiftScreen();
-  if(tabId==='rangeReport'){$('rangeFrom').value=$('rangeTo').value=today();}
-  if(tabId==='products')renderProductsTab();
-  if(tabId==='stocks')renderStockTab();
-  if(tabId==='stores')renderStoresTab();
-  if(tabId==='shifts')renderShiftLogTab();
-  if(tabId==='auditLog')renderAuditLog();
-  if(tabId==='service')renderServiceTab();
-  if(tabId==='deleted')renderDeletedSales();
-  if(tabId==='heldOrders')renderHeldOrders();
-  if(tabId==='return')renderReturnHistory();
+function logout(){
+  auditLog('Nag-logout');
+  LS.removeItem('pos_role');LS.removeItem('pos_currentStoreId');LS.removeItem('pos_currentStoreName');
+  LS.removeItem('pos_cart');LS.removeItem('pos_currentDiscount');
+  location.reload();
 }
 
-// ═══════════════════ SELL SCREEN ═══════════════════
-function renderSellScreen(){ renderCategories(); renderProductsList(); recalcTotals(); }
-function handleBarcodeScan(e){
-  if(e.key==='Enter'){
-    const code=$('barcodeInput').value.trim();
-    if(!code)return;
-    const m=PRODUCTS.find(p=>p.storeId===user.storeId&&((p.barcode&&p.barcode===code)||p.name.toLowerCase()===code.toLowerCase()||(p.barcode&&p.barcode.toLowerCase()===code.toLowerCase())));
-    if(m){addToCartByProduct(m);$('barcodeInput').value='';}
-    else alert('⚠️ Walang produkto!');
+// ═══════════════════ PASSWORD SETTINGS ═══════════════════
+function changePassword(){
+  const oldPass=$('settOldPass').value,new1=$('settNewPass1').value,new2=$('settNewPass2').value;
+  if(new1!==new2)return alert('Hindi magkatugma');
+  if(!new1.trim())return alert('Walang laman');
+  let ok=false;
+  if(gRole==='admin' && oldPass===LS.getItem('pos_adminPass')){LS.setItem('pos_adminPass',new1);ok=true;}
+  if(gRole==='sp' && oldPass===LS.getItem('pos_spPass')){LS.setItem('pos_spPass',new1);ok=true;}
+  if(!ok)return alert('Maling lumang password');
+  auditLog('Binago ang password');
+  alert('Na-update na!');
+  $('settOldPass').value=$('settNewPass1').value=$('settNewPass2').value='';
+}
+
+// ═══════════════════ TAB SYSTEM ═══════════════════
+let gCurrentTab='';
+function showTab(id){
+  gCurrentTab=id;
+  document.querySelectorAll('.tab-page').forEach(e=>e.classList.add('hidden'));
+  document.querySelectorAll('.nav button').forEach(e=>e.classList.remove('active'));
+  $(`v${id[0].toUpperCase()+id.slice(1)}`)?.classList.remove('hidden');
+  $(`tab${id[0].toUpperCase()+id.slice(1)}`)?.classList.add('active');
+  if(id==='sales')renderSalesTab();
+  if(id==='products')renderProductsTab();
+  if(id==='stocks')renderStockTab();
+  if(id==='stores')renderStoresTab();
+  if(id==='shifts')renderShiftLogTab();
+  if(id==='holdOrders')renderHoldOrdersTab();
+  if(id==='audit')renderAuditTab();
+  if(id==='service')renderServiceTab();
+  if(id==='deleted')renderDeletedTab();
+  if(id==='return')renderReturnTab();
+}
+function buildUI(){
+  const role=LS.getItem('pos_role');
+  const show=ids=>ids.forEach(id=>{if($(id))$(id).classList.remove('hidden');});
+  if(role==='cashier')show(['tabSell','tabHoldOrders','tabReturn','tabPriceLookup','tabVoidReq','tabCashReq','tabProdOutReq','tabShift','tabSales']);
+  if(role==='admin')show(['tabSell','tabVoidReq','tabCashReq','tabProdOutReq','tabShift','tabSales','tabRangeReport','tabProducts','tabStocks','tabStores','tabShifts','tabAdminReq','tabAudit','tabBackup','tabSettings']);
+  if(role==='sp')show(['tabSales','tabRangeReport','tabProducts','tabStocks','tabStores','tabShifts','tabAudit','tabBackup','tabService','tabDeleted']);
+  $('userInfoLine').textContent = `${LS.getItem('pos_userName')||''} — ${LS.getItem('pos
+                                                                                    _currentStoreName')||''}`;
+}
+function refreshAll(){
+  renderSalesTab();
+}
+
+// ═══════════════════ SHIFT MANAGEMENT ═══════════════════
+function startShift(){
+  const shifts=JSON.parse(LS.getItem('pos_shifts')||'[]');
+  if(shifts.find(x=>x.storeId===gStoreId && !x.ended)){
+    alert('May bukas na shift na!');
+    finishLogin();
+    return;
   }
+  gShiftId='S'+Date.now();
+  shifts.unshift({
+    id:gShiftId,
+    storeId:gStoreId,
+    storeName:gStoreName,
+    cashier:LS.getItem('pos_userName')||'Cashier',
+    started:new Date().toISOString(),
+    ended:null,
+    startCash:0,
+    endCash:null,
+    endGcash:null,
+    denomination:'',
+    note:''
+  });
+  LS.setItem('pos_shifts',JSON.stringify(shifts));
+  auditLog('Nagsimula ng Shift');
+  alert('Shift Nagsimula! Maaari ka nang magbenta.');
+  finishLogin();
 }
-function addToCartByProduct(p){
-  const key=`${user.storeId}|${p.name}`;
-  const qtyInCart=cart.filter(c=>c.name===p.name).reduce((s,i)=>s+i.qty,0)+1;
-  const avail=STOCKS[key]||0;
-  if(avail<=0||qtyInCart>avail)return alert(`⚠️ Kulang sa stock! Mayroon: ${avail}`);
-  const ex=cart.find(c=>c.name===p.name&&c.price===p.price);
-  ex?ex.qty++:cart.push({...p,qty:1});
-  recalcTotals(); renderCart();
+
+function openShiftCloseModal(){
+  const shifts=JSON.parse(LS.getItem('pos_shifts')||'[]');
+  const shift=shifts.find(x=>x.storeId===gStoreId && !x.ended);
+  if(!shift)return alert('Walang bukas na shift!');
+  gShiftId=shift.id;
+  $('shiftStartTm').textContent=fmtTime(shift.started);
+  const mins=Math.round((Date.now()-new Date(shift.started))/60000);
+  $('shiftDuration').textContent=`${Math.floor(mins/60)} oras ${mins%60} minuto`;
+  $('shiftCloseModal').classList.remove('hidden');
 }
+function closeShiftModal(){$('shiftCloseModal').classList.add('hidden');}
+function confirmShiftClose(){
+  const shifts=JSON.parse(LS.getItem('pos_shifts')||'[]');
+  const idx=shifts.findIndex(x=>x.id===gShiftId);
+  if(idx===-1)return;
+  shifts[idx].ended=new Date().toISOString();
+  shifts[idx].endCash=parseFloat($('shiftCashOnHand').value)||0;
+  shifts[idx].endGcash=parseFloat($('shiftGcashOnHand').value)||0;
+  shifts[idx].denomination=$('shiftCashDenom').value;
+  shifts[idx].note=$('shiftNote').value;
+  LS.setItem('pos_shifts',JSON.stringify(shifts));
+  auditLog('Isinara ang Shift');
+  closeShiftModal();
+  alert('Shift Isinara na!');
+  showTab('shift');
+}
+
+// ═══════════════════ PRODUCTS & CATEGORIES ═══════════════════
+let gCart=[];
+let gSelCat='LAHAT';
+
 function renderCategories(){
-  const c=[...new Set(PRODUCTS.filter(p=>p.storeId===user.storeId).map(p=>p.category).filter(cat=>cat))];
-  $('catList').innerHTML=`<button class="cat-btn ${selectedCategory===null?'active':''}" onclick="selectCategory(null)">Lahat</button>`+c.map(cat=>`<button class="cat-btn ${selectedCategory===cat?'active':''}" onclick="selectCategory('${cat}')">${cat}</button>`).join('');
+  const prods=JSON.parse(LS.getItem('pos_products')||'[]');
+  const cats=[...new Set(prods.map(x=>x.category||'Iba pa'))];
+  let h=`<button class="cat-btn ${gSelCat==='LAHAT'?'active':''}" onclick="selCat('LAHAT')">Lahat</button>`;
+  cats.forEach(c=>h+=`<button class="cat-btn ${gSelCat===c?'active':''}" onclick="selCat('${c}')">${c}</button>`);
+  $('catList').innerHTML=h;
 }
-function selectCategory(cat){ selectedCategory=cat; renderCategories(); renderProductsList(); }
-function filterProducts(){ productSearchQuery=$('prodSearch').value.toLowerCase(); renderProductsList(); }
-function renderProductsList(){
-  let list=PRODUCTS.filter(p=>p.storeId===user.storeId);
-  if(selectedCategory)list=list.filter(p=>p.category===selectedCategory);
-  if(productSearchQuery)list=list.filter(p=>p.name.toLowerCase().includes(productSearchQuery)||(p.barcode&&p.barcode.toLowerCase().includes(productSearchQuery)));
-  $('prodList').innerHTML=list.length?list.map((p,i)=>{
-    const key=`${user.storeId}|${p.name}`, qty=STOCKS[key]||0, low=qty<=5;
-    return `<button class="prod-btn" onclick="addToCart(${i})">${p.barcode?'['+p.barcode+'] ':''}${p.name} — ₱${fmt(p.price)} ${low?'⚠️':''}</button>`;
-  }).join(''):'<div class="empty">Walang produkto.</div>';
+function selCat(c){gSelCat=c;filterProducts();}
+function filterProducts(){
+  renderCategories();
+  const q=($('prodSearch')?.value||'').toLowerCase();
+  const prods=JSON.parse(LS.getItem('pos_products')||'[]').filter(x=>
+    (gSelCat==='LAHAT'||x.category===gSelCat) &&
+    (!q||x.name.toLowerCase().includes(q)||x.price.toString().includes(q))
+  );
+  const stocks=JSON.parse(LS.getItem('pos_stocks')||'[]');
+  const h=prods.map(p=>{
+    const st=stocks.find(s=>s.storeId===gStoreId && s.productId===p.id);
+    const qty=st?.qty||0;
+    return `<button class="prod-btn ${qty<1?'opacity-50':''}" ${qty<1?'disabled':''} 
+      onclick="addToCart('${p.id}','${p.name}',${p.price})">
+      <strong>${p.name}</strong> — ₱${fmt(p.price)}
+      ${qty<1?'<span class="low-stock"> — Wala sa Stock</span>':` (${qty} natira)`}
+    </button>`;
+  }).join('');
+  $('prodList').innerHTML=h||'<p>Walang produkto</p>';
 }
-function addToCart(i){
-  const sp=PRODUCTS.filter(p=>p.storeId===user.storeId), p=sp[i];
-  if(!p)return;
-  const key=`${user.storeId}|${p.name}`, qtyInCart=cart.filter(c=>c.name===p.name).reduce((s,x)=>s+x.qty,0)+1, avail=STOCKS[key]||0;
-  if(avail<=0||qtyInCart>avail)return alert(`⚠️ Kulang sa stock! Mayroon: ${avail}`);
-  const ex=cart.find(x=>x.name===p.name&&x.price===p.price);
-  ex?ex.qty++:cart.push({...p,qty:1});
-  recalcTotals(); renderCart();
+
+function addToCart(id,name,price){
+  const idx=gCart.findIndex(x=>x.id===id);
+  if(idx>=0)gCart[idx].qty++;
+  else gCart.push({id,name,price,qty:1});
+  LS.setItem('pos_cart',JSON.stringify(gCart));
+  recalcTotals();
+  filterProducts();
 }
-function renderCart(){
-  if(!cart.length){$('cartArea').innerHTML='<div class="empty">Wala pang gamit.</div>';return;}
-  $('cartArea').innerHTML=cart.map((item,i)=>`<div class="cart-row"><div><strong>${item.name}</strong><br>₱${fmt(item.price)} × ${item.qty}</div><div><button class="btn-sm btn-gray" onclick="chgCartQty(${i},-1)">−</button><button class="btn-sm btn-gray" onclick="chgCartQty(${i},1)">+</button><button class="btn-sm btn-red" onclick="removeCartItem(${i})">×</button></div></div>`).join('');
+function removeFromCart(idx){
+  if(gCart[idx].qty>1)gCart[idx].qty--;
+  else gCart.splice(idx,1);
+  LS.setItem('pos_cart',JSON.stringify(gCart));
+  recalcTotals();
 }
-function chgCartQty(i,d){
-  const item=cart[i], key=`${user.storeId}|${item.name}`, newQty=item.qty+d, avail=(STOCKS[key]||0)+item.qty;
-  if(newQty>avail)return alert(`⚠️ Kulang sa stock! Mayroon: ${avail}`);
-  newQty<=0?cart.splice(i,1):cart[i].qty=newQty;
-  recalcTotals(); renderCart();
-}
-function removeCartItem(i){ cart.splice(i,1); recalcTotals(); renderCart(); }
-function clearCart(){ if(!cart.length||confirm('🗑️ Linisin?')){cart=[];recalcTotals();renderCart();$('discountSel').value='none';$('discId').value='';$('discName').value='';} }
 function recalcTotals(){
-  let total=cart.reduce((s,i)=>s+i.price*i.qty,0);
-  const dt=$('discountSel').value;
-  if(dt==='senior'||dt==='pwd'){
-    const id=$('discId').value.trim(), name=$('discName').value.trim();
-    if(!id||!name){alert('⚠️ Kailangan ng ID at Pangalan!');$('discountSel').value='none';}else total*=0.95;
-  }
+  const disc=$('discountSel')?.value||'none';
+  let total=gCart.reduce((s,x)=>s+x.price*x.qty,0);
+  if((disc==='senior'||disc==='pwd')&&$('discId')?.value)total*=0.95;
   $('grandTotal').textContent=fmt(total);
 }
-function getTotalAmount(){return parseFloat($('grandTotal').textContent);}
+function clearCart(){
+  if(!confirm('Burahin ang kasalukuyang order?'))return;
+  gCart=[];LS.removeItem('pos_cart');
+  if($('discountSel'))$('discountSel').value='none';
+  if($('discId'))$('discId').value='';
+  if($('discName'))$('discName').value='';
+  recalcTotals();
+  renderCart();
+  filterProducts();
+}
+function renderCart(){
+  if(!gCart.length){
+    $('cartArea').innerHTML='<div class="empty">Wala pang gamit.</div>';
+    return;
+  }
+  $('cartArea').innerHTML=gCart.map((x,i)=>`
+    <div class="cart-row">
+      <div><strong>${x.name}</strong><br>₱${fmt(x.price)} × ${x.qty}</div>
+      <div><strong>₱${fmt(x.price*x.qty)}</strong> 
+        <button class="btn-sm btn-red" onclick="removeFromCart(${i})">−</button></div>
+    </div>`).join('');
+}
 
 // ═══════════════════ PAYMENT ═══════════════════
 function payCash(){
-  const total=getTotalAmount(); if(!total)return alert('⚠️ Walang halaga!');
-  const given=parseFloat(prompt(`Kabuuang Halaga: ₱${fmt(total)}\nIpasok ang ibinayad:`));
-  if(isNaN(given)||given<total)return alert('⚠️ Kulang!');
-  completeSale('CASH',total,given,given-total);
+  if(!gCart.length)return alert('Walang gamit sa order!');
+  const total=parseFloat($('grandTotal').textContent);
+  let give=parseFloat(prompt(`Kabuuang Halaga: ₱${fmt(total)}\nIpasok ang Binayad:`));
+  if(isNaN(give)||give<total)return alert('Hindi sapat ang halaga!');
+  completeSale('CASH',give,total);
 }
 function payGCash(){
-  const total=getTotalAmount(); if(!total)return alert('⚠️ Walang halaga!');
-  const ref=prompt('Ipasok ang Reference #:'); if(!ref)return alert('⚠️ Kailangan ang Ref #!');
-  completeSale('GCASH',total,total,0,ref);
+  if(!gCart.length)return alert('Walang gamit sa order!');
+  const total=parseFloat($('grandTotal').textContent);
+  const ref=prompt(`Kabuuang Halaga: ₱${fmt(total)}\nIpasok ang GCash Reference #:`);
+  if(!ref)return;
+  completeSale('GCash',total,total,ref);
 }
-// ═══════════════════ SPLIT PAYMENT ═══════════════════
 function openSplitPay(){
-  const total = getTotalAmount();
-  if (!total) return alert('⚠️ Walang halaga!');
-  $('splitTotal').textContent = `₱${fmt(total)}`;
-  $('splitCash').value = '0.00';
-  $('splitGCash').value = fmt(total);
-  $('splitRef').value = '';
-  document.getElementById('splitModal').classList.remove('hidden');
+  if(!gCart.length)return alert('Walang gamit sa order!');
+  const total=parseFloat($('grandTotal').textContent);
+  $('splitTotal').textContent='₱'+fmt(total);
+  $('splitCash').value='';$('splitGCash').value='';$('splitRef').value='';
+  $('splitModal').classList.remove('hidden');
 }
 function calcSplitGCash(){
-  const total = getTotalAmount();
-  const cash = parseFloat($('splitCash').value) || 0;
-  const gcash = Math.max(0, total - cash);
-  $('splitGCash').value = fmt(gcash);
+  const total=parseFloat($('grandTotal').textContent);
+  const cash=parseFloat($('splitCash').value)||0;
+  $('splitGCash').value=fmt(Math.max(0,total-cash));
 }
+function closeSplitModal(){$('splitModal').classList.add('hidden');}
 function confirmSplitPay(){
-  const total = getTotalAmount();
-  const cash = parseFloat($('splitCash').value) || 0;
-  const gcash = parseFloat($('splitGCash').value) || 0;
-  const ref = $('splitRef').value.trim();
-  if (cash < 0 || gcash < 0 || Math.abs((cash + gcash) - total) > 0.01)
-    return alert('⚠️ Hindi tugma ang halaga!');
-  if (gcash > 0 && !ref)
-    return alert('⚠️ Kailangan ang GCash Reference #!');
-  completeSale('SPLIT', total, cash, 0, ref, gcash);
+  const total=parseFloat($('grandTotal').textContent);
+  const cash=parseFloat($('splitCash').value)||0;
+  const gcash=parseFloat($('splitGCash').value)||0;
+  const ref=$('splitRef').value.trim();
+  if(cash+gcash<total-0.01)return alert('Hindi sapat ang kabuuan!');
+  if(gcash>0&&!ref)return alert('Ilagay ang Reference # para sa E-Wallet!');
+  completeSale('SPLIT',cash,total,ref,gcash);
   closeSplitModal();
 }
-function closeSplitModal(){ $('splitModal').classList.add('hidden'); }
-// ═══════════════════ COMPLETE SALE ═══════════════════
-function completeSale(method, total, cashGiven=0, change=0, ref='', gcashAmt=0){
-  if (!activeShift) return alert('⚠️ Walang bukas na Shift!');
-  const txnId = getNextTicketNumber();
-  const discount = $('discountSel').value;
-  const discId = $('discId').value.trim();
-  const discName = $('discName').value.trim();
-  const sale = {
-    id: txnId, storeId: user.storeId, cashier: user.name, shiftId: activeShift.id,
-    items: cart.map(i=>({name:i.name,qty:i.qty,price:i.price,amount:i.price*i.qty})),
-    total, method, cashGiven, change, gcashAmt, ref, discount, discId, discName,
-    time: new Date().toISOString(), synced: false
-  };
-  SALES.unshift(sale); save('pos_sales', SALES);
-  // Deduct stock
-  cart.forEach(i=>{
-    const key = `${user.storeId}|${i.name}`;
-    if (STOCKS[key] !== undefined) STOCKS[key] -= i.qty;
+
+function completeSale(method,cashGiven,total,ref='',gcashPortion=0){
+  const ticket=genTicket();
+  const stocks=JSON.parse(LS.getItem('pos_stocks')||'[]');
+  gCart.forEach(item=>{
+    const idx=stocks.findIndex(s=>s.storeId===gStoreId && s.productId===item.id);
+    if(idx>=0)stocks[idx].qty=Math.max(0,stocks[idx].qty-item.qty);
   });
-  save('pos_stocks', STOCKS);
-  addAuditLog('SALE', `Txn ${txnId} — ₱${fmt(total)} ${method}`);
-  // Print receipt
-  showReceipt(sale);
-  // Clear cart
-  cart = []; recalcTotals(); renderCart();
-  $('discountSel').value='none'; $('discId').value=''; $('discName').value='';
+  LS.setItem('pos_stocks',JSON.stringify(stocks));
+
+  const tx={
+    id:ticket,storeId:gStoreId,storeName:gStoreName,
+    time:new Date().toISOString(),items:[...gCart],
+    total,paymentMethod:method,cashGiven,gcashPortion,refNo:ref,
+    discount:($('discountSel')?.value||'none'),discId:$('discId')?.value||'',discName:$('discName')?.value||'',
+    shiftId:gShiftId,status:'COMPLETED'
+  };
+  const txs=JSON.parse(LS.getItem('pos_transactions')||'[]');
+  txs.unshift(tx);
+  LS.setItem('pos_transactions',JSON.stringify(txs));
+
+  auditLog(`Benta — Ticket:${ticket} Halaga:₱${fmt(total)} ${method}`);
+  printReceiptData(tx);
+  clearCart();
+  alert(`✅ Bayad na! Ticket #${ticket}`);
 }
 
 // ═══════════════════ RECEIPT ═══════════════════
-function showReceipt(sale){
-  let lines = [];
-  lines.push('          POS SYSTEM');
-  lines.push(`Tindahan: ${sale.storeId}`);
-  lines.push(`Kasirera: ${sale.cashier}`);
-  lines.push(`#${sale.id}`);
-  lines.push(`${new Date(sale.time).toLocaleString('en-PH')}`);
-  lines.push('--------------------------------');
-  sale.items.forEach(it=>lines.push(`${it.name}\n${it.qty}×${fmt(it.price).padStart(7)} = ${fmt(it.amount).padStart(10)}`));
-  lines.push('--------------------------------');
-  if (sale.discount!=='none') lines.push(`DISKWNTO (${sale.discount}): -₱${fmt(sale.total/0.95*0.05).padStart(10)}`);
-  lines.push(`KABUUAN: ₱${fmt(sale.total).padStart(10)}`);
-  if (sale.method==='CASH'){
-    lines.push(`CASH:    ₱${fmt(sale.cashGiven).padStart(10)}`);
-    lines.push(`BALIK:   ₱${fmt(sale.change).padStart(10)}`);
-  } else if (sale.method==='GCASH'){
-    lines.push(`GCASH:   ₱${fmt(sale.total).padStart(10)}`);
-    lines.push(`Ref: ${sale.ref}`);
-  } else {
-    lines.push(`CASH:    ₱${fmt(sale.cashGiven).padStart(10)}`);
-    lines.push(`GCASH:   ₱${fmt(sale.gcashAmt).padStart(10)}`);
-    if (sale.ref) lines.push(`Ref: ${sale.ref}`);
+function printReceiptData(tx){
+  let out=`====================================\n`;
+  out+=`        RESIBO NG BENTA\n`;
+  out+=`====================================\n`;
+  out+=`Tindahan: ${tx.storeName}\n`;
+  out+=`Ticket #: ${tx.id}\n`;
+  out+=`Petsa/Oras: ${fmtTime(tx.time)}\n`;
+  out+=`------------------------------------\n`;
+  tx.items.forEach(it=>out+=`${it.name} x${it.qty}\n  ₱${fmt(it.price)} = ₱${fmt(it.price*it.qty)}\n`);
+  out+=`------------------------------------\n`;
+  if(tx.discount!=='none')out+=`Diskwento (${tx.discount}): -5%\n`;
+  out+=`KABUUAN: ₱${fmt(tx.total)}\n`;
+  out+=`Paraan: ${tx.paymentMethod}\n`;
+  if(tx.paymentMethod==='CASH'){
+    out+=`Tinanggap: ₱${fmt(tx.cashGiven)}\n`;
+    out+=`Sukli: ₱${fmt(tx.cashGiven-tx.total)}\n`;
   }
-  lines.push('--------------------------------');
-  lines.push('  SALAMAT PO!');
-  $('receiptContent').textContent = lines.join('\n');
+  if(tx.gcashPortion>0)out+=`GCash: ₱${fmt(tx.gcashPortion)} Ref: ${tx.refNo}\n`;
+  out+=`====================================\nSalamat sa Pagbili!\n====================================\n`;
+  $('receiptContent').textContent=out;
   $('receiptModal').classList.remove('hidden');
 }
-function printReceipt(){ window.print(); }
-function closeReceiptModal(){ $('receiptModal').classList.add('hidden'); }
+function printReceipt(){window.print();}
+function closeReceiptModal(){$('receiptModal').classList.add('hidden');}
 
-// ═══════════════════ HELD ORDERS ═══════════════════
-let HELD_ORDERS = load('pos_held', []);
-function openHoldModal(){ if(!cart.length)return; $('holdOrderName').value=''; $('holdModal').classList.remove('hidden'); }
-function closeHoldModal(){ $('holdModal').classList.add('hidden'); }
-function saveHeldOrder(){
-  const name = $('holdOrderName').value.trim() || `Order ${Date.now()}`;
-  HELD_ORDERS.unshift({id:uid(),name,storeId:user.storeId,cashier:user.name,cart:cart.slice(),time:new Date().toISOString()});
-  save('pos_held',HELD_ORDERS); closeHoldModal();
-  cart=[]; recalcTotals(); renderCart();
-  alert(`✅ Itinabi: ${name}`);
+// ═══════════════════ HOLD ORDERS ═══════════════════
+function openHoldModal(){$('holdLabel').value='';$('holdOrderModal').classList.remove('hidden');}
+function closeHoldModal(){$('holdOrderModal').classList.add('hidden');}
+function saveHoldOrder(){
+  if(!gCart.length)return alert('Walang order na itatabi!');
+  const label=$('holdLabel').value.trim()||'Walang Pangalan';
+  const hld=JSON.parse(LS.getItem('pos_holdOrders')||'[]');
+  hld.unshift({id:'H'+Date.now(),label,items:[...gCart],time:new Date().toISOString(),storeId:gStoreId});
+  LS.setItem('pos_holdOrders',JSON.stringify(hld));
+  auditLog('Itinabi ang Order');
+  closeHoldModal();
+  clearCart();
+  alert('✅ Itinabi na!');
+  showTab('holdOrders');
 }
-function renderHeldOrders(){
-  const list = HELD_ORDERS.filter(h=>h.storeId===user.storeId);
-  $('heldOrdersList').innerHTML = list.length ? list.map(h=>`<div class="card"><strong>${h.name}</strong> — ${new Date(h.time).toLocaleString('en-PH')}<br>
-    ${h.cart.map(i=>`${i.name} × ${i.qty}`).join(', ')}<br>
-    <button class="btn-green" onclick="resumeOrder('${h.id}')">✅ Ituloy</button>
-    <button class="btn-red" onclick="dropHeldOrder('${h.id}')">🗑️ Alisin</button>
-  </div>`).join('') : '<div class="empty">Wala pang itinabi.</div>';
+function renderHoldOrdersTab(){
+  const hld=JSON.parse(LS.getItem('pos_holdOrders')||'[]').filter(x=>x.storeId===gStoreId);
+  $('holdOrderList').innerHTML=hld.length?hld.map(o=>`
+    <div class="card">
+      <strong>${o.label}</strong> — ${fmtTime(o.time)}<br>
+      ${o.items.length} gamit — Kabuuan: ₱${fmt(o.items.reduce((s,i)=>s+i.price*i.qty,0))}
+      <div style="margin-top:8px">
+        <button class="btn-green btn-sm" onclick="recallOrder('${o.id}')">✅ Kunin at Ituloy</button>
+        <button class="btn-red btn-sm" onclick="deleteHold('${o.id}')">🗑️ Alisin</button>
+      </div>
+    </div>`).join(''):'<p class="empty">Walang itinabing order</p>';
 }
-function resumeOrder(id){
-  const idx = HELD_ORDERS.findIndex(h=>h.id===id);
-  if(idx<0)return;
-  if(cart.length && !confirm('⚠️ May kasalukuyang order. Palitan?'))return;
-  cart = HELD_ORDERS[idx].cart.slice();
-  HELD_ORDERS.splice(idx,1); save('pos_held',HELD_ORDERS);
-  recalcTotals(); renderCart(); showTab('sell');
+function recallOrder(id){
+  const hld=JSON.parse(LS.getItem('pos_holdOrders')||'[]');
+  const idx=hld.findIndex(x=>x.id===id);
+  if(idx===-1)return;
+  gCart=hld[idx].items;
+  LS.setItem('pos_cart',JSON.stringify(gCart));
+  hld.splice(idx,1);
+  LS.setItem('pos_holdOrders',JSON.stringify(hld));
+  recalcTotals();renderCart();filterProducts();
+  auditLog('Kinuha ang Itinabing Order');
+  showTab('sell');
 }
-function dropHeldOrder(id){
-  if(!confirm('🗑️ Alisin?'))return;
-  HELD_ORDERS = HELD_ORDERS.filter(h=>h.id!==id);
-  save('pos_held',HELD_ORDERS); renderHeldOrders();
+function deleteHold(id){
+  if(!confirm('Burahin ang itinabing order?'))return;
+  let hld=JSON.parse(LS.getItem('pos_holdOrders')||'[]');
+  hld=hld.filter(x=>x.id!==id);
+  LS.setItem('pos_holdOrders',JSON.stringify(hld));
+  renderHoldOrdersTab();
+}
+
+// ═══════════════════ RETURN / REFUND ═══════════════════
+function openReturnModal(){
+  const txs=JSON.parse(LS.getItem('pos_transactions')||'[]').filter(x=>x.storeId===gStoreId && x.status==='COMPLETED');
+  $('retTicket').innerHTML=txs.map(x=>`<option value="${x.id}">${x.id} — ₱${fmt(x.total)}</option>`).join('');
+  updateReturnProdList();
+  $('returnModal').classList.remove('hidden');
+}
+function updateReturnProdList(){
+  const tx=JSON.parse(LS.getItem('pos_transactions')||'[]').find(x=>x.id===$('retTicket').value);
+  $('retProd').innerHTML=tx?tx.items.map(i=>`<option value="${i.id}">${i.name} (₱${fmt(i.price)})</option>`).join(''):'<option>—</option>';
+}
+function closeReturnModal(){$('returnModal').classList.add('hidden');}
+function confirmReturn(){
+  const ticket=$('retTicket').value,prodId=$('retProd').value,qty=parseInt($('retQty').value)||1,reason=$('retReason').value||'Walang dahilan';
+  if(!ticket||!prodId)return alert('Punan ang lahat ng impormasyon!');
+  const txs=JSON.parse(LS.getItem('pos_transactions')||'[]');
+  const txIdx=txs.findIndex(x=>x.id===ticket);
+  if(txIdx===-1)return alert('Hindi matagpuan ang transaksyon!');
+  const item=txs[txIdx].items.find(x=>x.id===prodId);
+  if(!item||item.qty<qty)return alert('Hindi sapat ang dami!');
+  const stocks=JSON.parse(LS.getItem('pos_stocks')||'[]');
+  const sIdx=stocks.findIndex(s=>s.storeId===gStoreId && s.productId===prodId);
+  if(sIdx>=0)stocks[sIdx].qty+=qty;
+  else stocks.push({storeId:gStoreId,productId:prodId,qty:qty});
+  LS.setItem('pos_stocks',JSON.stringify(stocks));
+  const rLog=JSON.parse(LS.getItem('pos_returnLog')||'[]');
+  rLog.unshift({ticket,productId:prodId,productName:item.name,qty,reason,time:new Date().toISOString(),storeId:gStoreId});
+  LS.setItem('pos_returnLog',JSON.stringify(rLog));
+  auditLog(`Pagbabalik: ${item.name} ×${qty} Ticket:${ticket}`);
+  closeReturnModal();
+  alert('✅ Naibalik na sa Stock!');
+  renderReturnTab();
+}
+function renderReturnTab(){
+  const rLog=JSON.parse(LS.getItem('pos_returnLog')||'[]').filter(x=>x.storeId===gStoreId);
+  $('returnLog').innerHTML=rLog.length?rLog.map(r=>`
+    <div class="card" style="padding:8px 12px">
+      <strong>Ticket:</strong> ${r.ticket} | <strong>${r.productName}</strong> ×${r.qty}<br>
+      <small>${fmtTime(r.time)} — ${r.reason}</small>
+    </div>`).join(''):'<p class="empty">Wala pang pagbabalik</p>';
 }
 
 // ═══════════════════ PRICE LOOKUP ═══════════════════
-function openPriceLookup(){ $('priceLookupInput').value=''; $('priceLookupResult').innerHTML=''; $('priceLookupModal').classList.remove('hidden'); }
-function closePriceLookupModal(){ $('priceLookupModal').classList.add('hidden'); }
 function doPriceLookup(){
-  const q = $('priceLookupInput').value.trim().toLowerCase();
-  if(!q) return $('priceLookupResult').innerHTML='I-type o i-scan ang code/pangalan...';
-  const found = PRODUCTS.filter(p=>p.storeId===user.storeId && (
-    (p.barcode && p.barcode.toLowerCase().includes(q)) || p.name.toLowerCase().includes(q)
-  ));
-  $('priceLookupResult').innerHTML = found.length ? found.map(p=>
-    `<strong>${p.name}</strong><br>Presyo: ₱${fmt(p.price)} | Cost: ₱${fmt(p.cost||0)} | Code: ${p.barcode||'—'}`
-  ).join('<hr>') : '<span style="color:var(--drg)">⚠️ Walang nakitang produkto.</span>';
+  const q=$('priceLookupInput').value.toLowerCase();
+  const prods=JSON.parse(LS.getItem('pos_products')||'[]').filter(x=>!q||x.name.toLowerCase().includes(q));
+  $('priceResult').innerHTML=prods.length?prods.map(p=>`
+    <div class="card" style="padding:8px">
+      <strong>${p.name}</strong><br>Presyo: <span class="tag success">₱${fmt(p.price)}</span> — ${p.category||'Iba pa'}
+    </div>`).join(''):'<p>Walang nahanap</p>';
 }
-
-// ═══════════════════ RETURNS ═══════════════════
-function openReturnModal(){
-  const txns = SALES.filter(s=>s.storeId===user.storeId && !s.deleted);
-  $('returnTxn').innerHTML = '<option value="">— Pumili ng Transaksyon —</option>' +
-    txns.map(t=>`<option value="${t.id}">${t.id} — ${new Date(t.time).toLocaleString('en-PH')}</option>`).join('');
-  $('returnItem').innerHTML=''; $('returnQty').value=1; $('returnNote').value='';
-  $('returnModal').classList.remove('hidden');
-}
-function closeReturnModal(){ $('returnModal').classList.add('hidden'); }
-document.addEventListener('change',e=>{
-  if(e.target.id==='returnTxn'){
-    const txn = SALES.find(s=>s.id===e.target.value);
-    $('returnItem').innerHTML = !txn?'':txn.items.map((it,i)=>`<option value="${i}">${it.name} — ${it.qty} × ₱${fmt(it.price)}</option>`).join('');
-  }
-});
-function confirmReturn(){
-  const txnId=$('returnTxn').value, itemIdx=parseInt($('returnItem').value),
-        qty=parseInt($('returnQty').value), reason=$('returnReason').value, note=$('returnNote').value.trim();
-  if(!txnId || isNaN(itemIdx) || qty<1) return alert('⚠️ Kulang na impormasyon!');
-  const txn = SALES.find(s=>s.id===txnId), item = txn.items[itemIdx];
-  if(qty>item.qty) return alert('⚠️ Sobrang dami!');
-  RETURN_RECORDS.unshift({
-    id:uid(), txnId, storeId:user.storeId, cashier:user.name,
-    itemName:item.name, qty, price:item.price, amount:item.price*qty, reason, note, time:new Date().toISOString()
-  });
-  save('pos_returns',RETURN_RECORDS);
-  // Return stock
-  const key = `${user.storeId}|${item.name}`;
-  if(STOCKS[key]!==undefined) STOCKS[key]+=qty;
-  save('pos_stocks',STOCKS);
-  addAuditLog('RETURN',`${item.name} × ${qty} — ₱${fmt(item.price*qty)}`);
-  alert('✅ Naitala na!'); closeReturnModal(); renderReturnHistory();
-}
-function renderReturnHistory(){
-  const hist = RETURN_RECORDS.filter(r=>r.storeId===user.storeId);
-  $('returnHistoryList').innerHTML = hist.length ? hist.map(r=>`<div class="card">
-    <strong>${r.itemName}</strong> × ${r.qty} — ₱${fmt(r.amount)}<br>
-    Transaksyon: ${r.txnId} | Dahilan: ${r.reason}<br>
-    ${new Date(r.time).toLocaleString('en-PH')} ${r.note?' | Tandaan: '+r.note:''}
-  </div>`).join('') : '<div class="empty">Wala pang pagbabalik.</div>';
-}
-
-// ═══════════════════ SHIFT ═══════════════════
-function renderShiftScreen(){
-  if(!activeShift){
-    $('shiftStatusArea').innerHTML = `<div class="shift-indicator" style="background:#fff7ed;color:#c2410c">⚠️ Walang bukas na Shift</div>
-      <button class="btn-green" onclick="openShift()">✅ BUKASAN ANG SHIFT</button>`;
-  } else {
-    const start = new Date(activeShift.startTime);
-    const now = new Date();
-    $('shiftStartTm').textContent = start.toLocaleString('en-PH');
-    const mins = Math.floor((now-start)/60000);
-    $('shiftDuration').textContent = `${Math.floor(mins/60)} oras ${mins%60} minuto`;
-    $('shiftStatusArea').innerHTML = `<div class="shift-indicator">✅ BUKSAN — Nagsimula: ${start.toLocaleString('en-PH')}</div>
-      <button class="btn-red" onclick="$('shiftCloseModal').classList.remove('hidden')">🔒 ISARA ANG SHIFT</button>`;
-  }
-  renderMyShiftLog();
-}
-function openShift(){
-  if(activeShift) return alert('⚠️ May bukas na Shift!');
-  activeShift = {
-    id:uid(), storeId:user.storeId, cashier:user.name,
-    startTime:new Date().toISOString(), endTime:null,
-    startCash:0, endCash:0, endGCash:0, note:''
-  };
-  SHIFTS.unshift(activeShift); save('pos_shifts',SHIFTS);
-  addAuditLog('SHIFT-OPEN','Shift binuksan');
-  alert('✅ Shift binuksan!'); renderShiftScreen();
-}
-function calcDenomTotal(){
-  const t = 
-    ($('d1000').value||0)*1000 + ($('d500').value||0)*500 + ($('d200').value||0)*200 +
-    ($('d100').value||0)*100 + ($('d50').value||0)*50 + ($('d20').value||0)*20 +
-    ($('d10').value||0)*10 + ($('d5').value||0)*5 + ($('d1').value||0)*1 +
-    parseFloat($('dcoins').value||0);
-  $('denomTotal').textContent = fmt(t);
-}
-function closeShiftModal(){ $('shiftCloseModal').classList.add('hidden'); }
-function confirmShiftClose(){
-  if(!activeShift) return;
-  const cash = parseFloat($('denomTotal').textContent);
-  const gcash = parseFloat($('shiftGcashOnHand').value)||0;
-  activeShift.endTime = new Date().toISOString();
-  activeShift.endCash = cash;
-  activeShift.endGCash = gcash;
-  activeShift.note = $('shiftNote').value.trim();
-  save('pos_shifts',SHIFTS);
-  addAuditLog('SHIFT-CLOSE',`Cash: ₱${fmt(cash)}, GCash: ₱${fmt(gcash)}`);
-  activeShift = null;
-  alert('✅ Shift isinara!');
-  closeShiftModal();
-  renderShiftScreen();
-}
-function renderMyShiftLog(){
-  const list = SHIFTS.filter(s=>s.storeId===user.storeId).slice(0,5);
-  $('myShiftLog').innerHTML = list.length ? `<table><thead><tr><th>Simula</th><th>Pagsara</th><th>Cash</th><th>GCash</th></tr></thead><tbody>` +
-    list.map(s=>`<tr><td>${new Date(s.startTime).toLocaleString('en-PH')}</td><td>${s.endTime?new Date(s.endTime).toLocaleString('en-PH'):'—'}</td>
-    <td>₱${fmt(s.endCash)}</td><td>₱${fmt(s.endGCash)}</td></tr>`).join('') +
-    `</tbody></table>` : '<div class="empty">Wala pang talaan.</div>';
-}
+function closePriceLookupModal(){$('priceLookupModal').classList.add('hidden');}
+function doPriceLookup2(){doPriceLookup();$('priceLookupInput').value=$('priceLookupInput2').value;$('priceLookupInput').dispatchEvent(new Event('input'));}
 
 // ═══════════════════ SALES REPORT ═══════════════════
-function renderSalesReport(){
-  const todayStr = today();
-  const txns = SALES.filter(s=>{
-    const sd = s.time.split('T')[0];
-    return (user.storeId==='ALL' || s.storeId===user.storeId) && sd===todayStr && !s.deleted;
+function renderSalesTab(){
+  $('rptDate').textContent=today();
+  const txs=JSON.parse(LS.getItem('pos_transactions')||'[]').filter(x=>{
+    const d=x.time.slice(0,10);
+    return d===today() && (gRole==='cashier'?x.storeId===gStoreId:true);
   });
-  let total=0, cash=0, gcash=0;
-  txns.forEach(t=>{
-    total += t.total;
-    if(t.method==='CASH') cash += t.cashGiven||t.total;
-    else if(t.method==='GCASH') gcash += t.total;
-    else if(t.method==='SPLIT'){ cash += t.cashGiven||0; gcash += t.gcashAmt||0; }
+  let tCash=0,tGcash=0,tAll=0;
+  txs.forEach(t=>{
+    tAll+=t.total;
+    if(t.paymentMethod==='CASH')tCash+=t.total;
+    else if(t.paymentMethod==='GCash')tGcash+=t.total;
+    else if(t.paymentMethod==='SPLIT'){tCash+=t.cashGiven;tGcash+=t.gcashPortion;}
   });
-  $('rptTotal').textContent = fmt(total);
-  $('rptCash').textContent = fmt(cash);
-  $('rptGCash').textContent = fmt(gcash);
-  $('syncInfoSales').textContent = LAST_SYNCED?`(Huling Sync: ${new Date(LAST_SYNCED).toLocaleString('en-PH')})`:'(Hindi pa na-sync)';
-  $('salesLogBody').innerHTML = txns.map(t=>`<tr><td>${t.id}</td><td>${new Date(t.time).toLocaleTimeString('en-PH')}</td>
-    <td>${t.items.length} item(s)</td><td>₱${fmt(t.total)}</td><td class="tag ${t.method==='GCASH'?'gcash':'cash'}">${t.method}</td>
-    <td>${t.ref||'—'}</td><td>${t.synced?'✅':'❌'}</td></tr>`).join('');
+  $('rptTotal').textContent=fmt(tAll);
+  $('rptCash').textContent=fmt(tCash);
+  $('rptGCash').textContent=fmt(tGcash);
+  $('salesLogBody').innerHTML=txs.map(t=>`
+    <tr>
+      <td>${new Date(t.time).toLocaleTimeString('tl-PH')}</td>
+      <td>${t.items.length} gamit</td>
+      <td>₱${fmt(t.total)}</td>
+      <td>${t.paymentMethod}</td>
+      <td>${t.refNo||'—'}</td>
+      <td><span class="tag success">OK</span></td>
+    </tr>`).join('')||'<tr><td colspan="6" class="empty">Wala pang benta ngayong araw</td></tr>';
 }
 
-// ═══════════════════ RANGE REPORT ═══════════════════
-function showRangeReport(){
-  const f=$('rangeFrom').value, t=$('rangeTo').value;
-  const txns = SALES.filter(s=>{
-    const sd = s.time.split('T')[0];
-    return (user.storeId==='ALL' || s.storeId===user.storeId) && sd>=f && sd<=t && !s.deleted;
-  });
-  let total=0, cash=0, gcash=0, returns=0;
-  txns.forEach(x=>{
-    total += x.total;
-    if(x.method==='CASH') cash += x.cashGiven||x.total;
-    else if(x.method==='GCASH') gcash += x.total;
-    else { cash += x.cashGiven||0; gcash += x.gcashAmt||0; }
-  });
-  RETURN_RECORDS.filter(r=>{
-    const rd = r.time.split('T')[0];
-    return r.storeId===user.storeId && rd>=f && rd<=t;
-  }).forEach(r=>returns += r.amount);
-  $('rangeResult').innerHTML = `<div class="card">
-    <h4>Mula ${f} hanggang ${t}</h4>
-    <p><strong>Kabuuang Benta:</strong> ₱${fmt(total)}</p>
-    <p><strong>Cash:</strong> ₱${fmt(cash)} | <strong>GCash:</strong> ₱${fmt(gcash)}</p>
-    <p><strong>Pagbabalik:</strong> ₱${fmt(returns)}</p>
-    <p><strong>Net:</strong> ₱${fmt(total-returns)}</p>
-    <p>Transaksyon: ${txns.length}</p>
-  </div>`;
-}
-
-// ═══════════════════ PRODUCTS ═══════════════════
-function renderProductsTab(){
-  $('prodStoreSel').innerHTML = STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('');
-  renderProductsTable();
+// ═══════════════════ ADMIN: PRODUCTS & STORES ═══════════════════
+function loadStoreOptions(selId,def=''){
+  const s=JSON.parse(LS.getItem('pos_stores')||'[]');
+  $(selId).innerHTML=s.map(x=>`<option value="${x.id}" ${x.id===def?'selected':''}>${x.id} — ${x.name}</option>`).join('');
 }
 function addProduct(){
-  const barcode=$('newProdBarcode').value.trim(), cat=$('newCat').value.trim()||'Hindi Nakategorya',
-        name=$('newProdName').value.trim(), cost=parseFloat($('newProdCost').value)||0,
-        price=parseFloat($('newProdPrice').value)||0, store=$('prodStoreSel').value;
-  if(!name || !price) return alert('⚠️ Pangalan at Presyo ay kailangan!');
-  PRODUCTS.push({barcode, category:cat, name, cost, price, storeId:store});
-  const key = `${store}|${name}`;
-  if(STOCKS[key]===undefined) STOCKS[key]=0;
-  save('pos_products',PRODUCTS); save('pos_stocks',STOCKS);
-  addAuditLog('PRODUCT-ADD',`${name} — ₱${fmt(price)} (${store})`);
-  alert('✅ Naidagdag!');
-  $('newProdBarcode').value=$('newCat').value=$('newProdName').value=$('newProdCost').value=$('newProdPrice').value='';
-  renderProductsTable();
+  const name=$('newProdName').value.trim(),price=parseFloat($('newProdPrice').value)||0,cat=$('newCat').value.trim()||'Iba pa',store=$('prodStoreSel').value;
+  if(!name||!price||!store)return alert('Punan lahat!');
+  const prods=JSON.parse(LS.getItem('pos_products')||'[]');
+  prods.push({id:'P'+Date.now(),name,price,category:cat,storeId:store});
+  LS.setItem('pos_products',JSON.stringify(prods));
+  auditLog(`Nagdagdag ng Produkto: ${name}`);
+  alert('✅ Nadagdag!');
+  $('newProdName').value=$('newProdPrice').value=$('newCat').value='';
+  renderProductsTab();
 }
-function renderProductsTable(){
-  $('prodBody').innerHTML = PRODUCTS.map((p,i)=>`<tr><td>${p.barcode||'—'}</td><td>${p.storeId}</td><td>${p.category}</td><td>${p.name}</td><td>₱${fmt(p.price)}</td><td>₱${fmt(p.cost||0)}</td>
-    <td><button class="btn-sm btn-red" onclick="delProduct(${i})">🗑️</button></td></tr>`).join('');
+function renderProductsTab(){
+  loadStoreOptions('prodStoreSel');
+  const prods=JSON.parse(LS.getItem('pos_products')||'[]');
+  const s=JSON.parse(LS.getItem('pos_stores')||'[]');
+  const sn=Object.fromEntries(s.map(x=>[x.id,x.name]));
+  $('prodBody').innerHTML=prods.map(p=>`
+    <tr>
+      <td>${sn[p.storeId]||p.storeId}</td>
+      <td>${p.category}</td>
+      <td>${p.name}</td>
+      <td>₱${fmt(p.price)}</td>
+      <td><button class="btn-sm btn-red" onclick="delProduct('${p.id}')">🗑️ Burahin</button></td>
+    </tr>`).join('');
 }
-function delProduct(i){
-  if(!confirm('🗑️ Burahin?')) return;
-  const p = PRODUCTS[i];
-  PRODUCTS.splice(i,1); save('pos_products',PRODUCTS);
-  addAuditLog('PRODUCT-DELETE',`${p.name} (${p.storeId})`);
-  renderProductsTable();
-}
-
-// ═══════════════════ STOCKS ═══════════════════
-function renderStockTab(){
-  $('stockInStore').innerHTML = $('stockViewStore').innerHTML = STORES.map(s=>`<option value="${s.code}">${s.code} — ${s.name}</option>`).join('')+'<option value="ALL">Lahat ng Tindahan</option>';
-  $('stockInProd').innerHTML = PRODUCTS.filter(p=>$('stockInStore').value==='ALL'||p.storeId===$('stockInStore').value).map((p,i)=>`<option value="${i}">${p.storeId} | ${p.name}</option>`).join('');
-  let list = Object.entries(STOCKS).map(([k,q])=>{
-    const [storeId,...rest] = k.split('|');
-    const name = rest.join('|');
-    return {storeId, name, qty};
-  });
-  const f = $('stockViewStore').value;
-  if(f!=='ALL') list = list.filter(x=>x.storeId===f);
-  $('stockBody').innerHTML = list.length ? list.map(x=>{
-    const low = x.qty<=5;
-    return `<tr><td>${x.storeId}</td><td>${x.name}</td><td>${x.qty}</td>
-      <td class="${low?'tag warn':'tag success'}">${low?'⚠️ Mababa':'✅ Sapat'}</td>
-      <td><button class="btn-sm btn-gray" onclick="adjustStock('${x.storeId}','${x.name}')">✏️ Ayusin</button></td></tr>`;
-  }).join('') : '<tr><td colspan="5" class="empty">Wala pang stock.</td></tr>';
-}
-function stockIn(){
-  const store=$('stockInStore').value, pi=$('stockInProd').value, qty=parseInt($('stockInQty').value);
-  if(!store || isNaN(pi) || isNaN(qty)) return alert('⚠️ Kulang na impormasyon!');
-  const p = PRODUCTS.filter(x=>x.storeId===store)[parseInt(pi)];
-  if(!p) return alert('⚠️ Walang produkto!');
-  const key = `${store}|${p.name}`;
-  STOCKS[key] = (STOCKS[key]||0)+qty;
-  save('pos_stocks',STOCKS);
-  addAuditLog('STOCK-UPDATE',`${p.name} @ ${store}: ${qty}`);
-  alert(`✅ Stock na-update: ${p.name} → ${STOCKS[key]}`);
-  renderStockTab();
-}
-function adjustStock(store,name){
-  const q = prompt(`Kasalukuyang stock: ${STOCKS[`${store}|${name}`]||0}\nIpasok ang bagong dami:`);
-  if(!q) return;
-  const n=parseInt(q);
-  if(isNaN(n)) return alert('⚠️ Hindi wasto!');
-  STOCKS[`${store}|${name}`]=n; save('pos_stocks',STOCKS);
-  addAuditLog('STOCK-ADJUST',`${store}|${name} → ${n}`);
-  renderStockTab();
-}
-
-// ═══════════════════ STORES ═══════════════════
-function renderStoresTab(){
-  $('storesBody').innerHTML = STORES.map((s,i)=>`<tr><td>${s.code}</td><td>${s.name}</td><td>${s.address}</td>
-    <td><button class="btn-sm btn-red" onclick="delStore(${i})">🗑️</button></td></tr>`).join('');
+function delProduct(id){
+  if(!confirm('Burahin ang produkto?'))return;
+  let p=JSON.parse(LS.getItem('pos_products')||'[]').filter(x=>x.id!==id);
+  LS.setItem('pos_products',JSON.stringify(p));
+  auditLog('Bumura ng Produkto');
+  renderProductsTab();
 }
 function addStore(){
-  const code=$('newStoreCode').value.trim(), name=$('newStoreName').value.trim(), addr=$('newStoreAddr').value.trim();
-  if(!code || !name) return alert('⚠️ Code at Pangalan ay kailangan!');
-  if(STORES.some(x=>x.code===code)) return alert('⚠️ May ganon nang Code!');
-  STORES.push({code,name,address:addr}); save('pos_stores',STORES);
-  addAuditLog('STORE-ADD',`${code} — ${name}`);
-  alert('✅ Naidagdag!');
-  $('newStoreCode').value=$('newStoreName').value=$('newStoreAddr').value='';
+  const code=$('newStoreCode').value.trim().toUpperCase(),name=$('newStoreName').value.trim();
+  if(!code||!name)return alert('Punan lahat!');
+  const s=JSON.parse(LS.getItem('pos_stores')||'[]');
+  if(s.find(x=>x.id===code))return alert('May ganitong Code na!');
+  s.push({id:code,name});
+  LS.setItem('pos_stores',JSON.stringify(s));
+  auditLog(`Nagdagdag ng Tindahan: ${code}`);
+  alert('✅ Nadagdag!');
+  $('newStoreCode').value=$('newStoreName').value='';
   renderStoresTab();
 }
-function delStore(i){
-  if(!confirm('🗑️ Burahin?')) return;
-  const s = STORES[i];
-  STORES.splice(i,1); save('pos_stores',STORES);
-  addAuditLog('STORE-DELETE',`${s.code} — ${s.name}`);
+function renderStoresTab(){
+  const s=JSON.parse(LS.getItem('pos_stores')||'[]');
+  $('storeBody').innerHTML=s.map(x=>`
+    <tr>
+      <td>${x.id}</td><td>${x.name}</td>
+      <td><button class="btn-sm btn-red" onclick="delStore('${x.id}')">🗑️ Burahin</button></td>
+    </tr>`).join('');
+  ['stockInStore','stockViewStore','shiftFilterStore'].forEach(id=>{
+    if($(id)){
+      const cur=$(id).value;
+      $(id).innerHTML=`<option value="ALL">Lahat ng Tindahan</option>`+s.map(x=>`<option value="${x.id}">${x.id}</option>`).join('');
+      $(id).value=cur;
+    }
+  });
+}
+function delStore(id){
+  if(!confirm('Burahin ang tindahan?'))return;
+  let s=JSON.parse(LS.getItem('pos_stores')||'[]').filter(x=>x.id!==id);
+  LS.setItem('pos_stores',JSON.stringify(s));
+  auditLog('Bumura ng Tindahan');
   renderStoresTab();
 }
 
-// ═══════════════════ SHIFT LOG ═══════════════════
+// ═══════════════════ STOCK MANAGEMENT ═══════════════════
+function stockIn(){
+  const store=$('stockInStore').value,prod=$('stockInProd').value,qty=parseInt($('stockInQty').value)||0;
+  if(!store||!prod||qty<1)return alert('Punan lahat!');
+  const stocks=JSON.parse(LS.getItem('pos_stocks')||'[]');
+  const idx=stocks.findIndex(x=>x.storeId===store && x.productId===prod);
+  if(idx>=0)stocks[idx].qty+=qty;
+  else stocks.push({storeId,productId:prod,qty});
+  LS.setItem('pos_stocks',JSON.stringify(stocks));
+  auditLog(`Stock In: ${prod} ×${qty}`);
+  alert('✅ Na-update ang Stock!');
+  $('stockInQty').value='';
+  renderStockTab();
+}
+function renderStockTab(){
+  loadStoreOptions('stockInStore');
+  const prods=JSON.parse(LS.getItem('pos_products')||'[]');
+  $('stockInProd').innerHTML=prods.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
+  const fStore=$('stockViewStore')?.value||'ALL';
+  let stocks=JSON.parse(LS.getItem('pos_stocks')||'[]');
+  if(fStore!=='ALL')stocks=stocks.filter(x=>x.storeId===fStore);
+  const s=JSON.parse(LS.getItem('pos_stores')||'[]');
+  const sn=Object.fromEntries(s.map(x=>[x.id,x.name]));
+  const pn=Object.fromEntries(prods.map(x=>[x.id,x.name]));
+  $('stockBody').innerHTML=stocks.map(x=>`
+    <tr>
+      <td>${sn[x.storeId]||x.storeId}</td>
+      <td>${pn[x.productId]||'Hindi Kilala'}</td>
+      <td>${x.qty}</td>
+      <td>${x.qty<5?'<span class="low-stock">Mababa</span>':'Sapat'}</td>
+      <td><button class="btn-sm btn-orange" onclick="adjStock('${x.storeId}','${x.productId}')">I-adjust</button></td>
+    </tr>`).join('')||'<tr><td colspan="5" class="empty">Walang Stock</td></tr>';
+}
+function adjStock(sid,pid){
+  const qty=parseInt(prompt('Bagong Dami:'));
+  if(isNaN(qty)||qty<0)return;
+  const s=JSON.parse(LS.getItem('pos_stocks')||'[]');
+  const i=s.findIndex(x=>x.storeId===sid && x.productId===pid);
+  if(i>=0){s[i].qty=qty;LS.setItem('pos_stocks',JSON.stringify(s));renderStockTab();}
+}
+
+// ═══════════════════ SHIFT LOG (ADMIN) ═══════════════════
 function renderShiftLogTab(){
-  $('shiftLogBody').innerHTML = SHIFTS.map(s=>`<tr><td>${s.storeId}</td><td>${s.cashier}</td>
-    <td>${new Date(s.startTime).toLocaleString('en-PH')}</td>
-    <td>${s.endTime?new Date(s.endTime).toLocaleString('en-PH'):'— BUKSAN —'}</td>
-    <td>₱${fmt(s.endCash)}</td><td>₱${fmt(s.endGCash)}</td></tr>`).join('');
+  renderStoresTab();
+  let s=JSON.parse(LS.getItem('pos_shifts')||'[]');
+  const f=$('shiftFilterStore')?.value||'ALL';
+  if(f!=='ALL')s=s.filter(x=>x.storeId===f);
+  $('shiftLogBody').innerHTML=s.map(x=>`
+    <tr>
+      <td>${x.storeName||x.storeId}</td>
+      <td>${x.cashier}</td>
+      <td>${fmtTime(x.started)}</td>
+      <td>${x.ended?fmtTime(x.ended):'<span class="tag warn">Bukas</span>'}</td>
+      <td>₱${fmt(x.endCash||0)}</td>
+      <td>₱${fmt(x.endGcash||0)}</td>
+      <td>${x.note||'—'}</td>
+      <td>${x.ended?'<span class="tag success">Sarado</span>':'<span class="tag warn">Bukas</span>'}</td>
+    </tr>`).join('');
 }
 
-// ═══════════════════ SETTINGS ═══════════════════
-function changePasswords(){
-  const c=$('setCashierPass').value.trim(), a=$('setAdminPass').value.trim(), sp=$('setSPPass').value.trim();
-  if(c && !checkPasswordStrength(c)) return alert('⚠️ Cashier Password: min 6 letra!');
-  if(a && !checkPasswordStrength(a)) return alert('⚠️ Admin Password: min 6 letra!');
-  if(sp && !checkPasswordStrength(sp)) return alert('⚠️ SP Password: min 6 letra!');
-  if(c){ PASS.cashier=c; $('setCashierPass').value=''; }
-  if(a){ PASS.admin=a; $('setAdminPass').value=''; }
-  if(sp){ PASS.sp=sp; $('setSPPass').value=''; }
-  save('pos_pass',PASS);
-  addAuditLog('PASSWORD-CHANGE','Na-update');
-  alert('✅ Password na-update!');
+// ═══════════════════ DATE RANGE REPORT ═══════════════════
+function showRangeReport(){
+  const f=$('rangeFrom').value,t=$('rangeTo').value;
+  if(!f||!t)return alert('Punan ang Petsa!');
+  const txs=JSON.parse(LS.getItem('pos_transactions')||'[]').filter(x=>x.time.slice(0,10)>=f && x.time.slice(0,10)<=t);
+  let tCash=0,tGcash=0,tAll=0;
+  txs.forEach(x=>{
+    tAll+=x.total;
+    if(x.paymentMethod==='CASH')tCash+=x.total;
+    else if(x.paymentMethod==='GCash')tGcash+=x.total;
+    else{tCash+=x.cashGiven;tGcash+=x.gcashPortion;}
+  });
+  $('rangeResult').innerHTML=`
+    <div class="card" style="margin-top:12px">
+      <h4>Buod: ${f} — ${t}</h4>
+      <div class="grid3">
+        <div class="total-box-blue">KABUUAN:<br>₱${fmt(tAll)}</div>
+        <div class="total-box">CASH:<br>₱${fmt(tCash)}</div>
+        <div class="total-box-orange">E-WALLET:<br>₱${fmt(tGcash)}</div>
+      </div>
+      <p style="margin-top:8px">Bilang ng Transaksyon: ${txs.length}</p>
+    </div>`;
 }
 
-// ═══════════════════ SERVICE ═══════════════════
-function renderServiceTab(){
-  const active = isServiceActive(), exp = getExpiryDate();
-  $('servStatus').innerHTML = active ? '<span class="tag success">✅ AKTIBO</span>' : '<span class="tag danger">❌ HINDI AKTIBO</span>';
-  $('servExpiry').textContent = `${exp.toLocaleDateString('en-PH')} — ${exp.toLocaleTimeString('en-PH')}`;
+// ═══════════════════ REQUESTS (VOID / CASH INOUT / PRODUCT OUT) ═══════════════════
+function submitVoidReq(){
+  const w=$('wrongTicket').value,r=$('rightTicket').value,reason=$('voidReason').value.trim();
+  if(!w||!r||!reason)return alert('Punan lahat!');
+  const v=JSON.parse(LS.getItem('pos_voidRequests')||'[]');
+  v.unshift({id:'V'+Date.now(),storeId:gStoreId,wrongTicket:w,rightTicket:r,reason,time:new Date().toISOString(),status:'PENDING'});
+  LS.setItem('pos_voidRequests',JSON.stringify(v));
+  auditLog('Nag-request ng VOID');
+  alert('✅ Naipadala! Hintayin ang pag-apruba ng Admin.');
+  $('wrongTicket').value=$('rightTicket').value=$('voidReason').value='';
+  loadVoidTicketOpts();
+  renderMyReqs();
+}
+function loadVoidTicketOpts(){
+  const txs=JSON.parse(LS.getItem('pos_transactions')||'[]').filter(x=>x.storeId===gStoreId);
+  const o=txs.map(x=>`<option value="${x.id}">${x.id} — ₱${fmt(x.total)}</option>`).join('');
+  $('wrongTicket').innerHTML=o;$('rightTicket').innerHTML=o;
+}
+function submitCashReq(){
+  const t=$('cashType').value,a=parseFloat($('cashAmt').value)||0,n=$('cashReason').value.trim();
+  if(!a||!n)return alert('Punan lahat!');
+  const c=JSON.parse(LS.getItem('pos_cashRequests')||'[]');
+  c.unshift({id:'C'+Date.now(),storeId:gStoreId,type:t,amount:a,reason:n,time:new Date().toISOString(),status:'PENDING'});
+  LS.setItem('pos_cashRequests',JSON.stringify(c));
+  auditLog(`Cash Request: ${t} ₱${fmt(a)}`);
+  alert('✅ Naipadala!');
+  $('cashAmt').value=$('cashReason').value='';
+  renderMyReqs();
+}
+function submitProdOut(){
+  const p=$('prodOutSel').value,q=$('prodOutQty').value,reason=$('prodOutReason').value,note=$('prodOutNote').value.trim();
+  if(!p||!q)return alert('Punan lahat!');
+  const po=JSON.parse(LS.getItem('pos_prodOutRequests')||'[]');
+  po.unshift({id:'O'+Date.now(),storeId:gStoreId,productId:p,qty:q,reason,note,time:new Date().toISOString(),status:'PENDING'});
+  LS.setItem('pos_prodOutRequests',JSON.stringify(po));
+  auditLog(`Product Out Request: ${p} ×${q}`);
+  alert('✅ Naipadala!');
+  $('prodOutQty').value=1;$('prodOutNote').value='';
+  loadProdOutOpts();
+  renderMyReqs();
+}
+function loadProdOutOpts(){
+  const p=JSON.parse(LS.getItem('pos_products')||'[]');
+  $('prodOutSel').innerHTML=p.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
+}
+function renderMyReqs(){
+  const v=JSON.parse(LS.getItem('pos_voidRequests')||'[]').filter(x=>x.storeId===gStoreId);
+  $('myVoidReqs').innerHTML=v.length?v.map(x=>`
+    <div class="card" style="padding:8px">
+      <strong>${x.id}</strong> — ${fmtTime(x.time)}
+      <span class="tag ${x.status==='PENDING'?'warn':'success'}">${x.status}</span><br>
+      Maling: ${x.wrongTicket} → Tama: ${x.rightTicket}<br>
+      Dahilan: ${x.reason}
+    </div>`).join(''):'<p>Walang Request</p>';
+  const c=JSON.parse(LS.getItem('pos_cashRequests')||'[]').filter(x=>x.storeId===gStoreId);
+  $('myCashReqs').innerHTML=c.length?c.map(x=>`
+    <div class="card" style="padding:8px">
+      <strong>${x.id}</strong> — ${fmtTime(x.time)}
+      <span class="tag ${x.status==='PENDING'?'warn':'success'}">${x.status}</span><br>
+      ${x.type}: ₱${fmt(x.amount)} — ${x.reason}
+    </div>`).join(''):'<p>Walang Request</p>';
+  const po=JSON.parse(LS.getItem('pos_prodOutRequests')||'[]').filter(x=>x.storeId===gStoreId);
+  $('myProdOutReqs').innerHTML=po.length?po.map(x=>`
+    <div class="card" style="padding:8px">
+      <strong>${x.id}</strong> — ${fmtTime(x.time)}
+      <span class="tag ${x.status==='PENDING'?'warn':'success'}">${x.status}</span><br>
+      Dami: ${x.qty} — ${x.reason}<br>
+      ${x.note}
+    </div>`).join(''):'<p>Walang Request</p>';
 }
 
-// ═══════════════════ DELETED SALES ═══════════════════
-function renderDeletedSales(){
-  $('deletedBody').innerHTML = DELETED_SALES.map(d=>`<tr><td>${d.id}</td><td>${d.storeId}</td><td>${d.cashier}</td>
-    <td>₱${fmt(d.total)}</td><td>${d.reason||'—'}</td><td>${new Date(d.time).toLocaleString('en-PH')}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">Wala pang naibura.</td></tr>';
+// ═══════════════════ ADMIN: APPROVE REQUESTS ═══════════════════
+function loadApproveRequests(){
+  const v=JSON.parse(LS.getItem('pos_voidRequests')||'[]').filter(x=>x.status==='PENDING');
+  $('appVoidReqs').innerHTML=v.length?v.map(x=>`
+    <div class="card" style="padding:8px">
+      <strong>${x.id}</strong> — ${x.storeId} — ${fmtTime(x.time)}<br>
+      Maling: ${x.wrongTicket} → Tama: ${x.rightTicket}<br>
+      Dahilan: ${x.reason}
+      <div style="margin-top:4px">
+        <button class="btn-green btn-sm" onclick="appReq('void','${x.id}','APPROVED')">✅ Aprubahan</button>
+        <button class="btn-red btn-sm" onclick="appReq('void','${x.id}','REJECTED')">❌ Tanggihan</button>
+      </div>
+    </div>`).join(''):'<p>Wala pang hinihintay</p>';
+  const c=JSON.parse(LS.getItem('pos_cashRequests')||'[]').filter(x=>x.status==='PENDING');
+  $('appCashReqs').innerHTML=c.length?c.map(x=>`
+    <div class="card" style="padding:8px">
+      <strong>${x.id}</strong> — ${x.storeId} — ${fmtTime(x.time)}<br>
+      ${x.type}: ₱${fmt(x.amount)} — ${x.reason}
+      <div style="margin-top:4px">
+        <button class="btn-green btn-sm" onclick="appReq('cash','${x.id}','APPROVED')">✅ Aprubahan</button>
+        <button class="btn-red btn-sm" onclick="appReq('cash','${x.id}','REJECTED')">❌ Tanggihan</button>
+      </div>
+    </div>`).join(''):'<p>Wala pang hinihintay</p>';
+  const po=JSON.parse(LS.getItem('pos_prodOutRequests')||'[]').filter(x=>x.status==='PENDING');
+  $('appProdOutReqs').innerHTML=po.length?po.map(x=>`
+    <div class="card" style="padding:8px">
+      <strong>${x.id}</strong> — ${x.storeId} — ${fmtTime(x.time)}<br>
+      Dami: ${x.qty} — ${x.reason} / ${x.note}
+      <div style="margin-top:4px">
+        <button class="btn-green btn-sm" onclick="appReq('prodOut','${x.id}','APPROVED')">✅ Aprubahan</button>
+        <button class="btn-red btn-sm" onclick="appReq('prodOut','${x.id}','REJECTED')">❌ Tanggihan</button>
+      </div>
+    </div>`).join(''):'<p>Wala pang hinihintay</p>';
+}
+function appReq(type,id,status){
+  let arr,key;
+  if(type==='void'){arr=JSON.parse(LS.getItem('pos_voidRequests')||'[]');key='pos_voidRequests';}
+  if(type==='cash'){arr=JSON.parse(LS.getItem('pos_cashRequests')||'[]');key='pos_cashRequests';}
+  if(type==='prodOut'){arr=JSON.parse(LS.getItem('pos_prodOutRequests')||'[]');key='pos_prodOutRequests';}
+  const idx=arr.findIndex(x=>x.id===id);
+  if(idx>=0){
+    arr[idx].status=status;
+    LS.setItem(key,JSON.stringify(arr));
+    auditLog(`Request ${id}: ${status}`);
+    alert(`✅ ${status}`);
+    loadApproveRequests();
+  }
 }
 
-// ═══════════════════ EXPORT / SYNC ═══════════════════
-function exportData(){
-  const payload = {
-    exported: new Date().toISOString(),
-    PASS, STORES, PRODUCTS, STOCKS, SALES, SHIFTS,
-    RETURN_RECORDS, DELETED_SALES, AUDIT_LOG, SERVICE
+// ═══════════════════ AUDIT LOG / BACKUP / SERVICE ═══════════════════
+function renderAuditTab(){
+  const a=JSON.parse(LS.getItem('pos_auditLog')||'[]');
+  $('auditBody').innerHTML=a.map(x=>`
+    <tr><td>${fmtTime(x.time)}</td><td>${x.user}</td><td>${x.store}</td><td>${x.action}</td></tr>`).join('');
+}
+function openBackupModal(){$('exportDataArea').value='';$('backupModal').classList.remove('hidden');}
+function closeBackupModal(){$('backupModal').classList.add('hidden');}
+function exportAllData(){
+  const data={
+    exported:new Date().toISOString(),
+    stores:JSON.parse(LS.getItem('pos_stores')||'[]'),
+    products:JSON.parse(LS.getItem('pos_products')||'[]'),
+    stocks:JSON.parse(LS.getItem('pos_stocks')||'[]'),
+    transactions:JSON.parse(LS.getItem('pos_transactions')||'[]'),
+    shifts:JSON.parse(LS.getItem('pos_shifts')||'[]'),
+    holdOrders:JSON.parse(LS.getItem('pos_holdOrders')||'[]'),
+    returnLog:JSON.parse(LS.getItem('pos_returnLog')||'[]'),
+    voidRequests:JSON.parse(LS.getItem('pos_voidRequests')||'[]'),
+    cashRequests:JSON.parse(LS.getItem('pos_cashRequests')||'[]'),
+    prodOutRequests:JSON.parse(LS.getItem('pos_prodOutRequests')||'[]'),
+    auditLog:JSON.parse(LS.getItem('pos_auditLog')||'[]'),
+    deletedLog:JSON.parse(LS.getItem('pos_deletedLog')||'[]')
   };
-  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `pos-backup-${today()}.json`;
+  $('exportDataArea').value=JSON.stringify(data,null,2);
+}
+function downloadBackup(){
+  exportAllData();
+  const blob=new Blob([$('exportDataArea').value],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`POS_BACKUP_${today()}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
-  alert('✅ Backup na-download!');
 }
-function manualSync(){
-  LAST_SYNCED = new Date().toISOString();
-  localStorage.setItem('pos_last_synced', LAST_SYNCED);
-  SALES.forEach(s=>s.synced=true);
-  save('pos_sales',SALES);
-  $('syncNote').textContent = `✅ Huling Sync: ${new Date(LAST_SYNCED).toLocaleString('en-PH')}`;
-  alert('✅ Na-sync na!');
-  if(document.querySelector('.tab-page:not(.hidden)')?.id==='vSales') renderSalesReport();
+function renderServiceTab(){
+  const start=LS.getItem('pos_serviceStart');
+  const exp=LS.getItem('pos_serviceExpiry');
+  $('servStart').textContent=fmtDate(start);
+  const days=Math.ceil((new Date(exp)-new Date())/864e5);
+  $('servDaysLeft').textContent=days>0?`${days} araw`:0;
+  $('servStatus').textContent=days>0?'✅ Aktibo':'❌ Nag-expire na';
+  $('servStatus').className=days>0?'tag success':'tag danger';
 }
-function updateNetStatus(){
-  IS_ONLINE = navigator.onLine;
-  $('netBadge').className = `status-badge ${IS_ONLINE?'status-online':'status-offline'}`;
-  $('netBadge').textContent = IS_ONLINE ? '🌐 ONLINE' : '🔌 OFFLINE';
+function extendService(){
+  const d=$('newExpiry').value;
+  if(!d)return alert('Pumili ng bagong petsa!');
+  LS.setItem('pos_serviceExpiry',new Date(d).toISOString());
+  auditLog('Pinalawig ang Serbisyo');
+  alert('✅ Na-update!');
+  renderServiceTab();
 }
-window.addEventListener('online', updateNetStatus);
-window.addEventListener('offline', updateNetStatus);
+function renderDeletedTab(){
+  const d=JSON.parse(LS.getItem('pos_deletedLog')||'[]');
+  $('deletedBody').innerHTML=d.map(x=>`
+    <tr><td>${fmtTime(x.time)}</td><td>${x.type}</td><td>${x.detail}</td><td>${x.user}</td></tr>`).join('');
+}
 
-// ═══════════════════ INIT ═══════════════════
-document.addEventListener('DOMContentLoaded', ()=>{
+// ═══════════════════ SHIFT TAB (CASHIER VIEW) ═══════════════════
+function renderShiftTab(){
+  const shifts=JSON.parse(LS.getItem('pos_shifts')||'[]').filter(x=>x.storeId===gStoreId);
+  const openShift=shifts.find(x=>!x.ended);
+  if(openShift){
+    gShiftId=openShift.id;
+    $('shiftStatusArea').innerHTML=`
+      <div class="shift-indicator">
+        <strong>🟢 BUKSAN ANG SHIFT</strong><br>
+        Nagsimula: ${fmtTime(openShift.started)}
+        <button class="btn-orange btn-sm" style="margin-top:4px" onclick="openShiftCloseModal()">🕐 Isara ang Shift</button>
+      </div>`;
+  }else{
+    $('shiftStatusArea').innerHTML=`<p class="empty">Walang bukas na shift.</p>
+      <button class="btn-green" onclick="startShift()">✅ Simulan ang Shift</button>`;
+  }
+  $('myShiftLog').innerHTML=shifts.slice(0,7).map(x=>`
+    <div class="card" style="padding:6px 10px">
+      ${fmtTime(x.started)} → ${x.ended?fmtTime(x.ended):'BUKSAN'}<br>
+      Cash: ₱${fmt(x.endCash||0)} | E-Wallet: ₱${fmt(x.endGcash||0)}
+    </div>`).join('');
+}
+
+// ═══════════════════ TAB-SPECIFIC REFRESH ON SHOW ═══════════════════
+const origShowTab=showTab;
+showTab=function(id){
+  origShowTab(id);
+  if(id==='shift')renderShiftTab();
+  if(id==='prodOutReq')loadProdOutOpts();
+  if(id==='voidReq')loadVoidTicketOpts();
+  if(id==='adminReq')loadApproveRequests();
+  if(id==='products')renderProductsTab();
+  if(id==='stocks')renderStockTab();
+  if(id==='stores')renderStoresTab();
+};
+
+// ═══════════════════ OFFLINE SYNC ═══════════════════
+window.addEventListener('online',()=>{
   updateNetStatus();
-  if(!STORES.length){
-    STORES = [{code:'STR-001',name:'Tindahan Davao',address:'Davao City'}];
-    save('pos_stores',STORES);
-  }
-  if(!PRODUCTS.length){
-    PRODUCTS = [
-      {barcode:'8991234560001',category:'Inumin',name:'Coke 500ml',cost:25.00,price:35.00,storeId:'STR-001'},
-      {barcode:'8991234560002',category:'Inumin',name:'Sprite 500ml',cost:25.00,price:35.00,storeId:'STR-001'},
-      {barcode:'8991234560003',category:'Pagkain',name:'Pandesal',cost:5.00,price:8.00,storeId:'STR-001'},
-      {barcode:'8991234560004',category:'Pagkain',name:'Kanin',cost:8.00,price:15.00,storeId:'STR-001'}
-    ];
-    PRODUCTS.forEach(p=>{ const key=`${p.storeId}|${p.name}`; STOCKS[key]=50; });
-    save('pos_products',PRODUCTS);
-    save('pos_stocks',STOCKS);
-  }
-  // Restore active shift
-  if(SHIFTS.length){
-    const open = SHIFTS.find(s=>!s.endTime && s.storeId);
-    if(open) activeShift = open;
-  }
+  $('syncNote').textContent='✅ Naka-sync sa Internet';
 });
+window.addEventListener('offline',()=>{
+  updateNetStatus();
+  $('syncNote').textContent='⚠️ Naka-lokal — awto-sync kapag may internet';
+});
+
+// ═══════════════════ INITIALIZE ON LOAD ═══════════════════
+window.onload=function(){
+  initData();
+  if(!checkExpiry())return;
+  updateNetStatus();
+  const savedCart=LS.getItem('pos_cart');
+  if(savedCart)gCart=JSON.parse(savedCart);
+  const savedRole=LS.getItem('pos_role');
+  if(savedRole){
+    gRole=savedRole;
+    gStoreId=LS.getItem('pos_currentStoreId')||'';
+    gStoreName=LS.getItem('pos_currentStoreName')||'';
+    finishLogin();
+  }
+};
 </script>
 </body>
 </html>
