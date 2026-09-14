@@ -1,712 +1,1350 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BPOS — Business Point of Sales</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,system-ui,sans-serif}
-    :root{--pri:#2563eb;--sec:#16a34a;--warn:#f59e0b;--danger:#dc2626;--dark:#1f2937;--light:#f3f4f6;--gray:#9ca3af}
-    body{background:#e5e7eb;color:var(--dark)}
-    .hide{display:none !important}
-    .mask{letter-spacing:2px;font-family:monospace}
-    .container{max-width:1200px;margin:0 auto;padding:16px}
-    .card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 2px 8px #0001;margin-bottom:16px}
-    .login-container{max-width:420px;margin:80px auto}
-    h1,h2,h3{margin-bottom:16px;color:var(--dark)}
-    input,select,button{width:100%;padding:10px 12px;margin:6px 0 12px;border:1px solid #d1d5db;border-radius:8px;font-size:15px}
-    button{background:var(--pri);color:#fff;border:none;cursor:pointer;font-weight:500;transition:opacity .15s}
-    button:hover{opacity:.92}
-    button.sec{background:var(--sec)}
-    button.warn{background:var(--warn)}
-    button.danger{background:var(--danger)}
-    .btn-group{display:flex;gap:8px;flex-wrap:wrap}
-    .btn-group button{flex:1;min-width:100px}
-    .status-bar{position:sticky;top:0;background:#fff;padding:8px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;z-index:50}
-    .status-indicator{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:500}
-    .dot{width:10px;height:10px;border-radius:50%}
-    .dot.online{background:var(--sec)}
-    .dot.syncing{background:var(--warn);animation:pulse 1s infinite}
-    .dot.offline{background:var(--danger)}
-    @keyframes pulse{0%{opacity:1}50%{opacity:.4}100%{opacity:1}}
-    .nav-tabs{display:flex;gap:4px;border-bottom:1px solid #e5e7eb;margin-bottom:16px;flex-wrap:wrap}
-    .nav-tab{padding:10px 16px;cursor:pointer;border-radius:8px 8px 0 0;border:1px solid transparent}
-    .nav-tab.active{border-color:#e5e7eb #e5e7eb #fff;background:#fff;font-weight:600}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
-    .product-card{border:1px solid #e5e7eb;border-radius:8px;padding:12px;background:#fff;cursor:pointer;transition:border-color .15s}
-    .product-card:hover{border-color:var(--pri)}
-    .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600}
-    .badge.pending{background:#fef3c7;color:#92400e}
-    .badge.approved{background:#dcfce7;color:#166534}
-    .badge.rejected{background:#fee2e2;color:#991b1b}
-    .label{font-size:13px;font-weight:500;color:#4b5563}
-    .small{font-size:13px;color:#6b7280}
-    .alert{padding:12px;border-radius:8px;margin:12px 0}
-    .alert.info{background:#eff6ff;color:#1e40af}
-    .alert.danger{background:#fef2f2;color:#b91c1c}
-    .alert.warn{background:#fffbeb;color:#b45309}
-    table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
-    th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #e5e7eb}
-    th{background:#f9fafb;font-weight:600}
-    .chat-box{border:1px solid #e5e7eb;border-radius:8px;display:flex;flex-direction:column;height:320px}
-    .chat-messages{flex:1;padding:12px;overflow-y:auto;background:#f9fafb}
-    .chat-input{display:flex;gap:8px;padding:10px}
-    .chat-input input{flex:1;margin:0}
-    .msg{margin:6px 0;padding:8px 12px;border-radius:16px;max-width:75%}
-    .msg.me{background:var(--pri);color:#fff;margin-left:auto}
-    .msg.other{background:#e5e7eb;color:#1f2937;margin-right:auto}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPOS — Business Point of Sales</title>
+    <style>
+        * {box-sizing:border-box; margin:0; padding:0; font-family:Arial, sans-serif;}
+        body {background:#f0f2f5; font-size:14px;}
+        .container {max-width:1200px; margin:0 auto; padding:10px;}
+        .top-bar {background:#2c3e50; color:#fff; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; border-radius:6px; margin-bottom:15px;}
+        .status-indicator {display:flex; gap:8px; align-items:center;}
+        .status-online {color:#2ecc71;} .status-syncing {color:#f39c12;} .status-offline {color:#e74c3c;}
+        .card {background:#fff; border-radius:8px; padding:20px; margin-bottom:15px; box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+        .btn {padding:10px 18px; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:600; margin:3px;}
+        .btn-primary {background:#3498db; color:#fff;}
+        .btn-success {background:#2ecc71; color:#fff;}
+        .btn-danger {background:#e74c3c; color:#fff;}
+        .btn-warning {background:#f39c12; color:#fff;}
+        .btn-sm {padding:5px 10px; font-size:12px;}
+        input, select, textarea {width:100%; padding:10px; margin:5px 0 12px; border:1px solid #ccc; border-radius:4px; font-size:14px;}
+        input:read-only {background:#f5f5f5;}
+        label {font-weight:600; color:#333;}
+        table {width:100%; border-collapse:collapse; margin-top:10px;}
+        th, td {padding:10px; text-align:left; border-bottom:1px solid #ddd; font-size:13px;}
+        th {background:#f8f9fa;}
+        .hidden {display:none !important;}
+        .alert {padding:12px; border-radius:6px; margin:10px 0;}
+        .alert-success {background:#d4edda; color:#155724;}
+        .alert-danger {background:#f8d7da; color:#721c24;}
+        .alert-warning {background:#fff3cd; color:#856404;}
+        .modal {position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000;}
+        .modal-content {background:#fff; padding:25px; border-radius:10px; max-width:500px; width:90%;}
+        .modal-broadcast {border:3px solid #e74c3c; background:#fff8f8;}
+        .ticket-link {color:#3498db; cursor:pointer; text-decoration:underline; font-weight:bold;}
+        .ticket-link:hover {color:#e74c3c;}
+        .receipt {font-family:'Courier New',monospace; font-size:12px; line-height:1.4; max-width:300px; margin:0 auto; border:1px dashed #333; padding:15px; background:#fff;}
+        .receipt .center {text-align:center;}
+        .receipt .right {text-align:right;}
+        .chat-box {height:200px; overflow-y:auto; border:1px solid #ccc; padding:10px; margin-bottom:10px; background:#fafafa;}
+        .chat-msg {margin:5px 0; padding:6px; border-radius:4px;}
+        .chat-msg.from-me {background:#e3f2fd; text-align:right;}
+        .chat-msg.from-other {background:#f1f1f1; text-align:left;}
+        .tabs {display:flex; flex-wrap:wrap; gap:5px; margin-bottom:15px;}
+        .tab {padding:8px 14px; background:#eee; border-radius:6px; cursor:pointer;}
+        .tab.active {background:#3498db; color:#fff;}
+        .grid2 {display:grid; grid-template-columns:1fr 1fr; gap:15px;}
+        .badge {display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold;}
+        .badge-pending {background:#fff3cd; color:#856404;}
+        .badge-approved {background:#d4edda; color:#155724;}
+        .badge-rejected {background:#f8d7da; color:#721c24;}
+    </style>
 </head>
 <body>
 
-<!-- LOGIN PAGE -->
-<div id="page-login" class="login-container">
-  <div class="card">
-    <h2 style="text-align:center">🔐 BPOS — Login</h2>
-    <div id="login-msg" class="alert info">Enter your credentials to continue</div>
-    <div>
-      <label class="label">Select Store</label>
-      <select id="sel-store">
-        <option value="store-a">Store — Davao Branch A</option>
-        <option value="store-b">Store — Davao Branch B</option>
-      </select>
+<!-- TOP BAR -->
+<div class="top-bar">
+    <h2>🏪 BPOS — Business Point of Sales</h2>
+    <div class="status-indicator">
+        <span id="syncStatus" class="status-online">✅ ONLINE</span>
+        <span id="userInfo"></span>
+        <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
     </div>
-    <div>
-      <label class="label">Role</label>
-      <select id="sel-role">
-        <option value="sp">🛠️ Service Provider</option>
-        <option value="admin">🔐 Admin / Owner</option>
-        <option value="cashier">💵 Cashier</option>
-      </select>
-    </div>
-    <div id="cashier-name-field" class="hide">
-      <label class="label">Cashier Username</label>
-      <input type="text" id="inp-cashier-user" placeholder="Enter your name">
-    </div>
-    <div>
-      <label class="label">Password</label>
-      <input type="password" id="inp-pass" placeholder="Enter password" autocomplete="off">
-    </div>
-    <button onclick="doLogin()">🔑 Log In</button>
-  </div>
 </div>
 
-<!-- MAIN SYSTEM — WRAPPER -->
-<div id="page-main" class="hide">
-  <!-- STATUS BAR -->
-  <div class="status-bar">
-    <div style="font-weight:600">BPOS — <span id="cur-store"></span></div>
-    <div class="status-indicator">
-      <span id="status-dot" class="dot online"></span>
-      <span id="status-text">Online & Synced</span>
+<div class="container">
+
+<!-- SERVICE EXPIRED LOCK SCREEN -->
+<div id="expiryLock" class="card hidden">
+    <h2>⚠️ SERVICE EXPIRED</h2>
+    <p>Your service has expired. Please contact Service Provider to renew.</p>
+    <p>Plans: ₱199 / Week · ₱325 / 2 Weeks · ₱579 / Month</p>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="card">
+    <h2>🔐 Login — BPOS System</h2>
+    <div id="storeSelectGroup" class="hidden">
+        <label>🏪 Select Store First:</label>
+        <select id="storeSelect"></select>
     </div>
     <div>
-      <span id="cur-role-badge" class="badge"></span>
-      <button onclick="logout()" style="all:unset;cursor:pointer;color:var(--pri);margin-left:10px">🚪 Logout</button>
+        <label>Username:</label>
+        <input type="text" id="username" autocomplete="off">
     </div>
-  </div>
+    <div>
+        <label>Password:</label>
+        <input type="password" id="password" placeholder="••••••" autocomplete="off">
+    </div>
+    <button class="btn btn-primary" onclick="login()">Login</button>
+    <div id="loginMsg"></div>
+</div>
 
-  <div class="container">
-    <!-- ROLE: CASHIER VIEW -->
-    <div id="view-cashier" class="hide">
-      <h2>💵 Cashier Panel</h2>
-      <div id="shift-not-opened" class="card">
-        <h3>🕐 Open Shift</h3>
-        <p>Declare Cash Float: ₱1,000.00</p>
-        <button class="sec" onclick="openShift()">✅ Open Shift Now</button>
-      </div>
-      <div id="shift-opened" class="hide">
-        <div class="nav-tabs">
-          <div class="nav-tab active" data-tab="sell">🛒 Sell</div>
-          <div class="nav-tab" data-tab="requests">📋 Requests</div>
-          <div class="nav-tab" data-tab="shift">🕐 Shift</div>
-          <div class="nav-tab" data-tab="chat">💬 Chat</div>
-        </div>
+<!-- FIRST LOGIN — FORCE PASSWORD CHANGE (IF DEFAULT PASS DETECTED) -->
+<div id="passChangeModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>⚠️ Change Password Required</h3>
+        <p>You are using the default password. You must change it before proceeding.</p>
+        <label>New Password (min 6 characters):</label>
+        <input type="password" id="newPass1" placeholder="••••••">
+        <label>Confirm New Password:</label>
+        <input type="password" id="newPass2" placeholder="••••••">
+        <button class="btn btn-primary" onclick="submitPassChange()">Update Password</button>
+        <div id="passChangeMsg"></div>
+    </div>
+</div>
 
-        <!-- SELL / CHECKOUT -->
-        <div id="tab-sell" class="tab-content">
-          <div class="card">
-            <h3>Product Search</h3>
-            <input type="text" id="prod-search" placeholder="Scan barcode or type product name...">
-            <div id="product-grid" class="grid" style="margin-top:12px"></div>
-          </div>
-          <div class="card">
-            <h3>Current Transaction</h3>
-            <div id="cart-list"></div>
-            <div style="font-size:18px;font-weight:bold;margin:12px 0">Total: ₱<span id="cart-total">0.00</span></div>
-            <div class="btn-group">
-              <button onclick="applyDiscountSenior()">Senior 5%</button>
-              <button onclick="applyDiscountPWD()">PWD 5%</button>
-              <button class="warn" onclick="clearCart()">Clear</button>
-            </div>
-            <div style="margin-top:12px">
-              <h4>Payment Method</h4>
-              <div class="btn-group">
-                <button onclick="payCash()">💵 Cash</button>
-                <button onclick="payGCash()">📱 GCash</button>
-                <button onclick="paySplit()">💳 Split</button>
-              </div>
-            </div>
-          </div>
-        </div>
+<!-- SP BROADCAST POP-UP MESSAGE -->
+<div id="broadcastModal" class="modal hidden">
+    <div class="modal-content modal-broadcast">
+        <h3>📢 SYSTEM MESSAGE</h3><hr>
+        <p id="broadcastText" style="font-size:16px; font-weight:500;"></p><hr>
+        <button class="btn btn-primary" onclick="closeBroadcast()">OK</button>
+    </div>
+</div>
 
-        <!-- REQUESTS -->
-        <div id="tab-requests" class="tab-content hide">
-          <div class="card">
-            <h3>Submit Request</h3>
-            <select id="req-type">
-              <option value="void">📤 Void Transaction</option>
-              <option value="cashin">💰 Cash In</option>
-              <option value="cashout">💸 Cash Out</option>
-              <option value="prodout">📦 Product Out</option>
-            </select>
-            <input type="text" id="req-amount" placeholder="Amount / Qty / Ticket #" style="margin-top:4px">
-            <input type="text" id="req-reason" placeholder="Reason — Required">
-            <button class="sec" onclick="submitRequest()">📤 Send Request</button>
-          </div>
-          <div class="card">
-            <h3>My Requests</h3>
-            <div id="cashier-reqs"></div>
-          </div>
-        </div>
-
-        <!-- SHIFT CLOSE -->
-        <div id="tab-shift" class="tab-content hide">
-          <div class="card">
-            <h3>Close Shift — Denomination</h3>
-            <p class="small">Count bills & coins in drawer then enter below. Expected remittance is HIDDEN for security.</p>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <label>₱1000 bills</label><input type="number" id="d1000" value="0">
-              <label>₱500 bills</label><input type="number" id="d500" value="0">
-              <label>₱200 bills</label><input type="number" id="d200" value="0">
-              <label>₱100 bills</label><input type="number" id="d100" value="0">
-              <label>₱50 bills</label><input type="number" id="d50" value="0">
-              <label>₱20 bills</label><input type="number" id="d20" value="0">
-              <label>₱10 coins</label><input type="number" id="d10" value="0">
-              <label>₱5 coins</label><input type="number" id="d5" value="0">
-              <label>₱1 coins</label><input type="number" id="d1" value="0">
-              <label>Loose Change ₱</label><input type="number" id="d-loose" value="0">
-              <label>GCash on hand ₱</label><input type="number" id="d-gcash" value="0">
-            </div>
-            <label>Notes / Explanation if mismatch:</label>
-            <input type="text" id="shift-note" placeholder="Reason for difference...">
-            <button class="warn" onclick="closeShift()">🔒 Submit & Close Shift</button>
-          </div>
-        </div>
-
-        <!-- CHAT -->
-        <div id="tab-chat" class="tab-content hide">
-          <div class="card chat-box">
-            <div id="chat-messages" class="chat-messages"></div>
-            <div class="chat-input">
-              <input type="text" id="chat-in" placeholder="Message Admin...">
-              <button onclick="sendChat()">Send</button>
-            </div>
-          </div>
-        </div>
-      </div>
+<!-- MAIN APPLICATION -->
+<div id="mainApp" class="hidden">
+    <div class="tabs">
+        <div class="tab" onclick="showTab('dashboard')">Dashboard</div>
+        <div class="tab tab-cashier" onclick="showTab('sales')">💵 Sales</div>
+        <div class="tab tab-cashier" onclick="showTab('shift')">🕐 Shift</div>
+        <div class="tab tab-admin" onclick="showTab('products')">📦 Products</div>
+        <div class="tab tab-admin" onclick="showTab('inventory')">📊 Inventory</div>
+        <div class="tab tab-admin" onclick="showTab('requests')">📋 Requests</div>
+        <div class="tab tab-admin" onclick="showTab('reports')">📈 Reports</div>
+        <div class="tab" onclick="showTab('chat')">💬 Chat</div>
+        <div class="tab tab-sp" onclick="showTab('spanel')">🛠️ SP Panel</div>
+        <div class="tab tab-admin" onclick="showTab('settings')">⚙️ Settings</div>
     </div>
 
-    <!-- ROLE: ADMIN VIEW — NO CASHIER SELL/SHIFT PANELS -->
-    <div id="view-admin" class="hide">
-      <h2>🔐 Admin / Owner Panel</h2>
-      <div class="nav-tabs">
-        <div class="nav-tab active" data-tab="adm-cashiers">👤 Cashiers</div>
-        <div class="nav-tab" data-tab="adm-prod">📦 Products</div>
-        <div class="nav-tab" data-tab="adm-stock">📥 Stock</div>
-        <div class="nav-tab" data-tab="adm-reqs">✅ Requests</div>
-        <div class="nav-tab" data-tab="adm-reports">📊 Reports</div>
-        <div class="nav-tab" data-tab="adm-chat">💬 Messages</div>
-        <div class="nav-tab" data-tab="adm-settings">⚙️ Settings</div>
-      </div>
-
-      <!-- CASHIER MANAGEMENT -->
-      <div id="tab-adm-cashiers" class="tab-content">
-        <div class="card">
-          <h3>Add Cashier</h3>
-          <input type="text" id="c-fname" placeholder="First Name">
-          <input type="text" id="c-lname" placeholder="Last Name (Optional)">
-          <input type="password" id="c-pass" placeholder="Set Password — shown masked ****">
-          <button class="sec" onclick="addCashier()">✅ Add Cashier</button>
-        </div>
-        <div class="card">
-          <h3>Cashier List</h3>
-          <div id="cashier-list"></div>
-        </div>
-      </div>
-
-      <!-- PRODUCTS -->
-      <div id="tab-adm-prod" class="tab-content">
-        <div class="card">
-          <h3>Add Product</h3>
-          <input type="text" id="p-barcode" placeholder="Scan Barcode → or leave blank to auto-generate">
-          <input type="text" id="p-name" placeholder="Product Name">
-          <input type="number" id="p-cost" placeholder="Cost Price ₱" step="0.01">
-          <input type="number" id="p-price" placeholder="Selling Price ₱" step="0.01">
-          <input type="number" id="p-qty" placeholder="Initial Qty (Optional)" value="0">
-          <button class="sec" onclick="addProduct()">✅ Save Product</button>
-        </div>
-        <div class="card">
-          <h3>Product List</h3>
-          <div id="product-list-admin"></div>
-        </div>
-      </div>
-
-      <!-- STOCK -->
-      <div id="tab-adm-stock" class="tab-content">
-        <div class="card">
-          <h3>Stock Entry — Delivery / Supplier</h3>
-          <input type="text" placeholder="Product Name or Barcode" id="stock-prod">
-          <input type="number" placeholder="Quantity" id="stock-qty">
-          <button class="sec" onclick="addStock()">✅ Add Stock</button>
-        </div>
-        <div class="card">
-          <h3>Request Actual Stock Count from Cashier</h3>
-          <button onclick="requestStockCount()">📋 Send Count Request</button>
-        </div>
-      </div>
-
-      <!-- APPROVE REQUESTS -->
-      <div id="tab-adm-reqs" class="tab-content">
-        <div class="card"><h3>Pending Requests</h3><div id="pending-reqs"></div></div>
-      </div>
-
-      <!-- REPORTS -->
-      <div id="tab-adm-reports" class="tab-content">
-        <div class="card">
-          <h3>Daily Sales Report</h3>
-          <div id="rpt-sales"></div>
-        </div>
-        <div class="card">
-          <h3>Cashier Variance / Shortage Report</h3>
-          <div id="rpt-variance"></div>
-        </div>
-        <div class="card">
-          <h3>All Transactions</h3>
-          <div id="rpt-transactions"></div>
-        </div>
-      </div>
-
-      <!-- CHAT -->
-      <div id="tab-adm-chat" class="tab-content">
-        <div class="card chat-box">
-          <div id="admin-chat-messages" class="chat-messages"></div>
-          <div class="chat-input">
-            <input type="text" id="admin-chat-in" placeholder="Message Cashier or SP...">
-            <button onclick="adminSendChat()">Send</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- SETTINGS -->
-      <div id="tab-adm-settings" class="tab-content">
-        <div class="card">
-          <h3>Contact Info (for SMS/Email alerts when offline)</h3>
-          <input type="text" id="admin-phone" placeholder="Phone Number">
-          <input type="text" id="admin-email" placeholder="Email Address">
-          <button onclick="saveAdminContact()">✅ Save Info</button>
-          <div class="alert info" style="margin-top:10px">⚠️ Admin Password can ONLY be changed by Service Provider</div>
-        </div>
-      </div>
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="card">
+        <h3>Welcome, <span id="dashRole"></span>!</h3>
+        <p>Store: <span id="dashStore"></span> | Shift: <span id="dashShift"></span></p>
+        <div id="dashAlerts"></div>
     </div>
 
-    <!-- ROLE: SERVICE PROVIDER VIEW — NO CASHIER SELL/SHIFT -->
-    <div id="view-sp" class="hide">
-      <h2>🛠️ Service Provider Panel</h2>
-      <div class="nav-tabs">
-        <div class="nav-tab active" data-tab="sp-sub">📅 Subscription</div>
-        <div class="nav-tab" data-tab="sp-pass">🔑 Password Management</div>
-        <div class="nav-tab" data-tab="sp-logs">📋 Password Change Logs</div>
-        <div class="nav-tab" data-tab="sp-chat">💬 Messages</div>
-      </div>
+    <!-- SALES / CHECKOUT — WITH AMOUNT TENDERED & TICKET # -->
+    <div id="tab-sales" class="card hidden">
+        <h3>💵 Sales Checkout — Ticket #<span id="curTicketNo">0</span></h3>
+        <div class="grid2">
+            <div>
+                <label>Search / Scan Barcode:</label>
+                <input type="text" id="prodSearch" placeholder="Scan barcode or type name..." oninput="searchProduct()">
+                <label>Category Filter:</label>
+                <select id="catFilter" onchange="searchProduct()">
+                    <option value="">All Categories</option>
+                </select>
+                <div id="prodList" style="max-height:300px; overflow-y:auto; margin-top:10px;"></div>
+            </div>
+            <div>
+                <h4>Cart</h4>
+                <div id="cartArea"></div>
+                <hr>
+                <p><strong>Total: ₱<span id="grandTotal">0.00</span></strong></p>
 
-      <div id="tab-sp-sub" class="tab-content">
-        <div class="card">
-          <h3>Service Subscription Plans</h3>
-          <div class="btn-group" style="margin:12px 0">
-            <button onclick="setSub('week')">₱199 — Weekly</button>
-            <button onclick="setSub('2week')">₱325 — 2 Weeks</button>
-            <button onclick="setSub('month')">₱579 — Monthly</button>
-          </div>
-          <p class="small">7-Day Free Trial activated automatically on first use. Only SP can renew service.</p>
-          <div id="sub-status" class="alert info">Service Status: 7-Day Free Trial Active</div>
-        </div>
-      </div>
+                <h4>Discount (Optional)</h4>
+                <select id="discType" onchange="updateTotal()">
+                    <option value="0">No Discount</option>
+                    <option value="5">Senior Citizen (5%)</option>
+                    <option value="5">PWD (5%)</option>
+                </select>
+                <div id="discFields" class="hidden">
+                    <label>ID Number:</label>
+                    <input type="text" id="discId">
+                    <label>Name:</label>
+                    <input type="text" id="discName">
+                    <p style="color:red; font-size:12px;">⚠️ Discount WILL NOT apply without both ID # and Name</p>
+                </div>
 
-      <div id="tab-sp-pass" class="tab-content">
-        <div class="card">
-          <h3>Change Admin Password</h3>
-          <input type="password" id="new-admin-pass" placeholder="New Admin Password" autocomplete="off">
-          <button class="sec" onclick="spChangeAdminPass()">✅ Update Admin Password</button>
-          <div class="alert info" style="margin-top:8px">SP only — Admin cannot change own password</div>
-        </div>
-        <div class="card">
-          <h3>Change Own (SP) Password</h3>
-          <input type="password" id="new-sp-pass" placeholder="New SP Password" autocomplete="off">
-          <button class="sec" onclick="spChangeSPPass()">✅ Update SP Password</button>
-        </div>
-      </div>
+                <h4>Payment Method & Amount Tendered</h4>
+                <label>💵 Cash Amount Tendered:</label>
+                <input type="number" id="cashTendered" min="0" step="0.01" placeholder="0.00" oninput="calcSplit()">
 
-      <div id="tab-sp-logs" class="tab-content">
-        <div class="card">
-          <h3>Password Change History</h3>
-          <div id="sp-pass-logs"></div>
-        </div>
-      </div>
+                <select id="payMethod" onchange="updatePayFields()">
+                    <option value="cash">💵 Full Cash</option>
+                    <option value="gcash">📱 GCash / E-Wallet</option>
+                    <option value="split">💳 Split Payment</option>
+                </select>
 
-      <div id="tab-sp-chat" class="tab-content">
-        <div class="card chat-box">
-          <div id="sp-chat-messages" class="chat-messages"></div>
-          <div class="chat-input">
-            <input type="text" id="sp-chat-in" placeholder="Message Admin...">
-            <button onclick="spSendChat()">Send</button>
-          </div>
+                <div id="gcashFields" class="hidden">
+                    <label>GCash Reference Number (REQUIRED):</label>
+                    <input type="text" id="gcashRef" placeholder="Enter Ref #">
+                </div>
+                <div id="splitFields" class="hidden">
+                    <label>GCash Portion (Auto-Calculated — READ ONLY):</label>
+                    <input type="text" id="gcashAmountSplit" readonly value="0.00">
+                    <p style="font-size:12px; color:#666;">Formula: Total − Cash = GCash Amount</p>
+                </div>
+
+                <button class="btn btn-success" onclick="completeSale()">✅ Complete Sale & Generate Ticket</button>
+                <button class="btn btn-warning" onclick="clearCart()">🗑️ Clear Cart</button>
+            </div>
         </div>
-      </div>
     </div>
 
-  </div>
+    <!-- SHIFT MANAGEMENT — WITH CLICKABLE TICKET # FOR VOID -->
+    <div id="tab-shift" class="card hidden">
+        <h3>🕐 Shift Management & Requests</h3>
+        <div id="shiftStatusArea"></div><hr>
+
+        <div id="openShiftArea">
+            <label>Cash Float (Fixed: ₱1,000.00):</label>
+            <input type="text" value="1000.00" readonly>
+            <button class="btn btn-success" onclick="openShift()">🔓 Open Shift</button>
+        </div>
+
+        <div id="closeShiftArea" class="hidden">
+            <h4>Close Shift — Enter Denomination Counts</h4>
+            <p>⚠️ Count bills & coins, then enter quantity below:</p>
+            <div style="columns:2;">
+                <label>₱1000 × </label><input type="number" class="denom" data-val="1000" min="0" value="0" oninput="calcCashTotal()">
+                <label>₱500 × </label><input type="number" class="denom" data-val="500" min="0" value="0" oninput="calcCashTotal()">
+                <label>₱200 × </label><input type="number" class="denom" data-val="200" min="0" value="0" oninput="calcCashTotal()">
+                <label>₱100 × </label><input type="number" class="denom" data-val="100" min="0" value="0" oninput="calcCashTotal()">
+                <label>₱50 × </label><input type="number" class="denom" data-val="50" min="0" value="0" oninput="calcCashTotal()">
+                <label>₱20 × </label><input type="number" class="denom" data-val="20" min="0" value="0" oninput="calcCashTotal()">
+                <label>₱10 × </label><input type="number" class="denom" data-val="10" min="0" value="0" oninput="calcCashTotal()">
+                <label>₱5 × </label><input type="number" class="denom" data-val="5" min="0" value="0" oninput="calcCashTotal()">
+                <label>₱1 × </label><input type="number" class="denom" data-val="1" min="0" value="0" oninput="calcCashTotal()">
+            </div>
+            <label>Loose Change (Other coins):</label>
+            <input type="number" id="looseChange" min="0" step="0.01" value="0" oninput="calcCashTotal()">
+            <label>Total GCash Amount on Hand:</label>
+            <input type="number" id="gcashOnHand" min="0" step="0.01" value="0">
+            <h4>💰 Computed Cash Total: ₱<span id="cashTotalCalc">0.00</span></h4>
+            <div id="varianceNoteArea" class="hidden alert alert-warning">
+                <label>⚠️ Amount does NOT match expected remittance! Enter Explanation / Reason:</label>
+                <textarea id="varianceNote" placeholder="Must explain difference before closing shift..."></textarea>
+            </div>
+            <button class="btn btn-danger" onclick="closeShift()">🔒 Close Shift & Submit</button>
+        </div><hr>
+
+        <h4>📤 Submit Requests (Pending until Admin Approval)</h4>
+        <select id="reqType" onchange="showReqFields()">
+            <option value="void">📤 Void Transaction</option>
+            <option value="cashin">💰 Cash In</option>
+            <option value="cashout">💸 Cash Out</option>
+            <option value="productout">📦 Product Out</option>
+        </select>
+        <div id="reqFields">
+            <!-- ✅ CLICKABLE TICKET SELECTION FOR VOID -->
+            <div id="voidFields">
+                <p style="color:green; font-weight:bold;">💡 Click Ticket Numbers from your recent sales below to select easily:</p>
+                <label>❌ WRONG Ticket # — Click to Select:</label>
+                <div id="wrongTicketList"></div>
+                <input type="text" id="wrongTicket" placeholder="Or type Ticket # manually">
+
+                <label>✅ CORRECT Ticket # — Click to Select:</label>
+                <div id="correctTicketList"></div>
+                <input type="text" id="correctTicket" placeholder="Or type Ticket # manually">
+
+                <label>Reason for Void:</label>
+                <input type="text" id="voidReason" placeholder="e.g. Wrong item selected, wrong price...">
+            </div>
+            <div id="cashReqFields" class="hidden">
+                <label>Amount:</label>
+                <input type="number" id="reqAmount" min="0" step="0.01">
+                <label>Reason:</label>
+                <input type="text" id="reqReason" placeholder="Reason...">
+            </div>
+            <div id="prodOutFields" class="hidden">
+                <label>Product:</label>
+                <select id="outProd"></select>
+                <label>Quantity:</label>
+                <input type="number" id="outQty" min="1">
+                <label>Reason:</label>
+                <select id="outReason">
+                    <option>Transfer</option>
+                    <option>Damaged</option>
+                    <option>Expired</option>
+                </select>
+                <label>Notes:</label>
+                <textarea id="outNotes"></textarea>
+            </div>
+        </div>
+        <button class="btn btn-primary" onclick="submitRequest()">📤 Submit Request</button>
+    </div>
+
+    <!-- PRODUCTS — WITH BARCODE SCAN OVERRIDE -->
+    <div id="tab-products" class="card hidden">
+        <h3>📦 Products Management</h3>
+        <h4>Add / Edit Product</h4>
+        <label>Category:</label>
+        <input type="text" id="prodCat" placeholder="e.g. Grocery, Drinks...">
+
+        <label>Barcode — Scan Actual Product Barcode OR leave blank to Auto-Generate:</label>
+        <div style="display:flex; gap:8px;">
+            <input type="text" id="prodBarcodeScan" placeholder="Scan barcode here...">
+            <button class="btn btn-sm btn-primary" onclick="assignScannedBarcode()">📡 Use Scanned Barcode</button>
+        </div>
+        <input type="text" id="prodBarcodeDisplay" placeholder="Auto-generated barcode will appear here" readonly>
+
+        <label>Product Name:</label>
+        <input type="text" id="prodName">
+        <label>Cost Price:</label>
+        <input type="number" id="prodCost" step="0.01">
+        <label>Selling Price:</label>
+        <input type="number" id="prodPrice" step="0.01">
+        <label>Initial Quantity (Optional — can update later):</label>
+        <input type="number" id="prodQtyInit" min="0" placeholder="Leave empty to add later">
+        <button class="btn btn-success" onclick="saveProduct()">✅ Save Product</button>
+        <hr>
+        <h4>Product List</h4>
+        <div id="adminProdList"></div>
+    </div>
+
+    <!-- INVENTORY & STOCK CONTROL -->
+    <div id="tab-inventory" class="card hidden">
+        <h3>📊 Inventory & Stocks</h3>
+        <h4>📥 Stock Entry (Delivery / Supplier Order)</h4>
+        <label>Product:</label>
+        <select id="stockProdSel"></select>
+        <label>Quantity Added:</label>
+        <input type="number" id="stockQtyAdd" min="1">
+        <button class="btn btn-primary" onclick="recordStockIn()">✅ Record Stock In</button>
+        <hr>
+        <h4>📋 Request Actual Inventory Count from Cashier</h4>
+        <label>Select Store:</label>
+        <select id="countStoreSel"></select>
+        <button class="btn btn-warning" onclick="requestInventoryCount()">📤 Send Count Request</button>
+        <hr>
+        <h4>📈 Current Stock Levels</h4>
+        <div id="stockStatus"></div>
+    </div>
+
+    <!-- APPROVE REQUESTS -->
+    <div id="tab-requests" class="card hidden">
+        <h3>📋 Pending Requests — Approve or Reject</h3>
+        <div id="pendingRequests"></div>
+    </div>
+
+    <!-- REPORTS -->
+    <div id="tab-reports" class="card hidden">
+        <h3>📈 Reports</h3>
+        <h4>Daily Sales Report</h4>
+        <div id="dailySalesRpt"></div><hr>
+        <h4>Date Range Sales Report</h4>
+        <label>From:</label><input type="date" id="rptFrom">
+        <label>To:</label><input type="date" id="rptTo">
+        <button class="btn btn-primary" onclick="genRangeReport()">Generate Report</button>
+        <div id="rangeRptArea"></div><hr>
+        <h4>💰 Cashier Shift Variance / Shortage Report</h4>
+        <div id="varianceRpt"></div><hr>
+        <h4>📋 All Transactions Report (Per Cashier)</h4>
+        <div id="allTransRpt"></div>
+    </div>
+
+    <!-- CHAT / MESSAGING -->
+    <div id="tab-chat" class="card hidden">
+        <h3>💬 Messaging / Chat</h3>
+        <label>Send Message To:</label>
+        <select id="chatReceiverSel"></select>
+        <div class="chat-box" id="chatMessages"></div>
+        <input type="text" id="chatInput" placeholder="Type message..." onkeypress="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary" onclick="sendChat()">Send</button>
+    </div>
+
+    <!-- SERVICE PROVIDER CONTROL PANEL -->
+    <div id="tab-spanel" class="card hidden">
+        <h3>🛠️ Service Provider — Control Panel</h3>
+        <h4>Subscription Management</h4>
+        <p>Service Expiry Date: <strong id="expiryDateDisp"></strong></p>
+        <p>Remaining Days: <span id="daysRemain"></span></p>
+        <label>Renew / Extend Service:</label>
+        <select id="renewPlanSel">
+            <option value="7">₱199 — 1 Week</option>
+            <option value="14">₱325 — 2 Weeks</option>
+            <option value="30">₱579 — 1 Month</option>
+        </select>
+        <button class="btn btn-success" onclick="renewSubscription()">✅ Renew & Extend</button><hr>
+
+        <h4>🔑 Password Management</h4>
+        <label>Change Admin Password:</label>
+        <input type="password" id="newAdminPass" placeholder="New Admin Password">
+        <button class="btn btn-primary" onclick="changeAdminPassword()">Update Admin Password</button>
+        <label>Change Your Own (SP) Password:</label>
+        <input type="password" id="newSPass" placeholder="New SP Password">
+        <button class="btn btn-primary" onclick="changeSPassword()">Update SP Password</button><hr>
+
+        <h4>📢 Send Broadcast Pop-Up Message</h4>
+        <label>Message to display on ALL users' screens:</label>
+        <textarea id="broadcastMsgInput" placeholder="e.g. Pahiram po muna ng POS, sandali lang to..."></textarea>
+        <button class="btn btn-warning" onclick="sendBroadcast()">📢 Send Pop-Up Message</button><hr>
+
+        <h4>📋 Password Change Logs (Sent to SP)</h4>
+        <div id="passChangeLog"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div id="tab-settings" class="card hidden">
+        <h3>⚙️ System Settings</h3>
+        <h4>Admin Contact Info (for SMS/Email Alerts when offline)</h4>
+        <label>Phone Number:</label>
+        <input type="text" id="adminPhone">
+        <label>Email Address:</label>
+        <input type="text" id="adminEmail">
+        <button class="btn btn-primary" onclick="saveAdminContact()">✅ Save Contact Info</button>
+        <hr>
+        <h4>🏪 Store Management</h4>
+        <label>Add New Store Name:</label>
+        <input type="text" id="newStoreName">
+        <button class="btn btn-success" onclick="addStore()">➕ Add Store</button>
+        <div id="storeListDisp"></div>
+        <hr>
+        <h4>👤 Cashier Management</h4>
+        <label>Cashier First Name:</label>
+        <input type="text" id="cashierFName">
+        <label>Cashier Last Name (Optional):</label>
+        <input type="text" id="cashierLName">
+        <label>Set Password:</label>
+        <input type="password" id="cashierPassSet" placeholder="••••••">
+        <button class="btn btn-success" onclick="addCashier()">✅ Add Cashier</button>
+        <div id="cashierListDisp"></div>
+    </div>
+
+    <!-- RECEIPT PREVIEW MODAL -->
+    <div id="receiptModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>🧾 Receipt Preview — Ticket #<span id="receiptTicketNum"></span></h3>
+            <div id="receiptContent" class="receipt"></div>
+            <button class="btn btn-primary" onclick="printReceipt()">🖨️ Print Receipt</button>
+            <button class="btn btn-success" onclick="closeReceiptModal()">✓ Close</button>
+        </div>
+    </div>
+
+</div>
 </div>
 
 <script>
-// === DEFAULT CREDENTIALS ===
-const DEFAULTS = {
-  spPass: "19970407chan",
-  adminPass: "8888"
+// ═══════════════════════════════════════════════════════════
+// 📦 BPOS — GLOBAL DATA STORAGE
+// ═══════════════════════════════════════════════════════════
+const STORAGE_KEY = 'bpos_data';
+const DEFAULT_PASS = { admin:'8888', sp:'19970407chan' };
+const ROLES = { CASHIER:'cashier', ADMIN:'admin', SP:'sp' };
+
+let data = {
+    users: { admin:{role:'admin',fname:'Admin',lname:'Owner',pass:DEFAULT_PASS.admin},
+             sp:{role:'sp',fname:'Service',lname:'Provider',pass:DEFAULT_PASS.sp} },
+    stores: ['Main Store'],
+    products: [],
+    transactions: [],
+    requests: [],
+    shifts: [],
+    inventoryCounts: [],
+    chats: [],
+    passChangeLogs: [],
+    expiryDate: null,
+    settings: { adminPhone:'', adminEmail:'', syncStatus:'online' }
 };
 
-// === GLOBAL STATE ===
-let App = {
-  role: null,
-  store: null,
-  cashierName: null,
-  shiftOpen: false,
-  cashFloat: 1000,
-  cart: [],
-  products: [],
-  cashiers: [],
-  requests: [],
-  transactions: [],
-  passChangeLogs: [],
-  subscription: { type: 'trial', expiry: Date.now() + 7*86400000 },
-  isOnline: true
-};
+let currentUser = null, currentStore = null, currentShift = null, cart = [], nextTicketNo = 1;
 
-// === INIT SAMPLE PRODUCTS ===
-function initSampleProducts(){
-  App.products = [
-    { barcode: "BP001", name: "Canned Sardines", cost:15.00, price:20.00, qty:50 },
-    { barcode: "BP002", name: "White Rice 1kg", cost:40.00, price:45.00, qty:30 },
-    { barcode: "BP003", name: "Bottled Water 500ml", cost:10.00, price:15.00, qty:100 }
-  ];
+// ═══════════════════════════════════════════════════════════
+// 🔒 INIT & STORAGE
+// ═══════════════════════════════════════════════════════════
+function loadData(){
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(saved){
+        const parsed = JSON.parse(saved);
+        data = {...data, ...parsed};
+    }
+    // Set 7-day free trial if new system
+    if(!data.expiryDate){
+        data.expiryDate = new Date(Date.now() + 7*86400000).toISOString();
+    }
+    syncUI();
+}
+function saveData(){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+function isServiceExpired(){
+    return new Date(data.expiryDate) < new Date();
 }
 
-// === LOGIN SYSTEM ===
-function doLogin(){
-  const store = document.getElementById('sel-store').value;
-  const role = document.getElementById('sel-role').value;
-  const pass = document.getElementById('inp-pass').value;
-  const cashierUser = document.getElementById('inp-cashier-user').value.trim();
-  let ok = false;
-
-  if(role === 'sp'){
-    if(pass === DEFAULTS.spPass){ ok = true; App.role='sp'; App.cashierName='Service Provider'; }
-    else{ showLoginMsg("❌ Incorrect SP password","danger"); return; }
-  } else if(role === 'admin'){
-    if(pass === DEFAULTS.adminPass){ ok = true; App.role='admin'; App.cashierName='Admin'; }
-    else{ showLoginMsg("❌ Incorrect Admin password","danger"); return; }
-  } else if(role === 'cashier'){
-    const found = App.cashiers.find(c=>c.user===cashierUser && c.pass===pass);
-    if(found){ ok=true; App.role='cashier'; App.cashierName=cashierUser; }
-    else{ showLoginMsg("❌ Cashier not found or wrong password","danger"); return; }
-  }
-
-  if(ok){
-    App.store=store;
-    document.getElementById('cur-store').textContent = store==='store-a'?'Davao Branch A':'Davao Branch B';
-    document.getElementById('cur-role-badge').textContent = App.role==='sp'?'🛠️ SP':App.role==='admin'?'🔐 Admin':'💵 Cashier';
-    document.getElementById('page-login').classList.add('hide');
-    document.getElementById('page-main').classList.remove('hide');
-    applyRoleView();
-    initSampleProducts();
-    renderAll();
-  }
+// ═══════════════════════════════════════════════════════════
+// 🔐 LOGIN & AUTHENTICATION
+// ═══════════════════════════════════════════════════════════
+function refreshStoreSelect(){
+    const sel = document.getElementById('storeSelect');
+    sel.innerHTML = '';
+    data.stores.forEach(s=>{const o=new Option(s,s); sel.appendChild(o);});
 }
-function showLoginMsg(txt,type='info'){
-  const el=document.getElementById('login-msg');
-  el.className=`alert ${type}`; el.textContent=txt;
+function login(){
+    const u=document.getElementById('username').value.trim();
+    const p=document.getElementById('password').value;
+    if(!u||!p){return showLoginMsg('Enter username & password','red');}
+
+    let found=null, role=null;
+    if(u.toLowerCase()==='admin' && p===data.users.admin.pass){
+        found=data.users.admin; role='admin';
+    } else if(u.toLowerCase()==='sp' && p===data.users.sp.pass){
+        found=data.users.sp; role='sp';
+    } else {
+        for(const uid in data.users){
+            if(data.users[uid].role==='cashier' && uid===u && data.users[uid].pass===p){
+                found=data.users[uid]; role='cashier'; break;
+            }
+        }
+    }
+    if(!found) return showLoginMsg('Invalid credentials','red');
+
+    // Cashier must select store
+    if(role==='cashier'){
+        currentStore = document.getElementById('storeSelect').value;
+        if(!currentStore) return showLoginMsg('Select store first','red');
+    } else {
+        currentStore = data.stores[0]; // Admin/SP default first store
+    }
+
+    // Check default password → force change
+    if( (role==='admin' && p===DEFAULT_PASS.admin) || (role==='sp' && p===DEFAULT_PASS.sp) ){
+        document.getElementById('passChangeModal').classList.remove('hidden');
+        currentUser={id:u, ...found, role};
+        return;
+    }
+
+    completeLogin(u,found,role);
+}
+function completeLogin(uid,user,role){
+    currentUser={id:uid, ...user, role};
+    saveData();
+    if(isServiceExpired()){
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('expiryLock').classList.remove('hidden');
+        return;
+    }
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('mainApp').classList.remove('hidden');
+    document.getElementById('userInfo').textContent = `${user.fname} [${role.toUpperCase()}] — ${currentStore}`;
+    document.getElementById('dashRole').textContent = `${user.fname} (${role.toUpperCase()})`;
+    document.getElementById('dashStore').textContent = currentStore;
+    updateTabsVisibility();
+    refreshAllSelects();
+    syncUI();
+}
+function showLoginMsg(txt,color='black'){
+    document.getElementById('loginMsg').innerHTML=`<span style="color:${color}">${txt}</span>`;
+}
+function logout(){
+    // Password NOT retained after logout
+    currentUser=null; currentShift=null; cart=[];
+    document.getElementById('password').value=''; // cleared
+    document.getElementById('mainApp').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('expiryLock').classList.add('hidden');
+    showTab('dashboard');
 }
 
-// === SHOW ONLY CORRECT ROLE VIEW ===
-function applyRoleView(){
-  document.getElementById('view-cashier').classList.add('hide');
-  document.getElementById('view-admin').classList.add('hide');
-  document.getElementById('view-sp').classList.add('hide');
-  if(App.role==='cashier') document.getElementById('view-cashier').classList.remove('hide');
-  else if(App.role==='admin') document.getElementById('view-admin').classList.remove('hide');
-  else if(App.role==='sp') document.getElementById('view-sp').classList.remove('hide');
-  setupTabs();
-}
+// ═══════════════════════════════════════════════════════════
+// ⚠️ FORCE PASSWORD CHANGE ON FIRST LOGIN (DEFAULT PASS)
+// ═══════════════════════════════════════════════════════════
+function submitPassChange(){
+    const p1=document.getElementById('newPass1').value;
+    const p2=document.getElementById('newPass2').value;
+    if(p1.length<6) return passChangeMsg('Min 6 characters','red');
+    if(p1!==p2) return passChangeMsg('Passwords do not match','red');
 
-// === TAB SYSTEM ===
-function setupTabs(){
-  document.querySelectorAll('.nav-tabs').forEach(tabBar=>{
-    tabBar.querySelectorAll('.nav-tab').forEach(tab=>{
-      tab.onclick=()=>{
-        tabBar.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-        tab.classList.add('active');
-        const container = tabBar.parentElement;
-        container.querySelectorAll('.tab-content').forEach(c=>c.classList.add('hide'));
-        container.querySelector(`#tab-${tab.dataset.tab}`).classList.remove('hide');
-      };
+    if(currentUser.role==='admin'){
+        logPasswordChange('Admin', data.users.admin.pass, p1);
+        data.users.admin.pass=p1;
+        DEFAULT_PASS.admin='__CHANGED__';
+    } else if(currentUser.role==='sp'){
+        logPasswordChange('Service Provider', data.users.sp.pass, p1);
+        data.users.sp.pass=p1;
+        DEFAULT_PASS.sp='__CHANGED__';
+    }
+    saveData();
+    document.getElementById('passChangeModal').classList.add('hidden');
+    completeLogin(currentUser.id, currentUser, currentUser.role);
+}
+function passChangeMsg(t,c){document.getElementById('passChangeMsg').innerHTML=`<span style="color:${c}">${t}</span>`;}
+
+// ═══════════════════════════════════════════════════════════
+// 📋 PASSWORD CHANGE LOGS — SENT TO SP
+// ═══════════════════════════════════════════════════════════
+function logPasswordChange(targetName, oldPass, newPass){
+    data.passChangeLogs.unshift({
+        target:targetName, changedBy:currentUser?currentUser.fname:'System',
+        oldPassword:oldPass, newPassword:newPass,
+        dateTime:new Date().toLocaleString()
     });
-  });
+    saveData();
+    renderPassChangeLogs();
+}
+function renderPassChangeLogs(){
+    const c=document.getElementById('passChangeLog');
+    if(!data.passChangeLogs.length){c.innerHTML='<p>No password changes yet.</p>';return;}
+    c.innerHTML='<table><tr><th>Who</th><th>Old Pass</th><th>New Pass</th><th>Date & Time</th></tr>'+
+        data.passChangeLogs.map(l=>`<tr><td>${l.target} (by ${l.changedBy})</td><td>${l.oldPassword}</td><td>${l.newPassword}</td><td>${l.dateTime}</td></tr>`).join('')+'</table>';
 }
 
-// === CASHIER — SHIFT OPERATIONS ===
+// ═══════════════════════════════════════════════════════════
+// 📢 SP BROADCAST POP-UP MESSAGE SYSTEM
+// ═══════════════════════════════════════════════════════════
+function sendBroadcast(){
+    const msg=document.getElementById('broadcastMsgInput').value.trim();
+    if(!msg) return alert('Enter a message first!');
+    showBroadcast(msg);
+    alert('✅ Pop-Up message sent! All users will see it immediately.');
+    document.getElementById('broadcastMsgInput').value='';
+}
+function showBroadcast(text){
+    document.getElementById('broadcastText').textContent=text;
+    document.getElementById('broadcastModal').classList.remove('hidden');
+}
+function closeBroadcast(){
+    document.getElementById('broadcastModal').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🎫 TICKET # GENERATION & CLICKABLE SELECTION FOR VOID
+// ═══════════════════════════════════════════════════════════
+function getNextTicketNo(){
+    return (data.transactions.length+1);
+}
+function refreshTicketLists(){
+    const recent = data.transactions.slice(-10).reverse(); // last 10 transactions
+    const wl=document.getElementById('wrongTicketList');
+    const cl=document.getElementById('correctTicketList');
+    wl.innerHTML=''; cl.innerHTML='';
+    recent.forEach(t=>{
+        const linkW=document.createElement('span'); linkW.className='ticket-link'; linkW.textContent=`Ticket #${t.ticketNo} — ₱${t.total.toFixed(2)}`;
+        linkW.onclick=()=>{document.getElementById('wrongTicket').value=t.ticketNo;};
+        wl.appendChild(linkW); wl.appendChild(document.createElement('br'));
+
+        const linkC=document.createElement('span'); linkC.className='ticket-link'; linkC.textContent=`Ticket #${t.ticketNo} — ₱${t.total.toFixed(2)}`;
+        linkC.onclick=()=>{document.getElementById('correctTicket').value=t.ticketNo;};
+        cl.appendChild(linkC); cl.appendChild(document.createElement('br'));
+    });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 💵 SALES CHECKOUT — WITH AMOUNT TENDERED & RECEIPT
+// ═══════════════════════════════════════════════════════════
+function searchProduct(){
+    const q=document.getElementById('prodSearch').value.toLowerCase();
+    const cat=document.getElementById('catFilter').value;
+    let list=data.products;
+    if(cat) list=list.filter(p=>p.category===cat);
+    if(q) list=list.filter(p=>p.name.toLowerCase().includes(q)||p.barcode.includes(q));
+    renderProdList(list);
+}
+function renderProdList(list){
+    const c=document.getElementById('prodList');
+    c.innerHTML=list.map(p=>`
+        <div style="padding:6px; border-bottom:1px solid #eee; cursor:pointer;" onclick="addToCart('${p.barcode}')">
+            <strong>${p.name}</strong> — ₱${p.price.toFixed(2)}<br>
+            <small>Barcode: ${p.barcode} | Qty: ${p.qty||0}</small>
+        </div>`).join('');
+}
+function addToCart(barcode){
+    const prod=data.products.find(p=>p.barcode===barcode);
+    if(!prod) return;
+    const ex=cart.find(i=>i.barcode===barcode);
+    if(ex) ex.qty++; else cart.push({...prod, qty:1});
+    updateCartDisplay();
+}
+function updateCartDisplay(){
+    const c=document.getElementById('cartArea');
+    c.innerHTML=cart.map((it,idx)=>`
+        <div>${it.name} × ${it.qty} = ₱${(it.price*it.qty).toFixed(2)}
+        <button class="btn btn-sm btn-danger" onclick="removeFromCart(${idx})">×</button></div>`).join('');
+    updateTotal();
+}
+function removeFromCart(i){cart.splice(i,1); updateCartDisplay();}
+function clearCart(){cart=[]; updateCartDisplay(); document.getElementById('cashTendered').value='';}
+function updateTotal(){
+    let subtotal=cart.reduce((s,i)=>s+i.price*i.qty,0);
+    const discPct=parseFloat(document.getElementById('discType').value);
+    if(discPct>0){
+        const id=document.getElementById('discId').value.trim();
+        const nm=document.getElementById('discName').value.trim();
+        if(!id||!nm) {
+            document.getElementById('discFields').classList.remove('hidden');
+        } else {
+            document.getElementById('discFields').classList.add('hidden');
+            subtotal = subtotal * (1 - discPct/100);
+        }
+    } else {
+        document.getElementById('discFields').classList.add('hidden');
+    }
+    document.getElementById('grandTotal').textContent=subtotal.toFixed(2);
+    calcSplit();
+}
+function calcSplit(){
+    const total=parseFloat(document.getElementById('grandTotal').textContent);
+    const cash=parseFloat(document.getElementById('cashTendered').value)||0;
+    const gcashPortion = Math.max(0, total - cash);
+    document.getElementById('gcashAmountSplit').value=gcashPortion.toFixed(2);
+}
+function updatePayFields(){
+    const m=document.getElementById('payMethod').value;
+    document.getElementById('gcashFields').classList.toggle('hidden', m!=='gcash' && m!=='split');
+    document.getElementById('splitFields').classList.toggle('hidden', m!=='split');
+}
+
+// ✅ COMPLETE SALE — GENERATE TICKET # + RECEIPT
+function completeSale(){
+    if(!cart.length) return alert('Cart is empty!');
+    if(!currentShift && currentUser.role==='cashier') return alert('⚠️ Open a shift first!');
+
+    const total=parseFloat(document.getElementById('grandTotal').textContent);
+    const payMethod=document.getElementById('payMethod').value;
+    let cashTendered=parseFloat(document.getElementById('cashTendered').value)||0;
+    let gcashRef='', gcashAmount=0;
+
+    if(payMethod==='gcash'){
+        gcashRef=document.getElementById('gcashRef').value.trim();
+        if(!gcashRef) return alert('⚠️ Enter GCash Reference Number!');
+        gcashAmount=total; cashTendered=0;
+    } else if(payMethod==='split'){
+        gcashAmount=parseFloat(document.getElementById('gcashAmountSplit').value);
+        if(!document.getElementById('gcashRef').value.trim()) return alert('⚠️ Enter GCash Reference Number!');
+        gcashRef=document.getElementById('gcashRef').value.trim();
+    }
+
+    const ticketNo=getNextTicketNo();
+    document.getElementById('curTicketNo').textContent=ticketNo;
+
+    const tx={
+        ticketNo,
+        timestamp:new Date().toISOString(),
+        cashierId:currentUser.id,
+        cashierName:currentUser.fname+' '+(currentUser.lname||''),
+        store:currentStore,
+        items:[...cart],
+        total,
+        payMethod,
+        cashTendered,
+        gcashAmount,
+        gcashRef,
+        discountPct:parseFloat(document.getElementById('discType').value),
+        discountId:document.getElementById('discId').value.trim(),
+        discountName:document.getElementById('discName').value.trim(),
+        synced:false
+    };
+    data.transactions.push(tx);
+    saveData();
+
+    // ✅ SHOW RECEIPT PREVIEW
+    showReceipt(tx);
+
+    cart=[]; updateCartDisplay();
+    document.getElementById('cashTendered').value='';
+    document.getElementById('gcashRef').value='';
+    refreshTicketLists(); // Update clickable ticket list for void
+    alert(`✅ Sale Complete! Ticket #${ticketNo} generated!`);
+}
+
+// 🧾 RECEIPT PREVIEW & PRINT
+function showReceipt(tx){
+    const r=document.getElementById('receiptContent');
+    r.innerHTML=`
+<div class="center">================================</div>
+<div class="center">     BPOS — RECEIPT</div>
+<div class="center">================================</div>
+<div>Ticket #: ${tx.ticketNo}</div>
+<div>Date: ${new Date(tx.timestamp).toLocaleString()}</div>
+<div>Cashier: ${tx.cashierName}</div>
+<div>Store: ${tx.store}</div>
+<div>--------------------------------</div>
+${tx.items.map(i=>`<div>${i.name} × ${i.qty} = ₱${(i.price*i.qty).toFixed(2)}</div>`).join('')}
+<div>--------------------------------</div>
+<div>TOTAL: ₱${tx.total.toFixed(2)}</div>
+<div>--------------------------------</div>
+<div>Payment: ${tx.payMethod.toUpperCase()}</div>
+${tx.cashTendered>0?`<div>Cash: ₱${tx.cashTendered.toFixed(2)}</div>`:''}
+${tx.gcashAmount>0?`<div>GCash: ₱${tx.gcashAmount.toFixed(2)} | Ref: ${tx.gcashRef}</div>`:''}
+<div>================================</div>
+<div class="center">   Thank You!  </div>
+<div class="center">================================</div>`;
+    document.getElementById('receiptTicketNum').textContent=tx.ticketNo;
+    document.getElementById('receiptModal').classList.remove('hidden');
+}
+function printReceipt(){
+    const w=window.open('','','width=350,height=600');
+    w.document.write('<html><body style="margin:0; padding:10px; font-family:Courier New; font-size:12px;">');
+    w.document.write(document.getElementById('receiptContent').innerHTML);
+    w.document.write('</body></html>');
+    w.document.close();
+    w.print();
+}
+function closeReceiptModal(){
+    document.getElementById('receiptModal').classList.add('hidden');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🕐 SHIFT MANAGEMENT
+// ═══════════════════════════════════════════════════════════
 function openShift(){
-  App.shiftOpen=true;
-  document.getElementById('shift-not-opened').classList.add('hide');
-  document.getElementById('shift-opened').classList.remove('hide');
-  alert("✅ Shift Opened. Cash Float: ₱1,000.00");
+    if(currentShift) return alert('⚠️ Shift already open!');
+    currentShift={
+        id:Date.now(),
+        cashierId:currentUser.id,
+        store:currentStore,
+        openTime:new Date().toISOString(),
+        cashFloat:1000.00,
+        status:'open'
+    };
+    data.shifts.push(currentShift);
+    saveData();
+    document.getElementById('dashShift').textContent='🔓 OPEN';
+    document.getElementById('openShiftArea').classList.add('hidden');
+    document.getElementById('closeShiftArea').classList.remove('hidden');
+    alert('✅ Shift Opened! Cash Float: ₱1,000.00');
+}
+function calcCashTotal(){
+    let t=0;
+    document.querySelectorAll('.denom').forEach(inp=>{
+        const v=parseFloat(inp.getAttribute('data-val'));
+        const q=parseInt(inp.value)||0;
+        t += v*q;
+    });
+    t += parseFloat(document.getElementById('looseChange').value)||0;
+    document.getElementById('cashTotalCalc').textContent=t.toFixed(2);
+    return t;
 }
 function closeShift(){
-  const total = 
-    (1000*Number(document.getElementById('d1000').value)) +
-    (500*Number(document.getElementById('d500').value)) +
-    (200*Number(document.getElementById('d200').value)) +
-    (100*Number(document.getElementById('d100').value)) +
-    (50*Number(document.getElementById('d50').value)) +
-    (20*Number(document.getElementById('d20').value)) +
-    (10*Number(document.getElementById('d10').value)) +
-    (5*Number(document.getElementById('d5').value)) +
-    (1*Number(document.getElementById('d1').value)) +
-    Number(document.getElementById('d-loose').value);
-  const note = document.getElementById('shift-note').value.trim();
-  if(total<=0 && !note) return alert("⚠️ Enter denomination or explanation before closing.");
-  alert("✅ Shift Closed & Submitted. Thank you!");
-  App.shiftOpen=false;
-  document.getElementById('shift-not-opened').classList.remove('hide');
-  document.getElementById('shift-opened').classList.add('hide');
+    if(!currentShift) return alert('No open shift!');
+    const cashTotal=calcCashTotal();
+    const gcashTotal=parseFloat(document.getElementById('gcashOnHand').value)||0;
+
+    // Calculate Expected Remittance (HIDDEN from Cashier)
+    const shiftSales = data.transactions.filter(t=>
+        t.cashierId===currentUser.id && t.store===currentStore &&
+        new Date(t.timestamp)>=new Date(currentShift.openTime));
+    let expectedCash=currentShift.cashFloat;
+    let totalSalesAmt=0, totalCashOutAmt=0, totalGcashAmt=0;
+    shiftSales.forEach(t=>{
+        totalSalesAmt += t.total;
+        totalCashOutAmt += t.cashTendered||0;
+        totalGcashAmt += t.gcashAmount||0;
+    });
+    // Expected Remittance Formula: Sales Cash − Cash Outs
+    const expectedRemit = totalSalesAmt - totalGcashAmt; // HIDDEN
+    const variance = cashTotal - expectedRemit;
+
+    const note=document.getElementById('varianceNote').value.trim();
+    if(Math.abs(variance)>0.01 && !note){
+        document.getElementById('varianceNoteArea').classList.remove('hidden');
+        return alert('⚠️ Amount does not match expected remittance!\n\nYou MUST enter an explanation before closing shift.');
+    }
+
+    // Close Shift
+    currentShift.closeTime=new Date().toISOString();
+    currentShift.cashTotalDeclared=cashTotal;
+    currentShift.gcashTotalDeclared=gcashTotal;
+    currentShift.variance=variance;
+    currentShift.varianceNote=note||'';
+    currentShift.status='closed';
+    currentShift.durationMinutes=Math.round((new Date()-new Date(currentShift.openTime))/60000);
+    saveData();
+
+    if(Math.abs(variance)>0.01){
+        alert(`⚠️ Shift Closed with VARIANCE!\nDeclared: ₱${cashTotal.toFixed(2)}\nExpected: ₱${expectedRemit.toFixed(2)}\nDifference: ₱${variance.toFixed(2)}\n\nRecorded in Admin Variance Report.`);
+    } else {
+        alert('✅ Shift Closed Successfully!');
+    }
+
+    currentShift=null;
+    document.getElementById('dashShift').textContent='—';
+    document.getElementById('openShiftArea').classList.remove('hidden');
+    document.getElementById('closeShiftArea').classList.add('hidden');
+    document.getElementById('varianceNoteArea').classList.add('hidden');
 }
 
-// === CASHIER — SELLING FUNCTIONS ===
-function renderAll(){
-  renderProducts(); renderCashierList(); renderRequests(); renderReports(); renderPasswordLogs();
-}
-function renderProducts(){
-  const grid=document.getElementById('product-grid');
-  grid.innerHTML=App.products.map(p=>`
-    <div class="product-card" onclick="addToCart('${p.barcode}')">
-      <div><strong>${p.name}</strong></div>
-      <div>₱${p.price.toFixed(2)}</div>
-      <div class="small">Stock: ${p.qty}</div>
-    </div>
-  `).join('');
-}
-let discountRate=0;
-function addToCart(barcode){
-  const p=App.products.find(x=>x.barcode===barcode);
-  if(!p)return;
-  App.cart.push({...p, qty:1});
-  updateCartTotal();
-}
-function updateCartTotal(){
-  let total=0;
-  App.cart.forEach(i=>total+=i.price*i.qty);
-  if(discountRate>0) total=total*(1-discountRate);
-  document.getElementById('cart-total').textContent=total.toFixed(2);
-}
-function applyDiscountSenior(){
-  const id=prompt("Enter Senior ID Number:"); const name=prompt("Enter Name:");
-  if(!id||!name)return alert("⚠️ Both ID # and Name are REQUIRED. Discount not applied.");
-  discountRate=0.05; updateCartTotal(); alert("✅ 5% Senior Discount Applied");
-}
-function applyDiscountPWD(){
-  const id=prompt("Enter PWD ID Number:"); const name=prompt("Enter Name:");
-  if(!id||!name)return alert("⚠️ Both ID # and Name are REQUIRED. Discount not applied.");
-  discountRate=0.05; updateCartTotal(); alert("✅ 5% PWD Discount Applied");
-}
-function clearCart(){ App.cart=[]; discountRate=0; updateCartTotal(); }
-function payCash(){ if(App.cart.length===0)return; alert("✅ Transaction Paid — Full Cash\n\nReceipt Printed"); clearCart(); }
-function payGCash(){ const ref=prompt("Enter GCash Reference Number:"); if(!ref)return; alert(`✅ Paid via GCash Ref: ${ref}\nReceipt Printed`); clearCart(); }
-function paySplit(){ const cash=Number(prompt("Enter Cash Amount:"))||0; const total=App.cart.reduce((s,i)=>s+i.price*i.qty,0)*(1-discountRate); const egc=(total-cash).toFixed(2); if(egc<=0)return alert("Cash covers full amount. Use Cash payment."); alert(`✅ Split Payment:\nCash: ₱${cash.toFixed(2)}\nGCash: ₱${egc} (Auto-Calculated)\nReceipt Printed`); clearCart(); }
-
-// === ADMIN — CASHIER MGMT ===
-function addCashier(){
-  const fn=document.getElementById('c-fname').value.trim();
-  const ln=document.getElementById('c-lname').value.trim();
-  const pw=document.getElementById('c-pass').value;
-  if(!fn||!pw)return alert("⚠️ First Name & Password Required");
-  const user=fn.toLowerCase().replace(/\s/g,'')+(ln?ln.toLowerCase().replace(/\s/g,''):'');
-  App.cashiers.push({user,fn,ln,pass:pw});
-  document.getElementById('c-fname').value=''; document.getElementById('c-lname').value=''; document.getElementById('c-pass').value='';
-  renderCashierList();
-  alert("✅ Cashier Added. Username: "+user);
-}
-function renderCashierList(){
-  document.getElementById('cashier-list').innerHTML=App.cashiers.map((c,i)=>`
-    <div class="card" style="margin:6px 0;padding:10px">
-      <div><strong>${c.fn} ${c.ln||''}</strong> (@${c.user})</div>
-      <button style="width:auto;padding:4px 8px;font-size:13px" onclick="resetCashierPass(${i})">🔑 Reset Password</button>
-    </div>
-  `).join('');
-}
-function resetCashierPass(idx){
-  const newPass=prompt("Enter New Password:");
-  if(!newPass)return;
-  const oldPass=App.cashiers[idx].pass;
-  App.cashiers[idx].pass=newPass;
-  App.passChangeLogs.unshift({
-    when:new Date().toLocaleString(),
-    who:'Admin',
-    target:'Cashier: '+App.cashiers[idx].user,
-    old:oldPass,
-    new:newPass
-  });
-  renderCashierList(); renderPasswordLogs();
-  alert("✅ Password Updated & Logged");
+// ═══════════════════════════════════════════════════════════
+// 📋 REQUESTS SYSTEM — Void / Cash In / Cash Out / Product Out
+// ═══════════════════════════════════════════════════════════
+function showReqFields(){
+    const t = document.getElementById('reqType').value;
+    document.getElementById('voidFields').classList.toggle('hidden', t!=='void');
+    document.getElementById('cashReqFields').classList.toggle('hidden', t!=='cashin' && t!=='cashout');
+    document.getElementById('prodOutFields').classList.toggle('hidden', t!=='productout');
+    refreshTicketLists();
 }
 
-// === ADMIN — PRODUCTS ===
-function addProduct(){
-  let barcode=document.getElementById('p-barcode').value.trim();
-  const name=document.getElementById('p-name').value.trim();
-  const cost=Number(document.getElementById('p-cost').value);
-  const price=Number(document.getElementById('p-price').value);
-  const qty=Number(document.getElementById('p-qty').value)||0;
-  if(!name||!price)return alert("⚠️ Product Name & Price Required");
-  if(!barcode) barcode="BP"+String(App.products.length+1).padStart(3,'0');
-  if(App.products.find(p=>p.barcode===barcode)) return alert("⚠️ Barcode already exists — scan a different one or leave blank");
-  App.products.push({barcode,name,cost,price,qty});
-  document.getElementById('p-barcode').value=''; document.getElementById('p-name').value='';
-  document.getElementById('p-cost').value=''; document.getElementById('p-price').value=''; document.getElementById('p-qty').value='';
-  renderProductsAdmin();
-  alert("✅ Product Saved. Barcode: "+barcode);
-}
-function renderProductsAdmin(){
-  document.getElementById('product-list-admin').innerHTML=App.products.map(p=>`
-    <div style="padding:8px 0;border-bottom:1px solid #eee">
-      <strong>${p.name}</strong> — ${p.barcode}<br>
-      Price: ₱${p.price.toFixed(2)} | Qty: ${p.qty}
-    </div>
-  `).join('');
-}
-function addStock(){ alert("✅ Stock Recorded — Inventory Updated"); }
-function requestStockCount(){ alert("✅ Count Request Sent — Cashier will be notified"); }
-
-// === REQUEST SYSTEM ===
 function submitRequest(){
-  App.requests.unshift({
-    id:Date.now(),
-    type:document.getElementById('req-type').value,
-    amount:document.getElementById('req-amount').value,
-    reason:document.getElementById('req-reason').value,
-    status:'pending',
-    by:App.cashierName,
-    when:new Date().toLocaleString()
-  });
-  document.getElementById('req-amount').value=''; document.getElementById('req-reason').value='';
-  renderRequests();
-  alert("✅ Request Sent — Pending Admin Approval");
-}
-function renderRequests(){
-  const mapType={void:'Void',cashin:'Cash In',cashout:'Cash Out',prodout:'Product Out'};
-  const mapStatus={pending:'badge pending',approved:'badge approved',rejected:'badge rejected'};
-  if(App.role==='cashier'){
-    document.getElementById('cashier-reqs').innerHTML=App.requests.filter(r=>r.by===App.cashierName).map(r=>`
-      <div style="padding:6px 0;border-bottom:1px solid #eee">
-        ${mapType[r.type]} — ${r.amount} <span class="${mapStatus[r.status]}">${r.status}</span><br>
-        <span class="small">${r.reason} | ${r.when}</span>
-      </div>
-    `).join('')||'<p class="small">No requests yet</p>';
-  } else if(App.role==='admin'){
-    document.getElementById('pending-reqs').innerHTML=App.requests.filter(r=>r.status==='pending').map((r,i)=>`
-      <div style="padding:8px 0;border-bottom:1px solid #eee">
-        <strong>${r.by}</strong> — ${mapType[r.type]}: ${r.amount}<br>
-        Reason: ${r.reason} | ${r.when}
-        <div class="btn-group" style="margin-top:4px">
-          <button class="sec" style="width:auto" onclick="approveReq(${i})">✅ Approve</button>
-          <button class="danger" style="width:auto" onclick="rejectReq(${i})">❌ Reject</button>
-        </div>
-      </div>
-    `).join('')||'<p class="small">No pending requests</p>';
-  }
-}
-function approveReq(i){ App.requests.filter(r=>r.status==='pending')[i].status='approved'; renderRequests(); alert("✅ Approved"); }
-function rejectReq(i){ App.requests.filter(r=>r.status==='pending')[i].status='rejected'; renderRequests(); alert("❌ Rejected"); }
+    if(!currentUser) return;
+    const t = document.getElementById('reqType').value;
+    const req = {
+        id: Date.now(),
+        type: t,
+        store: currentStore,
+        cashierId: currentUser.id,
+        cashierName: currentUser.fname+' '+(currentUser.lname||''),
+        timestamp: new Date().toISOString(),
+        status: 'pending',
+        approvedBy: null,
+        approvedAt: null
+    };
 
-// === ADMIN — REPORTS ===
-function renderReports(){
-  document.getElementById('rpt-sales').innerHTML='<p class="small">All cashier transactions appear here in full detail — Time, Items, Amount, Payment Method, Reference #, Store, Cashier Name</p>';
-  document.getElementById('rpt-variance').innerHTML='<p class="small">Discrepancies & shortages only — visible to Admin ONLY. Cashier NEVER sees expected remittance.</p>';
-  document.getElementById('rpt-transactions').innerHTML='<p class="small">Complete transaction log sent to Admin automatically for every sale made.</p>';
-}
+    if(t==='void'){
+        const wT = document.getElementById('wrongTicket').value.trim();
+        const cT = document.getElementById('correctTicket').value.trim();
+        const reason = document.getElementById('voidReason').value.trim();
+        if(!wT || !cT || !reason) return alert('⚠️ Fill Wrong Ticket #, Correct Ticket #, and Reason!');
+        req.wrongTicketNo = parseInt(wT);
+        req.correctTicketNo = parseInt(cT);
+        req.reason = reason;
+    } else if(t==='cashin' || t==='cashout'){
+        const amt = parseFloat(document.getElementById('reqAmount').value);
+        const reason = document.getElementById('reqReason').value.trim();
+        if(!amt || !reason) return alert('⚠️ Enter Amount and Reason!');
+        req.amount = amt;
+        req.reason = reason;
+    } else if(t==='productout'){
+        const prodSel = document.getElementById('outProd').value;
+        const qty = parseInt(document.getElementById('outQty').value);
+        const reason = document.getElementById('outReason').value;
+        const notes = document.getElementById('outNotes').value.trim();
+        if(!prodSel || !qty) return alert('⚠️ Select Product and enter Quantity!');
+        req.productBarcode = prodSel;
+        req.productName = data.products.find(p=>p.barcode===prodSel)?.name || '';
+        req.qty = qty;
+        req.reason = reason;
+        req.notes = notes;
+    }
 
-// === SP — SUBSCRIPTION ===
-function setSub(type){
-  const prices={week:199,'2week':325,month:579};
-  const ms={week:7*86400000,'2week':14*86400000,month:30*86400000};
-  App.subscription={type,expiry:Date.now()+ms[type]};
-  document.getElementById('sub-status').className='alert info';
-  document.getElementById('sub-status').textContent=`✅ Service Extended — ₱${prices[type]} — Valid until ${new Date(App.subscription.expiry).toLocaleDateString()}`;
-}
-
-// === SP — PASSWORD CONTROL ===
-function spChangeAdminPass(){
-  const newP=document.getElementById('new-admin-pass').value;
-  if(!newP)return alert("⚠️ Enter new password");
-  const old=DEFAULTS.adminPass;
-  DEFAULTS.adminPass=newP;
-  App.passChangeLogs.unshift({
-    when:new Date().toLocaleString(),
-    who:'Service Provider',
-    target:'Admin Account',
-    old:old,
-    new:newP
-  });
-  document.getElementById('new-admin-pass').value='';
-  renderPasswordLogs();
-  alert("✅ Admin Password Changed & Logged — Only SP can do this");
-}
-function spChangeSPPass(){
-  const newP=document.getElementById('new-sp-pass').value;
-  if(!newP)return alert("⚠️ Enter new password");
-  DEFAULTS.spPass=newP;
-  document.getElementById('new-sp-pass').value='';
-  alert("✅ SP Password Changed — Only SP can change own password");
-}
-function renderPasswordLogs(){
-  document.getElementById('sp-pass-logs').innerHTML=App.passChangeLogs.map(l=>`
-    <div style="padding:6px 0;border-bottom:1px solid #eee;font-size:13px">
-      <strong>${l.when}</strong> — ${l.who}<br>
-      Target: ${l.target}<br>
-      Old: <span class="mask">****</span> → New: <span class="mask">****</span>
-    </div>
-  `).join('')||'<p class="small">No password changes yet</p>';
+    data.requests.push(req);
+    saveData();
+    alert('✅ Request Submitted! Pending Admin Approval.');
+    // Clear fields
+    document.getElementById('wrongTicket').value='';
+    document.getElementById('correctTicket').value='';
+    document.getElementById('voidReason').value='';
+    document.getElementById('reqAmount').value='';
+    document.getElementById('reqReason').value='';
+    document.getElementById('outQty').value='';
+    document.getElementById('outNotes').value='';
+    refreshPendingRequests();
 }
 
-// === CHAT PLACEHOLDERS ===
-function sendChat(){ const m=document.getElementById('chat-in').value.trim(); if(!m)return; document.getElementById('chat-messages').innerHTML+=`<div class="msg me">${m}</div>`; document.getElementById('chat-in').value=''; }
-function adminSendChat(){ const m=document.getElementById('admin-chat-in').value.trim(); if(!m)return; document.getElementById('admin-chat-messages').innerHTML+=`<div class="msg me">${m}</div>`; document.getElementById('admin-chat-in').value=''; }
-function spSendChat(){ const m=document.getElementById('sp-chat-in').value.trim(); if(!m)return; document.getElementById('sp-chat-messages').innerHTML+=`<div class="msg me">${m}</div>`; document.getElementById('sp-chat-in').value=''; }
-function saveAdminContact(){ alert("✅ Contact Info Saved — Admin will be notified via SMS & Email when offline"); }
+function approveRequest(reqId){
+    const req = data.requests.find(r=>r.id===reqId);
+    if(!req || req.status!=='pending') return;
+    req.status = 'approved';
+    req.approvedBy = currentUser.fname;
+    req.approvedAt = new Date().toISOString();
 
-// === LOGOUT ===
-function logout(){
-  // Passwords are CLEARED from memory on logout — security requirement
-  App.role=null; App.shiftOpen=false; App.cart=[];
-  document.getElementById('page-main').classList.add('hide');
-  document.getElementById('page-login').classList.remove('hide');
-  document.getElementById('inp-pass').value=''; // Password NOT retained after logout
-  showLoginMsg("✅ Logged Out Securely — Password Cleared","info");
+    // Apply effect immediately upon approval
+    if(req.type==='productout'){
+        const prod = data.products.find(p=>p.barcode===req.productBarcode);
+        if(prod) prod.qty = Math.max(0, (prod.qty||0) - req.qty);
+    }
+    // Void/CashIn/CashOut recorded for shift reconciliation — effect at shift close
+
+    saveData();
+    alert('✅ Request Approved!');
+    refreshPendingRequests();
 }
 
-// === CASHIER NAME INPUT TOGGLE ===
-document.getElementById('sel-role').onchange=function(){
-  document.getElementById('cashier-name-field').classList.toggle('hide', this.value!=='cashier');
+function rejectRequest(reqId){
+    const req = data.requests.find(r=>r.id===reqId);
+    if(!req || req.status!=='pending') return;
+    req.status = 'rejected';
+    req.approvedBy = currentUser.fname;
+    req.approvedAt = new Date().toISOString();
+    saveData();
+    alert('❌ Request Rejected!');
+    refreshPendingRequests();
+}
+
+function refreshPendingRequests(){
+    const c = document.getElementById('pendingRequests');
+    const pending = data.requests.filter(r=>r.status==='pending');
+    if(!pending.length){
+        c.innerHTML='<p>No pending requests.</p>';
+        return;
+    }
+    c.innerHTML = pending.map(r=>{
+        let detail = '';
+        if(r.type==='void') detail = `Wrong #${r.wrongTicketNo} → Correct #${r.correctTicketNo}<br>Reason: ${r.reason}`;
+        else if(r.type==='cashin' || r.type==='cashout') detail = `Amount: ₱${r.amount.toFixed(2)}<br>Reason: ${r.reason}`;
+        else if(r.type==='productout') detail = `Product: ${r.productName} × ${r.qty}<br>Reason: ${r.reason} — ${r.notes||''}`;
+        return `<div class="card">
+            <p><strong>${r.type.toUpperCase()}</strong> — ${r.cashierName} @ ${r.store} — ${new Date(r.timestamp).toLocaleString()}</p>
+            <p>${detail}</p>
+            <button class="btn btn-success" onclick="approveRequest(${r.id})">✅ Approve</button>
+            <button class="btn btn-danger" onclick="rejectRequest(${r.id})">❌ Reject</button>
+        </div>`;
+    }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 📦 PRODUCTS MANAGEMENT — Barcode Scan + Auto-Generate
+// ═══════════════════════════════════════════════════════════
+function assignScannedBarcode(){
+    const scanned = document.getElementById('prodBarcodeScan').value.trim();
+    if(!scanned) return alert('⚠️ Scan or enter a barcode first!');
+    if(data.products.some(p=>p.barcode===scanned)) return alert('⚠️ This barcode already exists!');
+    document.getElementById('prodBarcodeDisplay').value = scanned;
+}
+
+function generateBarcode(){
+    return 'BP'+Date.now().toString().slice(-10);
+}
+
+function saveProduct(){
+    const cat = document.getElementById('prodCat').value.trim();
+    const name = document.getElementById('prodName').value.trim();
+    const cost = parseFloat(document.getElementById('prodCost').value);
+    const price = parseFloat(document.getElementById('prodPrice').value);
+    const qtyInput = document.getElementById('prodQtyInit').value;
+    const qty = qtyInput?parseInt(qtyInput):0;
+    let barcode = document.getElementById('prodBarcodeDisplay').value.trim() || generateBarcode();
+
+    if(!cat || !name || !cost || !price) return alert('⚠️ Fill Category, Name, Cost Price, and Selling Price!');
+    if(data.products.some(p=>p.barcode===barcode)) return alert('⚠️ Barcode already exists!');
+
+    data.products.push({ category:cat, barcode, name, costPrice:cost, price, qty, addedAt:new Date().toISOString() });
+    saveData();
+    alert('✅ Product Saved! Barcode: '+barcode);
+
+    // Clear form
+    document.getElementById('prodCat').value='';
+    document.getElementById('prodBarcodeScan').value='';
+    document.getElementById('prodBarcodeDisplay').value='';
+    document.getElementById('prodName').value='';
+    document.getElementById('prodCost').value='';
+    document.getElementById('prodPrice').value='';
+    document.getElementById('prodQtyInit').value='';
+
+    refreshAllSelects();
+    renderAdminProdList();
+}
+
+function renderAdminProdList(){
+    const c = document.getElementById('adminProdList');
+    c.innerHTML = '<table><tr><th>Barcode</th><th>Name</th><th>Cat</th><th>Cost</th><th>Price</th><th>Stock</th></tr>'+
+        data.products.map(p=>`<tr><td>${p.barcode}</td><td>${p.name}</td><td>${p.category}</td><td>₱${p.costPrice.toFixed(2)}</td><td>₱${p.price.toFixed(2)}</td><td>${p.qty||0}</td></tr>`).join('')+'</table>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// 📊 INVENTORY & STOCK CONTROL
+// ═══════════════════════════════════════════════════════════
+function recordStockIn(){
+    const barcode = document.getElementById('stockProdSel').value;
+    const qty = parseInt(document.getElementById('stockQtyAdd').value);
+    if(!barcode || !qty) return alert('⚠️ Select Product and enter Quantity!');
+    const prod = data.products.find(p=>p.barcode===barcode);
+    if(!prod) return alert('Product not found!');
+    prod.qty = (prod.qty||0) + qty;
+    saveData();
+    alert(`✅ Stock Recorded! ${prod.name} +${qty} → New Stock: ${prod.qty}`);
+    document.getElementById('stockQtyAdd').value='';
+    renderStockStatus();
+}
+
+function requestInventoryCount(){
+    const store = document.getElementById('countStoreSel').value;
+    if(!store) return alert('⚠️ Select Store first!');
+    // Broadcast request to cashier — stored for notification
+    data.inventoryCounts.push({
+        id: Date.now(),
+        store,
+        requestedAt: new Date().toISOString(),
+        requestedBy: currentUser.fname,
+        status: 'pending',
+        actualCounts: null
+    });
+    saveData();
+    alert(`✅ Inventory Count Request sent to ${store}! Cashier will be notified.`);
+}
+
+function renderStockStatus(){
+    const c = document.getElementById('stockStatus');
+    if(!data.products.length){c.innerHTML='<p>No products yet.</p>';return;}
+    c.innerHTML = '<table><tr><th>Barcode</th><th>Name</th><th>Category</th><th>Qty On Hand</th></tr>'+
+        data.products.map(p=>`<tr><td>${p.barcode}</td><td>${p.name}</td><td>${p.category}</td><td>${p.qty||0}</td></tr>`).join('')+'</table>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// 📈 REPORTS
+// ═══════════════════════════════════════════════════════════
+function genRangeReport(){
+    const from = new Date(document.getElementById('rptFrom').value);
+    const to = new Date(document.getElementById('rptTo').value + 'T23:59:59');
+    const txs = data.transactions.filter(t=>{
+        const dt = new Date(t.timestamp);
+        return dt>=from && dt<=to;
+    });
+    const totalSales = txs.reduce((s,t)=>s+t.total,0);
+    const cashTotal = txs.reduce((s,t)=>s+(t.payMethod!=='gcash'?t.cashTendered||0:0),0);
+    const gcashTotal = txs.reduce((s,t)=>s+t.gcashAmount,0);
+
+    document.getElementById('rangeRptArea').innerHTML = `
+        <p><strong>From:</strong> ${from.toLocaleDateString()} — <strong>To:</strong> ${to.toLocaleDateString()}</p>
+        <p>Total Sales: ₱${totalSales.toFixed(2)} | Cash: ₱${cashTotal.toFixed(2)} | GCash: ₱${gcashTotal.toFixed(2)}</p>
+        <table><tr><th>Ticket #</th><th>Date</th><th>Cashier</th><th>Store</th><th>Total</th><th>Payment</th></tr>`+
+        txs.map(tx=>`<tr><td>${tx.ticketNo}</td><td>${new Date(tx.timestamp).toLocaleString()}</td><td>${tx.cashierName}</td><td>${tx.store}</td><td>₱${tx.total.toFixed(2)}</td><td>${tx.payMethod} ${tx.gcashRef?' Ref: '+tx.gcashRef:''}</td></tr>`).join('')+
+        `</table>`;
+}
+
+function renderDailySalesRpt(){
+    const today = new Date().toDateString();
+    const txs = data.transactions.filter(t=>new Date(t.timestamp).toDateString()===today);
+    const totalSales = txs.reduce((s,t)=>s+t.total,0);
+    const cashTotal = txs.reduce((s,t)=>s+(t.payMethod!=='gcash'?t.cashTendered||0:0),0);
+    const gcashTotal = txs.reduce((s,t)=>s+t.gcashAmount,0);
+
+    document.getElementById('dailySalesRpt').innerHTML = `
+        <p><strong>Today's Sales:</strong> ₱${totalSales.toFixed(2)} | Cash: ₱${cashTotal.toFixed(2)} | GCash: ₱${gcashTotal.toFixed(2)}</p>
+        <table><tr><th>Ticket #</th><th>Time</th><th>Cashier</th><th>Amount</th><th>Payment</th></tr>`+
+        txs.map(t=>`<tr><td>${t.ticketNo}</td><td>${new Date(t.timestamp).toLocaleTimeString()}</td><td>${t.cashierName}</td><td>₱${t.total.toFixed(2)}</td><td>${t.payMethod} ${t.gcashRef||''}</td></tr>`).join('')+
+        `</table>`;
+}
+
+function renderVarianceRpt(){
+    const closed = data.shifts.filter(s=>s.status==='closed' && Math.abs(s.variance||0)>0.01);
+    const c = document.getElementById('varianceRpt');
+    if(!closed.length){c.innerHTML='<p>No shift variances recorded.</p>';return;}
+    c.innerHTML = '<table><tr><th>Cashier</th><th>Store</th><th>Opened</th><th>Declared Cash</th><th>Expected</th><th>Variance</th><th>Note</th></tr>'+
+        closed.map(s=>`<tr><td>${s.cashierId}</td><td>${s.store}</td><td>${new Date(s.openTime).toLocaleString()}</td><td>₱${(s.cashTotalDeclared||0).toFixed(2)}</td><td>—</td><td style="color:${(s.variance||0)<0?'red':'orange'}">₱${(s.variance||0).toFixed(2)}</td><td>${s.varianceNote||'—'}</td></tr>`).join('')+'</table>';
+}
+
+// ═══════════════════════════════════════════════════════════
+// 💬 CHAT / MESSAGING SYSTEM
+// ═══════════════════════════════════════════════════════════
+function refreshChatReceivers(){
+    const sel = document.getElementById('chatReceiverSel');
+    sel.innerHTML='';
+    if(currentUser.role==='cashier'){
+        sel.innerHTML = '<option value="admin">Admin / Owner</option>';
+    } else if(currentUser.role==='admin'){
+        sel.innerHTML = '<option value="sp">Service Provider</option>';
+        for(const uid in data.users){
+            if(data.users[uid].role==='cashier') sel.appendChild(new Option(data.users[uid].fname, uid));
+        }
+    } else if(currentUser.role==='sp'){
+        sel.innerHTML = '<option value="admin">Admin / Owner</option>';
+        for(const uid in data.users){
+            if(data.users[uid].role==='cashier') sel.appendChild(new Option(data.users[uid].fname, uid));
+        }
+    }
+}
+
+function sendChat(){
+    const to = document.getElementById('chatReceiverSel').value;
+    const text = document.getElementById('chatInput').value.trim();
+    if(!to || !text) return;
+    data.chats.push({
+        from: currentUser.id,
+        fromName: currentUser.fname,
+        to,
+        text,
+        timestamp: new Date().toISOString()
+    });
+    saveData();
+    document.getElementById('chatInput').value='';
+    renderChatMessages();
+}
+
+function renderChatMessages(){
+    const c = document.getElementById('chatMessages');
+    c.innerHTML = data.chats.map(m=>{
+        const mine = m.from===currentUser.id;
+        return `<div class="chat-msg ${mine?'from-me':'from-other'}">
+            <strong>${m.fromName} — ${new Date(m.timestamp).toLocaleString()}</strong><br>${m.text}
+        </div>`;
+    }).join('');
+    c.scrollTop = c.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🛠️ SERVICE PROVIDER PANEL — Subscription & Passwords
+// ═══════════════════════════════════════════════════════════
+function renewSubscription(){
+    if(currentUser.role!=='sp') return alert('⚠️ SP Only!');
+    const days = parseInt(document.getElementById('renewPlanSel').value);
+    const cur = new Date(data.expiryDate);
+    if(cur<new Date()) data.expiryDate = new Date();
+    data.expiryDate = new Date(cur.getTime() + days*86400000).toISOString();
+    saveData();
+    alert(`✅ Service Extended! New Expiry: ${new Date(data.expiryDate).toLocaleString()}`);
+    renderExpiryInfo();
+}
+
+function renderExpiryInfo(){
+    document.getElementById('expiryDateDisp').textContent = new Date(data.expiryDate).toLocaleString();
+    const days = Math.ceil((new Date(data.expiryDate)-new Date())/86400000);
+    document.getElementById('daysRemain').textContent = days>0?days+' days':'⚠️ EXPIRED';
+}
+
+function changeAdminPassword(){
+    if(currentUser.role!=='sp') return alert('⚠️ Only SP can change Admin Password!');
+    const newP = document.getElementById('newAdminPass').value;
+    if(newP.length<6) return alert('Min 6 characters!');
+    logPasswordChange('Admin', data.users.admin.pass, newP);
+    data.users.admin.pass = newP;
+    saveData();
+    alert('✅ Admin Password Updated!');
+    document.getElementById('newAdminPass').value='';
+    renderPassChangeLogs();
+}
+
+function changeSPassword(){
+    if(currentUser.role!=='sp') return;
+    const newP = document.getElementById('newSPass').value;
+    if(newP.length<6) return alert('Min 6 characters!');
+    logPasswordChange('Service Provider', data.users.sp.pass, newP);
+    data.users.sp.pass = newP;
+    saveData();
+    alert('✅ SP Password Updated!');
+    document.getElementById('newSPass').value='';
+    renderPassChangeLogs();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ⚙️ SETTINGS — Stores, Cashiers, Admin Contact
+// ═══════════════════════════════════════════════════════════
+function addStore(){
+    const name = document.getElementById('newStoreName').value.trim();
+    if(!name) return alert('Enter store name!');
+    if(data.stores.includes(name)) return alert('Store exists!');
+    data.stores.push(name);
+    saveData();
+    alert('✅ Store Added!');
+    document.getElementById('newStoreName').value='';
+    refreshStoreSelect();
+    renderStoreList();
+}
+
+function renderStoreList(){
+    document.getElementById('storeListDisp').innerHTML = '<ul>'+
+        data.stores.map(s=>`<li>${s}</li>`).join('')+'</ul>';
+}
+
+function addCashier(){
+    const fname = document.getElementById('cashierFName').value.trim();
+    const lname = document.getElementById('cashierLName').value.trim();
+    const pass = document.getElementById('cashierPassSet').value;
+    if(!fname || !pass) return alert('⚠️ Enter First Name and Password!');
+    if(pass.length<6) return alert('Password min 6 characters!');
+    const uid = fname.toLowerCase().replace(/\s/g,'');
+    if(data.users[uid]) return alert('Cashier exists with that name!');
+    data.users[uid] = { role:'cashier', fname, lname, pass };
+    logPasswordChange(`Cashier: ${fname} ${lname||''}`, '(new account)', pass);
+    saveData();
+    alert(`✅ Cashier Added! Username: ${uid}`);
+    document.getElementById('cashierFName').value='';
+    document.getElementById('cashierLName').value='';
+    document.getElementById('cashierPassSet').value='';
+    renderCashierList();
+    refreshAllSelects();
+}
+
+function renderCashierList(){
+    const list = [];
+    for(const uid in data.users){
+        if(data.users[uid].role==='cashier') list.push(`<li>${uid} — ${data.users[uid].fname} ${data.users[uid].lname||''}</li>`);
+    }
+    document.getElementById('cashierListDisp').innerHTML = list.length?'<ul>'+list.join('')+'</ul>':'<p>No cashiers yet.</p>';
+}
+
+function saveAdminContact(){
+    data.settings.adminPhone = document.getElementById('adminPhone').value.trim();
+    data.settings.adminEmail = document.getElementById('adminEmail').value.trim();
+    saveData();
+    alert('✅ Contact Info Saved!');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🎯 TABS & ROLE-BASED VISIBILITY
+// ═══════════════════════════════════════════════════════════
+function showTab(name){
+    document.querySelectorAll('[id^="tab-"]').forEach(el=>el.classList.add('hidden'));
+    document.getElementById('tab-'+name).classList.remove('hidden');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    event.target.classList.add('active');
+
+    if(name==='dashboard'){
+        document.getElementById('dashAlerts').innerHTML = isServiceExpired()?'<div class="alert alert-danger">⚠️ SERVICE EXPIRED — Contact SP to renew!</div>':'';
+    }
+    if(name==='sales'){ /* ready */ }
+    if(name==='shift'){
+        if(currentShift){
+            document.getElementById('openShiftArea').classList.add('hidden');
+            document.getElementById('closeShiftArea').classList.remove('hidden');
+        } else {
+            document.getElementById('openShiftArea').classList.remove('hidden');
+            document.getElementById('closeShiftArea').classList.add('hidden');
+        }
+        refreshTicketLists();
+    }
+    if(name==='products'){ renderAdminProdList(); }
+    if(name==='inventory'){ renderStockStatus(); }
+    if(name==='requests'){ refreshPendingRequests(); }
+    if(name==='reports'){ renderDailySalesRpt(); renderVarianceRpt(); }
+    if(name==='chat'){ refreshChatReceivers(); renderChatMessages(); }
+    if(name==='spanel'){ renderExpiryInfo(); renderPassChangeLogs(); }
+}
+
+function updateTabsVisibility(){
+    const role = currentUser.role;
+    document.querySelectorAll('.tab-cashier').forEach(el=>el.classList.toggle('hidden', role!=='cashier'));
+    document.querySelectorAll('.tab-admin').forEach(el=>el.classList.toggle('hidden', role!=='admin'));
+    document.querySelectorAll('.tab-sp').forEach(el=>el.classList.toggle('hidden', role!=='sp'));
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔄 REFRESH ALL DROPDOWNS / SELECT LISTS
+// ═══════════════════════════════════════════════════════════
+function refreshAllSelects(){
+    // Category filter — Sales
+    const cats = [...new Set(data.products.map(p=>p.category))];
+    const cf = document.getElementById('catFilter');
+    cf.innerHTML = '<option value="">All Categories</option>' + cats.map(c=>`<option>${c}</option>`).join('');
+
+    // Product selects — Inventory & Product Out
+    const prodOpts = data.products.map(p=>`<option value="${p.barcode}">${p.name} — ₱${p.price.toFixed(2)}</option>`).join('');
+    document.getElementById('stockProdSel').innerHTML = prodOpts;
+    document.getElementById('outProd').innerHTML = prodOpts;
+
+    // Store selects
+    refreshStoreSelect();
+    document.getElementById('countStoreSel').innerHTML = data.stores.map(s=>`<option>${s}</option>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔄 SYNC UI / STATUS
+// ═══════════════════════════════════════════════════════════
+function syncUI(){
+    renderExpiryInfo();
+    renderStoreList();
+    renderCashierList();
+    renderPassChangeLogs();
+    document.getElementById('adminPhone').value = data.settings.adminPhone;
+    document.getElementById('adminEmail').value = data.settings.adminEmail;
+    if(currentStore) document.getElementById('dashStore').textContent = currentStore;
+    if(currentShift) document.getElementById('dashShift').textContent = '🔓 OPEN';
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🚀 SYSTEM STARTUP
+// ═══════════════════════════════════════════════════════════
+window.onload = function(){
+    loadData();
+    refreshStoreSelect();
+    if(isServiceExpired()){
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('expiryLock').classList.remove('hidden');
+    }
 };
-
 </script>
 </body>
 </html>
