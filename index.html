@@ -1,1410 +1,414 @@
+<!-- 1. UNA: HTML STRUCTURE & UI (mula <!DOCTYPE html> hanggang </html>) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fortis POS — Business Point of Sales</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
-        :root {
-            --prim: #4CAF50; --prim-dark: #388E3C; --prim-light: #E8F5E9;
-            --sec: #2196F3; --warn: #FF9800; --danger: #f44336;
-            --bg: #F1F8E9; --border: #C8E6C9; --text-dark: #2E7D32; --text-normal: #333;
-        }
-        body { background: var(--bg); color: var(--text-normal); font-size: 14px; line-height: 1.5; }
-        .status-bar {
-            position: fixed; top: 0; left: 0; right: 0; padding: 8px 15px; color: #fff;
-            font-weight: bold; text-align: center; z-index: 9999; box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-        }
-        .status-online { background: var(--prim); }
-        .status-offline { background: var(--danger); }
-        .container { margin-top: 45px; padding: 10px; max-width: 1400px; margin: 45px auto 0; }
-        .card {
-            background: #fff; border-radius: 12px; padding: 18px; margin-bottom: 15px;
-            box-shadow: 0 3px 10px rgba(76,175,80,0.12); border: 1px solid var(--border);
-        }
-        h2, h3, h4 { color: var(--text-dark); margin-bottom: 12px; font-weight: bold; }
-        input, select, button, textarea {
-            padding: 10px 12px; margin: 5px 0; border: 2px solid var(--border);
-            border-radius: 8px; font-size: 14px; width: 100%;
-        }
-        input:focus, select:focus, textarea:focus {
-            outline: none; border-color: var(--prim); box-shadow: 0 0 0 3px rgba(76,175,80,0.15);
-        }
-        button {
-            background: var(--prim); color: #fff; border: none; cursor: pointer;
-            font-weight: bold; transition: 0.2s;
-        }
-        button:hover { background: var(--prim-dark); }
-        button.danger { background: var(--danger); }
-        button.warning { background: var(--warn); }
-        button.info { background: var(--sec); }
-        button.sm { width: auto; padding: 6px 10px; font-size: 13px; }
-        label { font-weight: bold; margin-top: 8px; display: inline-block; color: var(--text-dark); }
-        .hidden { display: none !important; }
-        .tabs { display: flex; flex-wrap: wrap; margin-bottom: 12px; border-bottom: 2px solid var(--border); }
-        .tab {
-            padding: 10px 16px; background: var(--prim-light); cursor: pointer; margin-right: 5px;
-            border-radius: 8px 8px 0 0; font-weight: bold; color: var(--text-dark);
-        }
-        .tab:hover { background: var(--border); }
-        .tab.active { background: var(--prim); color: #fff; }
-        .section { display: none; }
-        .section.active { display: block; }
-        .alert { padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid transparent; }
-        .alert.success { background: #E8F5E9; color: #2E7D32; border-left-color: #4CAF50; }
-        .alert.warn { background: #FFF8E1; color: #856404; border-left-color: #FFC107; }
-        .alert.danger { background: #FFEBEE; color: #C62828; border-left-color: #F44336; }
-        .alert.info { background: #E3F2FD; color: #1565C0; border-left-color: #2196F3; }
-        .grid-pos { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
-        .prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-        .prod-card {
-            border: 2px solid var(--border); border-radius: 8px; padding: 8px; text-align: center;
-            cursor: pointer; transition: 0.2s;
-        }
-        .prod-card:hover { border-color: var(--prim); background: var(--prim-light); transform: scale(1.02); }
-        .prod-icon {
-            background: var(--prim-light); border-radius: 4px; height: 70px;
-            display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 4px;
-        }
-        .pos-panel { background: var(--prim); color: #fff; border-radius: 10px; padding: 12px; }
-        .pos-panel h3 { color: #fff; margin-bottom: 8px; }
-        .cart-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.3);
-        }
-        .qty-btn {
-            width: 28px; height: 28px; padding: 0; font-weight: bold; font-size: 16px;
-            background: var(--prim-dark); margin: 0 4px;
-        }
-        .total-row { display: flex; justify-content: space-between; padding: 8px 0; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
-        th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { background: var(--prim); color: #fff; font-weight: bold; }
-        .chat-box { height: 250px; overflow-y: auto; background: #f9f9f9; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
-        .msg-me {
-            background: var(--prim-light); padding: 6px 10px; border-radius: 12px 12px 2px 12px;
-            margin: 4px 0; margin-left: 20%;
-        }
-        .msg-other {
-            background: #fff; border: 1px solid var(--border); padding: 6px 10px;
-            border-radius: 12px 12px 12px 2px; margin: 4px 0; margin-right: 20%;
-        }
-        .denom-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .modal {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #fff; border: 3px solid var(--danger); border-radius: 12px;
-            padding: 25px; z-index: 10000; box-shadow: 0 0 20px rgba(0,0,0,0.3);
-            min-width: 320px;
-        }
-        .badge {
-            display: inline-block; padding: 2px 8px; border-radius: 12px;
-            font-size: 12px; font-weight: bold;
-        }
-        .badge-success { background: #E8F5E9; color: #2E7D32; }
-        .badge-warn { background: #FFF8E1; color: #856404; }
-        .badge-danger { background: #FFEBEE; color: #C62828; }
-        .search-bar { margin-bottom: 10px; }
-        hr { border: none; border-top: 1px solid rgba(255,255,255,0.3); margin: 8px 0; }
-        .checklist-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
-        .trans-item { border-bottom: 1px solid var(--border); padding: 8px 0; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fortis POS</title>
+  <style>
+    <!-- ilalagay natin dito ang CSS mamaya -->
+  </style>
 </head>
 <body>
-<div id="statusBar" class="status-bar status-offline">
-    🔌 OFFLINE — Data saved locally, will sync when online
-</div>
-<div class="container">
-<!-- LOGIN SECTION -->
-<div id="loginSection" class="card section active">
-    <h2 style="text-align: center;">🌿 Fortis POS — Business Point of Sales</h2>
-    <label>Role:</label>
-    <select id="loginRole" onchange="toggleStoreSelect()">
-        <option value="admin">🔐 Admin / Owner</option>
-        <option value="sp">🛠️ Service Provider</option>
-        <option value="cashier">💵 Cashier</option>
-    </select>
-    <div id="storeSelectDiv" class="hidden">
-        <label>Select Store:</label>
-        <select id="loginStore"></select>
-    </div>
-    <label>Password:</label>
-    <input type="password" id="loginPass" placeholder="Enter password" autocomplete="off">
-    <br>
-    <button onclick="login()">➡️ Login</button>
-    <button class="danger sm" onclick="clearAndReload()">🔄 Reset All Data</button>
-    <p style="margin-top: 10px; font-size: 12px; color: #666;">
-        Default credentials will be changed on first login.<br>
-        Cashier accounts are created and managed by Admin only.
-    </p>
-</div>
-<!-- PASSWORD CHANGE SECTION -->
-<div id="forcePassChange" class="card section hidden">
-    <h2>⚠️ Change Default Password</h2>
-    <div class="alert warn">You are using the default password. You must change it before proceeding.</div>
-    <label>New Password (min 6 chars):</label>
-    <input type="password" id="newPass1" autocomplete="new-password" required>
-    <label>Confirm New Password:</label>
-    <input type="password" id="newPass2" autocomplete="new-password" required>
-    <button onclick="saveNewPassword()">✅ Save & Continue</button>
-    <button class="danger" onclick="logout()">❌ Cancel</button>
-</div>
-<!-- ADMIN DASHBOARD -->
-<div id="adminDashboard" class="card section hidden">
-    <h2>🔐 Admin / Owner Dashboard</h2>
-    <div class="tabs">
-        <div class="tab active" onclick="showAdminTab('adminStores')">🏪 Stores</div>
-        <div class="tab" onclick="showAdminTab('adminCashiers')">👤 Cashiers</div>
-        <div class="tab" onclick="showAdminTab('adminSalesOverview')">📊 Sales Overview</div>
-        <div class="tab" onclick="showAdminTab('adminProducts')">📦 Products</div>
-        <div class="tab" onclick="showAdminTab('adminStocks')">📈 Stocks Overview</div>
-        <div class="tab" onclick="showAdminTab('adminVoidRequests')">❌ Void Requests</div>
-        <div class="tab" onclick="showAdminTab('adminTransSummary')">📋 Transaction Summary</div>
-        <div class="tab" onclick="showAdminTab('adminCountRequests')">🔢 Stock Count</div>
-        <div class="tab" onclick="showAdminTab('adminChat')">💬 Chat</div>
-    </div>
-    <div id="adminStores" class="section active">
-        <h3>Add New Store (1–20 stores)</h3>
-        <div class="card" style="background: var(--prim-light);">
-            <label>Store No / Code (Optional):</label>
-            <input type="text" id="newStoreCode" placeholder="Auto-generated if left blank">
-            <label>Store Name:</label>
-            <input type="text" id="newStoreName" placeholder="e.g. Main Branch" required>
-            <label>Location (Optional):</label>
-            <input type="text" id="newStoreLocation" placeholder="e.g. Davao City">
-            <button onclick="addStore()">✅ Add Store</button>
+
+  <!-- BUONG BODY CONTENT DITO — yung header, panels, tabs, etc. -->
+  <header class="brand-bar">
+    <h1>⚡ Fortis POS</h1>
+    <span id="status-indicator" class="status-offline">Offline</span>
+    <button id="btn-logout" class="btn-secondary" style="display:none;">Logout</button>
+  </header>
+
+  <section id="login-panel" class="panel">
+    <h2>System Login</h2>
+    <input type="text" id="inp-user" placeholder="Username" autocomplete="off">
+    <input type="password" id="inp-pass" placeholder="Password" autocomplete="new-password">
+    <button id="btn-login" class="btn-primary">Login</button>
+    <p id="login-error" class="error-msg"></p>
+  </section>
+
+  <section id="dashboard" class="panel hidden">
+    <div class="role-badge" id="user-role-badge"></div>
+    <nav class="tabs">
+      <button data-tab="chat" class="tab-btn active">Messages</button>
+      <button data-tab="users" class="tab-btn admin-only">User Management</button>
+      <button data-tab="logs" class="tab-btn admin-only">Password Logs</button>
+    </nav>
+
+    <div id="chat-tab" class="tab-content">
+      <div class="chat-layout">
+        <aside class="conv-list">
+          <select id="conv-select">
+            <option value="">Select conversation...</option>
+          </select>
+          <button id="new-conv" class="btn-small">New Chat</button>
+        </aside>
+        <div class="conv-area">
+          <div id="conv-messages" class="messages"></div>
+          <div class="msg-input-row">
+            <input type="text" id="msg-text" placeholder="Type message...">
+            <button id="send-msg" class="btn-primary">Send</button>
+          </div>
         </div>
-        <h4>Store List (<span id="storeCount">0</span>/20)</h4>
-        <div id="storeList"></div>
+      </div>
     </div>
-    <div id="adminCashiers" class="section hidden">
-        <h3>Add Cashier (1–20 per store)</h3>
-        <div class="card" style="background: var(--prim-light);">
-            <label>First Name:</label>
-            <input type="text" id="cFirstName" placeholder="Given name" required>
-            <label>Last Name (Optional):</label>
-            <input type="text" id="cLastName" placeholder="Family name">
-            <label>Assign to Store:</label>
-            <select id="cStore" required></select>
-            <label>Password (4 digits):</label>
-            <input type="password" id="cPassword" maxlength="4" placeholder="0000" autocomplete="new-password" required>
-            <button onclick="createCashier()">✅ Create Account</button>
-        </div>
-        <h4>Cashier List</h4>
-        <div id="cashierList"></div>
+
+    <div id="users-tab" class="tab-content hidden">
+      <h3>Add Cashier Account</h3>
+      <input type="text" id="new-cashier-user" placeholder="Cashier Username">
+      <input type="password" id="new-cashier-pass" placeholder="Temporary Password">
+      <button id="add-cashier-btn" class="btn-primary">Create Account</button>
+      
+      <h3>Change Password</h3>
+      <select id="target-user"></select>
+      <input type="password" id="new-pass" placeholder="New Password">
+      <button id="change-pass-btn" class="btn-primary">Update</button>
     </div>
-    <div id="adminSalesOverview" class="section hidden">
-        <h3>Sales Overview</h3>
-        <label>Select Store:</label>
-        <select id="salesStoreFilter" onchange="renderSalesOverview()"></select>
-        <label>Date From:</label>
-        <input type="date" id="salesDateFrom" onchange="renderSalesOverview()">
-        <label>Date To:</label>
-        <input type="date" id="salesDateTo" onchange="renderSalesOverview()">
-        <div id="salesOverviewResult" class="card" style="margin-top:10px;"></div>
+
+    <div id="logs-tab" class="tab-content hidden">
+      <h3>Password Change Logs</h3>
+      <table id="log-table">
+        <thead><tr><th>Date/Time</th><th>Action By</th><th>Target</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
-    <div id="adminProducts" class="section hidden">
-        <h3>Add Product</h3>
-        <div class="card" style="background: var(--prim-light);">
-            <label>Select Store:</label>
-            <select id="prodStore" required></select>
-            <label>Product Name:</label>
-            <input type="text" id="prodName" placeholder="Product name" required>
-            <label>Price:</label>
-            <input type="number" step="0.25" id="prodPrice" placeholder="0.00" required>
-            <label>Initial Quantity:</label>
-            <input type="number" id="prodStock" placeholder="0" min="0">
-            <label>Barcode / SKU (Optional — auto-generate if blank):</label>
-            <input type="text" id="prodBarcode" placeholder="Scan or type code">
-            <button onclick="addProduct()">✅ Add Product</button>
-        </div>
-        <h4>Product List</h4>
-        <div id="productList"></div>
-    </div>
-    <div id="adminStocks" class="section hidden">
-        <h3>Stocks Overview</h3>
-        <label>Select Store:</label>
-        <select id="stockStoreFilter" onchange="renderStocksOverview()"></select>
-        <div id="stocksOverviewResult"></div>
-    </div>
-    <div id="adminVoidRequests" class="section hidden">
-        <h3>Void / Refund Requests</h3>
-        <div id="voidReqList"></div>
-    </div>
-    <div id="adminTransSummary" class="section hidden">
-        <h3>Transaction Summary</h3>
-        <label>Select Store:</label>
-        <select id="transStoreFilter" onchange="renderTransSummary()"></select>
-        <label>Date From:</label>
-        <input type="date" id="transDateFrom" onchange="renderTransSummary()">
-        <label>Date To:</label>
-        <input type="date" id="transDateTo" onchange="renderTransSummary()">
-        <div id="transSummaryResult"></div>
-    </div>
-    <div id="adminCountRequests" class="section hidden">
-        <h3>Request Actual Stock Count</h3>
-        <label>Select Store:</label>
-        <select id="countReqStore" onchange="loadCountProductChecklist()"></select>
-        <label>Select Products to Count:</label>
-        <div id="countProductChecklist" class="card" style="max-height:250px;overflow-y:auto;"></div>
-        <button onclick="sendCountRequest()">📤 Send Count Request</button>
-        <h4>Count Responses</h4>
-        <div id="countRespList"></div>
-    </div>
-    <div id="adminChat" class="section hidden">
-        <h3>Chat Module</h3>
-        <label>Send To:</label>
-        <select id="adminChatTarget" onchange="loadAdminChat()"></select>
-        <div id="adminChatDisplay" class="chat-box"></div>
-        <textarea id="adminChatMsg" placeholder="Type message..."></textarea>
-        <button onclick="adminSendMessage()">➡️ Send</button>
-    </div>
-    <br><button class="danger" onclick="logout()">🚪 Logout</button>
-</div>
-<!-- SP DASHBOARD -->
-<div id="spDashboard" class="card section hidden">
-    <h2>🛠️ Service Provider Dashboard</h2>
-    <div class="tabs">
-        <div class="tab active" onclick="showSPTab('spRenew')">💰 Subscription</div>
-        <div class="tab" onclick="showSPTab('spAdminPass')">🔐 Change Admin Password</div>
-        <div class="tab" onclick="showSPTab('spCashierLog')">📝 Cashier Password Log</div>
-        <div class="tab" onclick="showSPTab('spChat')">💬 Chat with Admin</div>
-    </div>
-    <div id="spRenew" class="section active">
-        <h3>Service Subscription</h3>
-        <div class="alert success">✅ 7-Day Free Trial Active — Activated on first login</div>
-        <div id="spServiceStatus"></div>
-        <label>Plan:</label>
-        <select id="planSelect">
-            <option value="weekly">Weekly — ₱199 (7 days)</option>
-            <option value="biweekly">Bi-Weekly — ₱325 (14 days)</option>
-            <option value="monthly">Monthly — ₱579 (30 days)</option>
-        </select>
-        <br><br>
-        <button onclick="renewService()">✅ Renew Now</button>
-    </div>
-    <div id="spAdminPass" class="section hidden">
-        <h3>Change Admin Password</h3>
-        <p style="color: #666; font-size: 13px; margin-bottom: 10px;">
-            Only Service Provider can change Admin password.<br>
-            SP password can only be changed by SP itself.
-        </p>
-        <label>New Admin Password (min 6 chars):</label>
-        <input type="password" id="spNewAdminPass" autocomplete="new-password" required>
-        <button onclick="spChangeAdminPass()">✅ Update Admin Password</button>
-        <hr style="margin: 15px 0; border-color: var(--border);">
-        <h4>Change SP Password</h4>
-        <label>New SP Password (min 6 chars):</label>
-        <input type="password" id="spNewSelfPass" autocomplete="new-password" required>
-        <button class="info" onclick="spChangeOwnPass()">✅ Update SP Password</button>
-    </div>
-    <div id="spCashierLog" class="section hidden">
-        <h3>Cashier Password Change Log</h3>
-        <div id="cashierPassLogList"></div>
-    </div>
-    <div id="spChat" class="section hidden">
-        <h3>Chat with Admin</h3>
-        <div id="spChatDisplay" class="chat-box"></div>
-        <textarea id="spChatMsg" placeholder="Type message..."></textarea>
-        <button onclick="spSendMessage()">➡️ Send</button>
-    </div>
-    <br><button class="danger" onclick="logout()">🚪 Logout</button>
-</div>
-<!-- CASHIER POS -->
-<div id="cashierPOS" class="section hidden">
-    <div id="startShiftCard" class="card">
-        <h2>💵 Start Shift</h2>
-        <label>Cash Float / Opening Fund:</label>
-        <input type="number" id="openingFloat" step="1" min="0" placeholder="0.00" required>
-        <button onclick="beginShift()">✅ Start Shift</button>
-    </div>
-    <div id="posMain" class="hidden">
-        <div class="tabs">
-            <div class="tab active" onclick="showPosTab('posSales')">🛒 Sales</div>
-            <div class="tab" onclick="showPosTab('posHistory')">📋 Recent Transactions</div>
-            <div class="tab" onclick="showPosTab('posVoid')">❌ Void Request</div>
-            <div class="tab" onclick="showPosTab('posStockOut')">📤 Stock Out</div>
-            <div class="tab" onclick="showPosTab('posCashIn')">💰 Cash In</div>
-            <div class="tab" onclick="showPosTab('posCashOut')">💸 Cash Out</div>
-            <div class="tab" onclick="showPosTab('posChat')">💬 Chat</div>
-            <div class="tab" onclick="showPosTab('posStockCount')">🔢 Stock Count</div>
-            <div class="tab danger" onclick="initiateEndShift()">🚪 End Shift / Logout</div>
-        </div>
-        <div id="posSales" class="section active">
-            <div class="grid-pos">
-                <div>
-                    <input type="text" id="productSearch" class="search-bar" placeholder="🔍 Scan barcode or search product..." 
-                           oninput="filterProducts(this.value)"
-                           onkeydown="if(event.key==='Enter'){filterProducts(this.value); this.select();}">
-                    <div id="productGrid" class="prod-grid"></div>
-                </div>
-                <div class="pos-panel">
-                    <h3>🛒 Current Order</h3>
-                    <div id="cartDisplay"></div>
-                    <div class="total-row">Subtotal: <span id="subtotal">₱0.00</span></div>
-                    <div class="total-row">PWD/Senior Discount (5%): <span id="discountAmt">₱0.00</span></div>
-                    <div class="total-row" style="font-size: 19px;">TOTAL: <span id="grandTotal">₱0.00</span></div>
-                    <div id="splitLiveDisplay" class="hidden" style="font-size: 13px; opacity: 0.9; margin-top: 4px;">
-                        Cash: <span id="splitLiveCash">₱0.00</span> | GCash: <span id="splitLiveGcash">₱0.00</span>
-                        <br>Remaining Due: <span id="splitRemain">₱0.00</span>
-                    </div>
-                    <hr>
-                    <label>Payment Method:</label>
-                    <select id="paymentMethod" onchange="togglePaymentFields()">
-                        <option value="cash">💵 Cash</option>
-                        <option value="gcash">🟢 GCash</option>
-                        <option value="split">Split (Cash + GCash)</option>
-                    </select>
-                    <div id="cashFields">
-                        <label>Cash Received:</label>
-                        <input type="number" id="cashReceived" step="0.25" placeholder="0.00" oninput="calculateChange()">
-                        <div style="font-size: 18px; font-weight: bold;">Change: <span id="changeAmt">₱0.00</span></div>
-                    </div>
-                    <div id="splitFields" class="hidden">
-                        <label>Cash Amount:</label>
-                        <input type="number" id="splitCashAmt" step="0.25" placeholder="0.00" oninput="calculateSplit()">
-                        <label>GCash Amount:</label>
-                        <input type="number" id="splitGcashAmt" step="0.25" placeholder="0.00" oninput="calculateSplit()">
-                    </div>
-                    <label style="display: flex; align-items: center; gap: 6px; color: #fff; margin-top: 10px;">
-                        <input type="checkbox" id="applyPwdDiscount" onchange="recalculateTotals()">
-                        Apply PWD / Senior Discount (5%)
-                    </label>
-                    <br>
-                    <button style="width: 100%; font-size: 17px; padding: 12px;" onclick="finalizeSale()">✅ COMPLETE SALE</button>
-                    <button class="warning" style="width: 48%;" onclick="clearCart()">🗑️ Clear</button>
-                </div>
-            </div>
-        </div>
-        <div id="posHistory" class="section">
-            <h3>Recent Transactions (Last 5)</h3>
-            <div id="recentTransList"></div>
-        </div>
-        <div id="posVoid" class="section">
-            <h3>Request Void / Cancel</h3>
-            <label>Select Wrong Transaction:</label>
-            <select id="voidTransSelect"></select>
-            <label>Correct Transaction # (Optional):</label>
-            <input type="text" id="voidCorrectTrans" placeholder="Leave blank if no replacement">
-            <label>Reason:</label>
-            <textarea id="voidReasonText" placeholder="Explain why this needs to be voided..." required></textarea>
-            <button onclick="submitVoidRequest()">📤 Send Request to Admin</button>
-            <h4>My Requests</h4>
-            <div id="myVoidRequests"></div>
-        </div>
-        <div id="posStockOut" class="section">
-            <h3>Stock Out</h3>
-            <label>Product:</label>
-            <select id="stockOutProduct"></select>
-            <label>Quantity:</label>
-            <input type="number" id="stockOutQty" min="1" value="1" required>
-            <label>Reason:</label>
-            <textarea id="stockOutReason" placeholder="e.g. Transfer to another store, owner's use, etc." required></textarea>
-            <button onclick="submitStockOut()">✅ Record Stock Out</button>
-            <h4>Log</h4>
-            <div id="stockOutLog"></div>
-        </div>
-        <div id="posCashIn" class="section">
-            <h3>Cash In</h3>
-            <label>Amount:</label>
-            <input type="number" id="cashInAmount" step="0.25" min="0" required>
-            <label>Reason:</label>
-            <textarea id="cashInReason" placeholder="Source / Explanation" required></textarea>
-            <button onclick="recordCashIn()">✅ Record</button>
-        </div>
-        <div id="posCashOut" class="section">
-            <h3>Cash Out</h3>
-            <label>Amount:</label>
-            <input type="number" id="cashOutAmount" step="0.25" min="0" required>
-            <label>Reason:</label>
-            <textarea id="cashOutReason" placeholder="Purpose / Explanation" required></textarea>
-            <button onclick="recordCashOut()">✅ Record</button>
-        </div>
-        <div id="posChat" class="section">
-            <h3>Send Message</h3>
-            <label>Send To:</label>
-            <select id="chatRecipient">
-                <option value="admin">🔐 Admin / Owner</option>
-                <option value="sp">🛠️ Service Provider</option>
-            </select>
-            <div id="chatMessageBox" class="chat-box"></div>
-            <textarea id="chatInputBox" placeholder="Type message..." required></textarea>
-            <button onclick="sendChatMessage()">➡️ Send</button>
-        </div>
-        <div id="posStockCount" class="section">
-            <h3>Stock Count Requests</h3>
-            <div id="countRequestInbox"></div>
-            <div id="countResponseArea" class="hidden">
-                <h4 id="countTargetName"></h4>
-                <label>Product:</label>
-                <input type="text" id="countProdNameDisplay" readonly style="background:#f0f0f0;">
-                <label>System Quantity:</label>
-                <input type="number" id="countSysQtyDisplay" readonly style="background:#f0f0f0;">
-                <label>Actual Counted Quantity:</label>
-                <input type="number" id="actualCountInput" min="0" placeholder="Enter actual count" required>
-                <button onclick="submitCountResponse()">✅ Submit Count</button>
-            </div>
-        </div>
-    </div>
-    <div id="endShiftModal" class="modal hidden">
-        <h3>💰 End Shift — Count Cash</h3>
-        <div class="denom-grid">
-            <label>₱1000:</label><input type="number" id="d1000" min="0" value="0" oninput="computeDenomTotal()">
-            <label>₱500:</label><input type="number" id="d500" min="0" value="0" oninput="computeDenomTotal()">
-            <label>₱200:</label><input type="number" id="d200" min="0" value="0" oninput="computeDenomTotal()">
-            <label>₱100:</label><input type="number" id="d100" min="0" value="0" oninput="computeDenomTotal()">
-            <label>₱50:</label><input type="number" id="d50" min="0" value="0" oninput="computeDenomTotal()">
-            <label>Coins:</label><input type="number" id="dCoins" min="0" value="0" step="0.01" oninput="computeDenomTotal()">
-        </div>
-        <p style="margin-top: 10px; font-weight: bold;">Total Remittance: <span id="denomTotalAmt">₱0.00</span></p>
-        <button onclick="confirmEndShift()">✅ Confirm & Logout</button>
-        <button class="warning" onclick="closeEndShiftModal()">❌ Cancel</button>
-    </div>
-    <div id="lockModal" class="modal hidden">
-        <h3>🔐 POS Locked — Enter Password</h3>
-        <input type="password" id="unlockPassword" placeholder="Your password" autocomplete="off">
-        <button onclick="unlockPOS()">✅ Unlock</button>
-    </div>
-</div>
-</div>
-<script>
-// ========== DEFAULT CREDENTIALS — NOT DISPLAYED ON PAGE ==========
-const DEFAULTS = { admin: '8888', sp: '19970407chan' };
-const PLANS = {
-    weekly: { days: 7, price: 199 },
-    biweekly: { days: 14, price: 325 },
-    monthly: { days: 30, price: 579 }
-};
-const LOCK_TIMEOUT = 10 * 60 * 1000;
-const MAX_STORES = 20;
-const MAX_CASHIERS_PER_STORE = 20;
-const MAX_RECENT_TRANS = 5;
-// ========== DATA STORE ==========
-let data = {
-    currentUser: null, serviceExpiry: null,
-    passwordChanged: { admin: false, sp: false },
-    adminPassword: null, spPassword: null,
-    stores: [], cashiers: [], cashierPassLog: [], products: [],
-    transactions: [], voidRequests: [], countRequests: [], chats: [],
-    stockOutLogs: [], cashInOutLogs: [], shift: null,
-    lastActivity: Date.now()
-};
-let cart = [];
-let lockTimer = null;
-let activeCountRequestId = null;
-let activeProductIndex = null;
-// ========== STORAGE HELPERS ==========
-function saveData() { localStorage.setItem('fortisPOS', JSON.stringify(data)); }
-function loadData() {
-    const stored = localStorage.getItem('fortisPOS');
-    if (stored) data = { ...data, ...JSON.parse(stored) };
-    if (!data.stores.length) {
-        data.stores = [{ id: 1, code: '#001', name: 'Main Store', location: 'Davao City' }];
-        saveData();
+  </section>
+
+  <!-- 2. HULI: LAHAT NG JAVASCRIPT — ilalagay bago magsara ang </body> -->
+  <script>
+    // ==========================================
+    // UNA: ROLES & CONFIGURATION
+    // ==========================================
+    const ROLES = {
+      ADMIN: 'admin',
+      SERVICE_PROVIDER: 'sp',
+      CASHIER: 'cashier'
+    };
+
+    const DEFAULT_USERS = {
+      admin: { role: ROLES.ADMIN, pass: '8888', active: true },
+      sp: { role: ROLES.SERVICE_PROVIDER, pass: '19970407chan', active: true }
+    };
+
+    // ==========================================
+    // KASUNOD: LOCALDB CLASS
+    // ==========================================
+    class LocalDB {
+      constructor(storeName) {
+        this.storeName = storeName;
+        this.db = null;
+        this.ready = this.initDB();
+      }
+
+      async initDB() {
+        return new Promise((resolve) => {
+          const req = indexedDB.open('FortisPOS', 1);
+          req.onupgradeneeded = e => {
+            e.target.result.createObjectStore('main');
+          };
+          req.onsuccess = e => {
+            this.db = e.target.result;
+            resolve();
+          };
+        });
+      }
+
+      async set(key, value) {
+        await this.ready;
+        return new Promise(resolve => {
+          const tx = this.db.transaction('main', 'readwrite');
+          tx.objectStore('main').put(value, key);
+          tx.oncomplete = resolve;
+        });
+      }
+
+      async get(key) {
+        await this.ready;
+        return new Promise(resolve => {
+          const tx = this.db.transaction('main');
+          const req = tx.objectStore('main').get(key);
+          req.onsuccess = () => resolve(req.result);
+        });
+      }
     }
-}
-function clearAndReload() {
-    if (confirm('⚠️ This will ERASE ALL DATA — stores, cashiers, products, transactions. Continue?')) {
-        localStorage.clear();
-        location.reload();
+
+    // ==========================================
+    // KASUNOD: AUTHSYSTEM CLASS
+    // ==========================================
+    class AuthSystem {
+      constructor() {
+        this.currentUser = null;
+        this.db = new LocalDB('fortis_auth');
+        this.init();
+      }
+
+      async init() {
+        await this.db.ready;
+        if (!(await this.db.get('users'))) {
+          await this.db.set('users', { ...DEFAULT_USERS });
+        }
+        const saved = sessionStorage.getItem('fortis_user');
+        if (saved) this.currentUser = JSON.parse(saved);
+      }
+
+      async login(username, password) {
+        const users = await this.db.get('users');
+        const user = users?.[username];
+        
+        if (!user || user.pass !== password) {
+          return { success: false, error: 'Invalid credentials' };
+        }
+        if (!user.active) {
+          return { success: false, error: 'Account disabled' };
+        }
+
+        this.currentUser = { username, role: user.role };
+        sessionStorage.setItem('fortis_user', JSON.stringify(this.currentUser));
+        return { success: true, user: this.currentUser };
+      }
+
+      async logout() {
+        this.currentUser = null;
+        sessionStorage.removeItem('fortis_user');
+        document.querySelectorAll('input[type="password"]').forEach(i => i.value = '');
+      }
+
+      async addCashier(username, password) {
+        if (this.currentUser?.role !== ROLES.ADMIN) return { success: false };
+        const users = await this.db.get('users');
+        users[username] = { role: ROLES.CASHIER, pass: password, active: true };
+        await this.db.set('users', users);
+        this.logPasswordChange('system', username, null, password);
+        return { success: true };
+      }
+
+      async changePassword(targetUser, newPass) {
+        const users = await this.db.get('users');
+        const oldPass = users[targetUser].pass;
+        users[targetUser].pass = newPass;
+        await this.db.set('users', users);
+        this.logPasswordChange(this.currentUser.username, targetUser, oldPass, newPass);
+        return { success: true };
+      }
+
+      async logPasswordChange(byUser, targetUser, oldPass, newPass) {
+        const logs = (await this.db.get('password_logs')) || [];
+        logs.unshift({
+          timestamp: new Date().toISOString(),
+          byUser,
+          targetUser,
+          oldPassword: oldPass ? '***' : null,
+          newPassword: '***'
+        });
+        await this.db.set('password_logs', logs.slice(0, 100));
+      }
+
+      isLoggedIn() { return !!this.currentUser; }
+      getRole() { return this.currentUser?.role; }
     }
-}
-function getToday() { return new Date().toISOString().split('T')[0]; }
-function getTimeStamp() { return new Date().toLocaleString('en-PH'); }
-function generateStoreCode() { return `#${String(data.stores.length + 1).padStart(3, '0')}`; }
-function generateBarcode() { return 'F' + Date.now().toString().slice(-10); }
-function generateTransId() { return 'TX' + Date.now(); }
-// ========== CONNECTION STATUS ==========
-function updateConnectionStatus() {
-    const bar = document.getElementById('statusBar');
-    if (navigator.onLine) {
-        bar.className = 'status-bar status-online';
-        bar.textContent = '✅ ONLINE — Connected & Synced';
-    } else {
-        bar.className = 'status-bar status-offline';
-        bar.textContent = '🔌 OFFLINE — Data saved locally, will sync when online';
-    }
-}
-window.addEventListener('online', updateConnectionStatus);
-window.addEventListener('offline', updateConnectionStatus);
-// ========== INACTIVITY LOCK ==========
-function resetActivityTimer() {
-    data.lastActivity = Date.now();
-    if (lockTimer) clearTimeout(lockTimer);
-    if (data.currentUser?.role === 'cashier' && data.shift) {
-        lockTimer = setTimeout(() => {
-            document.getElementById('lockModal').classList.remove('hidden');
-        }, LOCK_TIMEOUT);
-    }
-}
-document.addEventListener('mousemove', resetActivityTimer);
-document.addEventListener('keydown', resetActivityTimer);
-// ========== SECTION SWITCHING ==========
-function hideAllSections() {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-}
-function showSection(sectionId) {
-    hideAllSections();
-    document.getElementById(sectionId).classList.add('active');
-}
-// ========== DROPDOWN HELPERS ==========
-function toggleStoreSelect() {
-    const role = document.getElementById('loginRole').value;
-    const div = document.getElementById('storeSelectDiv');
-    div.classList.toggle('hidden', role !== 'cashier');
-    if (role === 'cashier') loadStoreDropdown('loginStore', false);
-}
-function loadStoreDropdown(selectId, addEmpty = true) {
-    const sel = document.getElementById(selectId);
-    if (!sel) return;
-    sel.innerHTML = addEmpty ? '<option value="">-- Select Store --</option>' : '';
-    data.stores.forEach(s => {
-        sel.innerHTML += `<option value="${s.id}">${s.code} — ${s.name}</option>`;
-    });
-}
-// ========== LOGIN ==========
-function login() {
-    loadData();
-    const role = document.getElementById('loginRole').value;
-    const pass = document.getElementById('loginPass').value.trim();
-    const storeSel = document.getElementById('loginStore');
-    const storeId = storeSel?.value ? Number(storeSel.value) : null;
-    if (data.serviceExpiry && new Date(data.serviceExpiry) < new Date() && role !== 'sp') {
-        return alert('⏰ Subscription expired. Please contact Service Provider to renew.');
-    }
-    if (role === 'cashier') {
-        if (!storeId) return alert('Please select a store first.');
-        const cashier = data.cashiers.find(c => c.password === pass && c.storeId === storeId);
-        if (!cashier) return alert('❌ Invalid password or no access to this store.');
-        data.currentUser = {
-            role: 'cashier', id: cashier.id,
-            name: `${cashier.firstName} ${cashier.lastName || ''}`.trim(),
-            storeId, password: cashier.password
+
+    // ==========================================
+    // KASUNOD: PRIVATECHAT CLASS
+    // ==========================================
+    class PrivateChat {
+      constructor(auth, db) {
+        this.auth = auth;
+        this.db = db;
+        this.conversations = [];
+      }
+
+      async init() {
+        this.conversations = (await this.db.get('conversations')) || [];
+      }
+
+      createConversation(participantIds, title = '') {
+        if (!this.auth.isLoggedIn()) return null;
+        const conv = {
+          id: `conv_${Date.now()}`,
+          participants: participantIds,
+          title,
+          messages: [],
+          createdAt: new Date().toISOString()
         };
-        saveData();
-        showCashierStartScreen();
-        resetActivityTimer();
-        return;
+        this.conversations.push(conv);
+        this.persist();
+        return conv;
+      }
+
+      getMyConversations() {
+        if (!this.auth.currentUser) return [];
+        const me = this.auth.currentUser.username;
+        return this.conversations.filter(c => c.participants.includes(me));
+      }
+
+      sendMessage(convId, text) {
+        const conv = this.conversations.find(c => c.id === convId);
+        if (!conv) return false;
+        const me = this.auth.currentUser.username;
+        if (!conv.participants.includes(me)) return false;
+        conv.messages.push({ sender: me, text, timestamp: new Date().toISOString() });
+        this.persist();
+        return true;
+      }
+
+      canViewConversation(convId) {
+        const conv = this.conversations.find(c => c.id === convId);
+        if (!conv || !this.auth.currentUser) return false;
+        return conv.participants.includes(this.auth.currentUser.username);
+      }
+
+      async persist() {
+        await this.db.set('conversations', this.conversations);
+      }
     }
-    let valid = pass === DEFAULTS[role];
-    if (role === 'admin' && !valid && data.adminPassword) valid = pass === data.adminPassword;
-    if (role === 'sp' && !valid && data.spPassword) valid = pass === data.spPassword;
-    if (!valid) return alert('❌ Incorrect password.');
-    if (pass === DEFAULTS[role] && !data.passwordChanged[role]) {
-        data.currentUser = { role, name: role === 'admin' ? 'Admin / Owner' : 'Service Provider' };
-        saveData();
-        showSection('forcePassChange');
-        return;
+
+    // ==========================================
+    // KASUNOD: SYNCMANAGER CLASS
+    // ==========================================
+    class SyncManager {
+      constructor(auth, db) {
+        this.auth = auth;
+        this.db = db;
+        this.syncEndpoint = '/api/sync';
+        this.isOnline = navigator.onLine;
+        window.addEventListener('online', () => this.syncAll());
+        window.addEventListener('offline', () => { this.isOnline = false; });
+      }
+
+      async queueChange(type, payload) {
+        const queue = (await this.db.get('sync_queue')) || [];
+        queue.push({ type, payload, timestamp: new Date().toISOString() });
+        await this.db.set('sync_queue', queue);
+        if (this.isOnline) setTimeout(() => this.syncAll(), 500);
+      }
+
+      async syncAll() {
+        if (!navigator.onLine) return;
+        this.isOnline = true;
+        const queue = (await this.db.get('sync_queue')) || [];
+        if (!queue.length) return;
+        try {
+          const res = await fetch(this.syncEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ changes: queue, user: this.auth.currentUser })
+          });
+          if (res.ok) {
+            await this.db.set('sync_queue', []);
+            console.log('✅ Sync complete:', queue.length, 'items');
+          }
+        } catch (err) {
+          console.warn('Sync failed — will retry:', err);
+        }
+      }
     }
-    data.currentUser = { role, name: role === 'admin' ? 'Admin / Owner' : 'Service Provider' };
-    saveData();
-    role === 'admin' ? showAdminDashboard() : showSPDashboard();
-}
-// ========== PASSWORD CHANGE ==========
-function saveNewPassword() {
-    const p1 = document.getElementById('newPass1').value;
-    const p2 = document.getElementById('newPass2').value;
-    if (p1.length < 6) return alert('❌ Password must be at least 6 characters.');
-    if (p1 !== p2) return alert('❌ Passwords do not match.');
-    if (data.currentUser.role === 'admin') data.adminPassword = p1;
-    else data.spPassword = p1;
-    data.passwordChanged[data.currentUser.role] = true;
-    saveData();
-    alert('✅ Password updated successfully!');
-    data.currentUser.role === 'admin' ? showAdminDashboard() : showSPDashboard();
-}
-// ========== LOGOUT ==========
-function logout() {
-    document.querySelectorAll('input[type="password"]').forEach(inp => inp.value = '');
-    data.currentUser = null; data.shift = null;
-    activeCountRequestId = null;
-    if (lockTimer) clearTimeout(lockTimer);
-    saveData();
-    showSection('loginSection');
-}
-// ========== ADMIN DASHBOARD ==========
-function showAdminDashboard() {
-    showSection('adminDashboard');
-    ['cStore','prodStore','salesStoreFilter','stockStoreFilter','transStoreFilter','countReqStore']
-        .forEach(id => loadStoreDropdown(id));
-    populateAdminChatTargets();
-    renderStoreList(); renderCashierList(); renderProductList();
-    renderVoidRequests(); renderCountResponses();
-}
-function showAdminTab(tabId) {
-    document.querySelectorAll('#adminDashboard .section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('#adminDashboard .tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    event.target.classList.add('active');
-    if (tabId === 'adminChat') loadAdminChat();
-    if (tabId === 'adminCountRequests') loadCountProductChecklist();
-}
-// --- Stores ---
-function addStore() {
-    if (data.stores.length >= MAX_STORES) return alert(`❌ Maximum ${MAX_STORES} stores allowed.`);
-    const name = document.getElementById('newStoreName').value.trim();
-    if (!name) return alert('Enter store name.');
-    const code = document.getElementById('newStoreCode').value.trim() || generateStoreCode();
-    const location = document.getElementById('newStoreLocation').value.trim();
-    if (data.stores.some(s => s.code === code)) return alert('❌ Store No/Code already exists.');
-    data.stores.push({ id: Date.now(), code, name, location });
-    saveData(); alert('✅ Store added!'); renderStoreList();
-    ['cStore','prodStore','salesStoreFilter','stockStoreFilter','transStoreFilter','countReqStore']
-        .forEach(id => loadStoreDropdown(id));
-    document.getElementById('newStoreName').value = '';
-    document.getElementById('newStoreCode').value = '';
-    document.getElementById('newStoreLocation').value = '';
-}
-function renderStoreList() {
-    document.getElementById('storeCount').textContent = data.stores.length;
-    document.getElementById('storeList').innerHTML = data.stores.map(s => `
-        <div class="card" style="padding: 10px;">
-            <strong>${s.code}</strong> — ${s.name}
-            ${s.location ? `<br><small>📍 ${s.location}</small>` : ''}
-        </div>`).join('');
-}
-// --- Cashiers ---
-function createCashier() {
-    const fn = document.getElementById('cFirstName').value.trim();
-    const ln = document.getElementById('cLastName').value.trim();
-    const storeId = Number(document.getElementById('cStore').value);
-    const pw = document.getElementById('cPassword').value.trim();
-    if (!fn || !pw || !storeId) return alert('Fill in all required fields.');
-    if (!/^\d{4}$/.test(pw)) return alert('❌ Password must be exactly 4 digits.');
-    if (data.cashiers.filter(c => c.storeId === storeId).length >= MAX_CASHIERS_PER_STORE) {
-        return alert(`❌ Maximum ${MAX_CASHIERS_PER_STORE} cashiers per store.`);
-    }
-    data.cashiers.push({ id: Date.now(), firstName: fn, lastName: ln, password: pw, storeId });
-    saveData(); alert('✅ Cashier account created!'); renderCashierList(); populateAdminChatTargets();
-    document.getElementById('cFirstName').value = '';
-    document.getElementById('cLastName').value = '';
-    document.getElementById('cPassword').value = '';
-}
-function renderCashierList() {
-    document.getElementById('cashierList').innerHTML = data.cashiers.map(c => {
-        const store = data.stores.find(s => s.id === c.storeId);
-        return `
-            <div class="card" style="padding: 10px;">
-                👤 ${c.firstName} ${c.lastName || ''} — Store: ${store?.name || 'Unknown'}
-                <br><small>Password: ${'•'.repeat(4)}</small>
-                <button class="sm" style="margin-left:10px;" onclick="changeCashierPass(${c.id})">🔑 Change Pass</button>
-                <button class="danger sm" style="float:right;" onclick="deleteCashier(${c.id})">Remove</button>
-            </div>`;
-    }).join('') || '<p>No cashiers yet.</p>';
-}
-function changeCashierPass(id) {
-    const cashier = data.cashiers.find(c => c.id === id);
-    if (!cashier) return;
-    const newPass = prompt(`Enter NEW 4-digit password for ${cashier.firstName}:`);
-    if (!newPass) return;
-    if (!/^\d{4}$/.test(newPass)) return alert('❌ Must be exactly 4 digits.');
-    data.cashierPassLog.unshift({
-        cashierId: cashier.id,
-        cashierName: `${cashier.firstName} ${cashier.lastName || ''}`.trim(),
-        oldPass: cashier.password, newPass,
-        changedBy: data.currentUser.name, time: getTimeStamp()
+
+    // ==========================================
+    // HULI: MAIN APP INITIALIZATION
+    // ==========================================
+    const auth = new AuthSystem();
+    const db = new LocalDB('fortis_data');
+    const chat = new PrivateChat(auth, db);
+    const sync = new SyncManager(auth, db);
+
+    const loginPanel = document.getElementById('login-panel');
+    const dashboard = document.getElementById('dashboard');
+    const btnLogin = document.getElementById('btn-login');
+    const btnLogout = document.getElementById('btn-logout');
+    const errMsg = document.getElementById('login-error');
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      await auth.init();
+      await chat.init();
+      updateOnlineStatus();
+      if (auth.isLoggedIn()) showDashboard();
+      btnLogin.addEventListener('click', handleLogin);
+      btnLogout.addEventListener('click', handleLogout);
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
     });
-    cashier.password = newPass;
-    saveData(); alert('✅ Password updated. Log recorded.'); renderCashierList();
-}
-function deleteCashier(id) {
-    if (!confirm('Remove this cashier account?')) return;
-    data.cashiers = data.cashiers.filter(c => c.id !== id);
-    saveData(); renderCashierList(); populateAdminChatTargets();
-}
-// --- Sales Overview ---
-function renderSalesOverview() {
-    const storeId = Number(document.getElementById('salesStoreFilter').value);
-    const from = document.getElementById('salesDateFrom').value;
-    const to = document.getElementById('salesDateTo').value;
-    if (!storeId || !from || !to) {
-        document.getElementById('salesOverviewResult').innerHTML = '<p>Select store and date range.</p>';
-        return;
+
+    async function handleLogin() {
+      const user = document.getElementById('inp-user').value.trim();
+      const pass = document.getElementById('inp-pass').value;
+      const result = await auth.login(user, pass);
+      if (result.success) {
+        errMsg.textContent = '';
+        showDashboard();
+      } else {
+        errMsg.textContent = result.error;
+      }
     }
-    const voidedIds = data.voidRequests.filter(r => r.status === 'approved').map(r => r.wrongTransId);
-    const trans = data.transactions.filter(t =>
-        t.storeId === storeId && t.date >= from && t.date <= to && !voidedIds.includes(t.id)
-    );
-    const totalCash = trans.reduce((s, t) => s + (t.method === 'gcash' ? 0 : t.cashGiven || t.total), 0);
-    const totalGcash = trans.reduce((s, t) => s + (t.method === 'cash' ? 0 : t.gcashAmount || 0), 0);
-    const grandTotal = trans.reduce((s, t) => s + t.total, 0);
-    document.getElementById('salesOverviewResult').innerHTML = `
-        <h4>📊 Sales Overview</h4>
-        <p><strong>Period:</strong> ${from} to ${to}</p>
-        <p><strong>Total Transactions:</strong> ${trans.length}</p>
-        <p class="alert success"><strong>💵 Cash Sales:</strong> ₱${totalCash.toFixed(2)}</p>
-        <p class="alert info"><strong>🟢 GCash Sales:</strong> ₱${totalGcash.toFixed(2)}</p>
-        <p class="alert" style="background:#E8F5E9;"><strong>💰 GRAND TOTAL:</strong> ₱${grandTotal.toFixed(2)}</p>`;
-}
-// --- Products ---
-function addProduct() {
-    const storeId = Number(document.getElementById('prodStore').value);
-    const name = document.getElementById('prodName').value.trim();
-    const price = parseFloat(document.getElementById('prodPrice').value);
-    const stock = parseInt(document.getElementById('prodStock').value) || 0;
-    let barcode = document.getElementById('prodBarcode').value.trim() || generateBarcode();
-    if (!name || !price || !storeId) return alert('Fill required fields.');
-    if (price <= 0) return alert('Price must be greater than 0.');
-    data.products.push({ id: Date.now(), storeId, name, price, stock, barcode });
-    saveData(); alert('✅ Product added!'); renderProductList();
-    document.getElementById('prodName').value = '';
-    document.getElementById('prodPrice').value = '';
-    document.getElementById('prodStock').value = '';
-    document.getElementById('prodBarcode').value = '';
-}
-function renderProductList() {
-    document.getElementById('productList').innerHTML = data.products.map(p => {
-        const store = data.stores.find(s => s.id === p.storeId);
-        return `
-            <div class="card" style="padding: 10px;">
-                <strong>${p.name}</strong> — ₱${p.price.toFixed(2)}
-                <br>
-                <small>Store: ${store?.name || 'Unknown'} | Stock: ${p.stock} | Barcode: ${p.barcode}</small>
-                <button class="sm" onclick="editProduct(${p.id})">✏️ Edit</button>
-                <button class="danger sm" onclick="deleteProduct(${p.id})">🗑️ Delete</button>
-            </div>`;
-    }).join('') || '<p>No products added yet.</p>';
-}
-function editProduct(id) {
-    const prod = data.products.find(p => p.id === id);
-    if (!prod) return;
-    const newName = prompt('Enter new product name:', prod.name);
-    if (newName === null) return;
-    const newPrice = prompt('Enter new price:', prod.price);
-    if (newPrice === null) return;
-    const newStock = prompt('Enter new stock quantity:', prod.stock);
-    if (newStock === null) return;
-    const newBarcode = prompt('Enter new barcode/SKU:', prod.barcode);
-        if (newBarcode === null) return;
-    prod.name = newName.trim() || prod.name;
-    prod.price = parseFloat(newPrice) || prod.price;
-    prod.stock = parseInt(newStock) || 0;
-    prod.barcode = newBarcode.trim() || prod.barcode;
-    saveData(); alert('✅ Product updated!'); renderProductList();
-}
-function deleteProduct(id) {
-    if (!confirm('Delete this product?')) return;
-    data.products = data.products.filter(p => p.id !== id);
-    saveData(); renderProductList();
-}
-// --- Stocks Overview ---
-function renderStocksOverview() {
-    const storeId = Number(document.getElementById('stockStoreFilter').value);
-    if (!storeId) {
-        document.getElementById('stocksOverviewResult').innerHTML = '<p>Select a store.</p>';
-        return;
+
+    async function handleLogout() {
+      await auth.logout();
+      document.querySelectorAll('input[type="password"]').forEach(el => el.value = '');
+      location.reload();
     }
-    const prods = data.products.filter(p => p.storeId === storeId);
-    document.getElementById('stocksOverviewResult').innerHTML = prods.length ? `
-        <table>
-            <tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th></tr>
-            ${prods.map(p => `
-                <tr>
-                    <td>${p.name}<br><small>${p.barcode}</small></td>
-                    <td>₱${p.price.toFixed(2)}</td>
-                    <td>${p.stock}</td>
-                    <td>${p.stock <= 5 ? '<span class="badge badge-danger">Low Stock</span>' : '<span class="badge badge-success">Adequate</span>'}</td>
-                </tr>`).join('')}
-        </table>` : '<p>No products yet.</p>';
-}
-// --- Void Requests ---
-function renderVoidRequests() {
-    document.getElementById('voidReqList').innerHTML = !data.voidRequests.length
-        ? '<p>No void requests yet.</p>'
-        : data.voidRequests.map(r => `
-            <div class="card" style="padding:10px;">
-                <strong>Transaction: ${r.wrongTransId}</strong>
-                <br>From: ${r.cashierName} — ${r.time}
-                <br>Reason: ${r.reason}
-                <br>Status: ${r.status === 'pending' ? '<span class="badge badge-warn">Pending</span>' : r.status === 'approved' ? '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-danger">Rejected</span>'}
-                ${r.status === 'pending' ? `
-                    <button class="sm" onclick="approveVoid('${r.id}')">✅ Approve</button>
-                    <button class="danger sm" onclick="rejectVoid('${r.id}')">❌ Reject</button>` : ''}
-            </div>`).join('');
-}
-function approveVoid(reqId) {
-    const req = data.voidRequests.find(r => r.id === reqId);
-    if (!req) return;
-    req.status = 'approved';
-    saveData(); alert('✅ Void Approved'); renderVoidRequests();
-}
-function rejectVoid(reqId) {
-    const req = data.voidRequests.find(r => r.id === reqId);
-    if (!req) return;
-    req.status = 'rejected';
-    saveData(); alert('❌ Void Rejected'); renderVoidRequests();
-}
-// --- Transaction Summary ---
-function renderTransSummary() {
-    const storeId = Number(document.getElementById('transStoreFilter').value);
-    const from = document.getElementById('transDateFrom').value;
-    const to = document.getElementById('transDateTo').value;
-    if (!storeId || !from || !to) {
-        document.getElementById('transSummaryResult').innerHTML = '<p>Select store & dates.</p>';
-        return;
+
+    function showDashboard() {
+      loginPanel.classList.add('hidden');
+      dashboard.classList.remove('hidden');
+      btnLogout.style.display = 'block';
+      document.getElementById('user-role-badge').textContent = 
+        `${auth.currentUser.username} — ${auth.getRole().toUpperCase()}`;
+      if (auth.getRole() !== ROLES.ADMIN) {
+        document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+      }
+      refreshConvList();
     }
-    const voidedIds = data.voidRequests.filter(r => r.status === 'approved').map(r => r.wrongTransId);
-    const trans = data.transactions.filter(t =>
-        t.storeId === storeId && t.date >= from && t.date <= to && !voidedIds.includes(t.id)
-    );
-    document.getElementById('transSummaryResult').innerHTML = !trans.length
-        ? '<p>No transactions for this period.</p>'
-        : `<table>
-            <tr><th>Date/Time</th><th>Items</th><th>Method</th><th>Total</th></tr>
-            ${trans.map(t => `
-                <tr>
-                    <td>${t.date} ${t.time}</td>
-                    <td>${t.items.length} item(s)</td>
-                    <td>${t.method === 'cash' ? '💵 Cash' : t.method === 'gcash' ? '🟢 GCash' : '💵+🟢 Split'}</td>
-                    <td>₱${t.total.toFixed(2)}</td>
-                </tr>`).join('')}
-            <tr><td colspan="3"><strong>TOTAL</strong></td><td><strong>₱${trans.reduce((s,t)=>s+t.total,0).toFixed(2)}</strong></td></tr>
-        </table>`;
-}
-// --- Stock Count ---
-function loadCountProductChecklist() {
-    const storeId = Number(document.getElementById('countReqStore').value);
-    if (!storeId) {
-        document.getElementById('countProductChecklist').innerHTML = '<p>Select store first.</p>';
-        return;
+
+    function updateOnlineStatus() {
+      const indicator = document.getElementById('status-indicator');
+      if (navigator.onLine) {
+        indicator.textContent = 'Online';
+        indicator.className = 'status-online';
+        sync.syncAll();
+      } else {
+        indicator.textContent = 'Offline';
+        indicator.className = 'status-offline';
+      }
     }
-    const prods = data.products.filter(p => p.storeId === storeId);
-    document.getElementById('countProductChecklist').innerHTML = prods.map(p => `
-        <label class="checklist-item">
-            <input type="checkbox" class="count-prod-checkbox" value="${p.id}">
-            ${p.name} — System Qty: ${p.stock}
-        </label>`).join('');
-}
-function sendCountRequest() {
-    const storeId = Number(document.getElementById('countReqStore').value);
-    const selected = Array.from(document.querySelectorAll('.count-prod-checkbox:checked')).map(c => Number(c.value));
-    if (!storeId || !selected.length) return alert('Select store and at least one product.');
-    data.countRequests.push({
-        id: 'CR' + Date.now(), storeId, productIds: selected,
-        status: 'pending', createdAt: getTimeStamp(), responses: []
-    });
-    saveData(); alert('✅ Request sent'); loadCountProductChecklist(); renderCountResponses();
-}
-function renderCountResponses() {
-    document.getElementById('countRespList').innerHTML = !data.countRequests.length
-        ? '<p>No stock count requests yet.</p>'
-        : data.countRequests.map(r => {
-            const store = data.stores.find(s => s.id === r.storeId);
-            return `
-                <div class="card" style="padding:10px;">
-                    <strong>Request ${r.id}</strong> — ${store?.name || 'Unknown Store'} (${r.createdAt})
-                    <br>Status: ${r.status}
-                    ${r.responses.length ? `<br>Responses: ${r.responses.length}` : ''}
-                </div>`;
-        }).join('');
-}
-// --- Admin Chat ---
-function populateAdminChatTargets() {
-    const sel = document.getElementById('adminChatTarget');
-    sel.innerHTML = '<option value="sp">🛠️ Service Provider</option>' +
-        data.cashiers.map(c => `<option value="cashier-${c.id}">👤 ${c.firstName} ${c.lastName || ''}</option>`).join('');
-}
-function loadAdminChat() {
-    const target = document.getElementById('adminChatTarget').value;
-    if (!target) return;
-    renderChat('admin', target, 'adminChatDisplay');
-}
-function adminSendMessage() {
-    const target = document.getElementById('adminChatTarget').value;
-    const msg = document.getElementById('adminChatMsg').value.trim();
-    if (!target || !msg) return alert('Select recipient and type message.');
-    data.chats.push({
-        from: 'admin', to: target, message: msg, time: getTimeStamp()
-    });
-    saveData(); document.getElementById('adminChatMsg').value = ''; loadAdminChat();
-}
-// ========== SP DASHBOARD ==========
-function showSPDashboard() {
-    showSection('spDashboard');
-    updateServiceStatus(); renderCashierPassLog();
-}
-function showSPTab(tabId) {
-    document.querySelectorAll('#spDashboard .section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('#spDashboard .tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    event.target.classList.add('active');
-    if (tabId === 'spChat') loadSPChat();
-}
-function updateServiceStatus() {
-    const el = document.getElementById('spServiceStatus');
-    if (!data.serviceExpiry) {
-        el.innerHTML = '<p class="alert success">Free trial active — expires in 7 days from first login</p>';
-        return;
+
+    function refreshConvList() {
+      const select = document.getElementById('conv-select');
+      select.innerHTML = '<option value="">Select conversation...</option>';
+      chat.getMyConversations().forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.title || c.participants.join(' ↔ ');
+        select.appendChild(opt);
+      });
     }
-    const expiry = new Date(data.serviceExpiry);
-    const now = new Date();
-    const daysLeft = Math.ceil((expiry - now)/(1000*60*60*24));
-    if (daysLeft <= 0) {
-        el.innerHTML = '<p class="alert danger">⚠️ Subscription expired — Renew now</p>';
-    } else if (daysLeft <= 3) {
-        el.innerHTML = `<p class="alert warn">⚠️ Expires in ${daysLeft} day(s)</p>`;
-    } else {
-        el.innerHTML = `<p class="alert success">✅ Active — ${daysLeft} day(s) remaining</p>`;
-    }
-}
-function renewService() {
-    const plan = document.getElementById('planSelect').value;
-    const {days, price} = PLANS[plan];
-    if (!confirm(`Confirm ${plan} plan — ₱${price} for ${days} days?`)) return;
-    const start = data.serviceExpiry && new Date(data.serviceExpiry) > new Date()
-        ? new Date(data.serviceExpiry) : new Date();
-    start.setDate(start.getDate() + days);
-    data.serviceExpiry = start.toISOString();
-    saveData(); alert(`✅ Renewed — valid until ${start.toLocaleDateString('en-PH')}`);
-    updateServiceStatus();
-}
-function spChangeAdminPass() {
-    const newPass = document.getElementById('spNewAdminPass').value;
-    if (newPass.length < 6) return alert('Min 6 characters.');
-    data.adminPassword = newPass;
-    saveData(); alert('✅ Admin password updated');
-    document.getElementById('spNewAdminPass').value = '';
-}
-function spChangeOwnPass() {
-    const newPass = document.getElementById('spNewSelfPass').value;
-    if (newPass.length < 6) return alert('Min 6 characters.');
-    data.spPassword = newPass;
-    saveData(); alert('✅ SP password updated');
-    document.getElementById('spNewSelfPass').value = '';
-}
-function renderCashierPassLog() {
-    document.getElementById('cashierPassLogList').innerHTML = !data.cashierPassLog.length
-        ? '<p>No password changes recorded.</p>'
-        : `<table>
-            <tr><th>Cashier</th><th>Old PIN</th><th>New PIN</th><th>Changed By</th><th>Time</th></tr>
-            ${data.cashierPassLog.map(l => `
-                <tr>
-                    <td>${l.cashierName}</td>
-                    <td>${'•'.repeat(4)}</td>
-                    <td>${'•'.repeat(4)}</td>
-                    <td>${l.changedBy}</td>
-                    <td>${l.time}</td>
-                </tr>`).join('')}
-        </table>`;
-}
-function loadSPChat() { renderChat('sp', 'admin', 'spChatDisplay'); }
-function spSendMessage() {
-    const msg = document.getElementById('spChatMsg').value.trim();
-    if (!msg) return alert('Type message.');
-    data.chats.push({ from: 'sp', to: 'admin', message: msg, time: getTimeStamp() });
-    saveData(); document.getElementById('spChatMsg').value = ''; loadSPChat();
-}
-// ========== SHARED CHAT RENDERER ==========
-function renderChat(sender, target, displayId) {
-    const msgs = data.chats.filter(m =>
-        (m.from === sender && m.to === target) || (m.from === target && m.to === sender)
-    );
-    document.getElementById(displayId).innerHTML = !msgs.length
-        ? '<p style="color:#888;">No messages yet</p>'
-        : msgs.map(m => `
-            <div class="${m.from === sender ? 'msg-me' : 'msg-other'}">
-                <small><strong>${m.from === sender ? 'You' : m.from}</strong> — ${m.time}</small>
-                <br>${m.message}
-            </div>`).join('');
-    const box = document.getElementById(displayId);
-    box.scrollTop = box.scrollHeight;
-}
-// ========== CASHIER POS ==========
-function showCashierStartScreen() {
-    showSection('cashierPOS');
-    if (data.shift) {
-        document.getElementById('startShiftCard').classList.add('hidden');
-        document.getElementById('posMain').classList.remove('hidden');
-        loadPOSData();
-    } else {
-        document.getElementById('startShiftCard').classList.remove('hidden');
-        document.getElementById('posMain').classList.add('hidden');
-    }
-}
-function beginShift() {
-    const float = parseFloat(document.getElementById('openingFloat').value);
-    if (isNaN(float) || float < 0) return alert('Enter valid opening fund.');
-    data.shift = {
-        cashierId: data.currentUser.id,
-        cashierName: data.currentUser.name,
-        storeId: data.currentUser.storeId,
-        openingFloat: float,
-        startTime: getTimeStamp(),
-        cashIn: 0, cashOut: 0,
-        transactions: []
-    };
-    saveData(); alert('✅ Shift started');
-    showCashierStartScreen();
-}
-function loadPOSData() {
-    loadStoreDropdown('stockOutProduct');
-    loadVoidTransSelect();
-    filterProducts('');
-}
-function showPosTab(tabId) {
-    document.querySelectorAll('#posMain .section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('#posMain .tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    event.target.classList.add('active');
-    if (tabId === 'posHistory') renderRecentTrans();
-    if (tabId === 'posVoid') loadVoidTransSelect();
-    if (tabId === 'posStockOut') loadStockOutProductOptions();
-    if (tabId === 'posChat') loadPosChat();
-    if (tabId === 'posStockCount') loadCountInbox();
-}
-function loadVoidTransSelect() {
-    const sel = document.getElementById('voidTransSelect');
-    const storeTrans = data.transactions.filter(t => t.storeId === data.currentUser.storeId);
-    sel.innerHTML = storeTrans.length
-        ? '<option value="">-- Select Transaction --</option>' +
-            storeTrans.map(t => `<option value="${t.id}">${t.id} — ₱${t.total.toFixed(2)} — ${t.date} ${t.time}</option>`).join('')
-        : '<option value="">No transactions yet</option>';
-}
-function loadStockOutProductOptions() {
-    const sel = document.getElementById('stockOutProduct');
-    const prods = data.products.filter(p => p.storeId === data.currentUser.storeId);
-    sel.innerHTML = prods.length
-        ? prods.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`).join('')
-        : '<option value="">No products yet</option>';
-}
-// --- Cart & POS ---
-function filterProducts(q) {
-    q = q.toLowerCase().trim();
-    const prods = data.products.filter(p =>
-        p.storeId === data.currentUser.storeId &&
-        (p.name.toLowerCase().includes(q) || p.barcode.includes(q))
-    );
-    document.getElementById('productGrid').innerHTML = prods.length
-        ? prods.map(p => `
-            <div class="prod-card" onclick="addToCart(${p.id})">
-                <div class="prod-icon">📦</div>
-                <div><strong>${p.name}</strong></div>
-                <div>₱${p.price.toFixed(2)}</div>
-                <small>Stock: ${p.stock}</small>
-            </div>`).join('')
-        : '<p style="grid-column:1/-1; color:#888;">No product found</p>';
-}
-function addToCart(prodId) {
-    const prod = data.products.find(p => p.id === prodId);
-    if (!prod) return;
-    if (prod.stock <= 0) return alert('❌ Out of stock');
-    const existing = cart.find(c => c.id === prodId);
-    if (existing) {
-        if (existing.qty >= prod.stock) return alert('❌ Not enough stock');
-        existing.qty++;
-    } else {
-        cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 });
-    }
-    renderCart();
-}
-function renderCart() {
-    document.getElementById('cartDisplay').innerHTML = !cart.length
-        ? '<p style="color:rgba(255,255,255,0.7);">Click products to add here</p>'
-        : cart.map(item => `
-            <div class="cart-item">
-                <div>
-                    <strong>${item.name}</strong><br>
-                    ₱${item.price.toFixed(2)} × ${item.qty}
-                </div>
-                <div style="display:flex;align-items:center;">
-                    <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
-                    <span>${item.qty}</span>
-                    <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
-                </div>
-            </div>`).join('');
-    recalculateTotals();
-}
-function changeQty(id, delta) {
-    const item = cart.find(c => c.id === id);
-    const prod = data.products.find(p => p.id === id);
-    if (!item || !prod) return;
-    item.qty += delta;
-    if (item.qty <= 0) {
-        cart = cart.filter(c => c.id !== id);
-    } else if (item.qty > prod.stock) {
-        return alert('❌ Not enough stock');
-    }
-    renderCart();
-}
-function recalculateTotals() {
-    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    const discount = document.getElementById('applyPwdDiscount').checked ? subtotal * 0.05 : 0;
-    const grand = subtotal - discount;
-    document.getElementById('subtotal').textContent = `₱${subtotal.toFixed(2)}`;
-    document.getElementById('discountAmt').textContent = `₱${discount.toFixed(2)}`;
-    document.getElementById('grandTotal').textContent = `₱${grand.toFixed(2)}`;
-    calculateChange();
-    calculateSplit();
-}
-function togglePaymentFields() {
-    const method = document.getElementById('paymentMethod').value;
-    document.getElementById('cashFields').classList.toggle('hidden', method !== 'cash');
-    document.getElementById('splitFields').classList.toggle('hidden', method !== 'split');
-    document.getElementById('splitLiveDisplay').classList.toggle('hidden', method !== 'split');
-}
-function calculateChange() {
-    const grand = getGrandTotal();
-    const received = parseFloat(document.getElementById('cashReceived').value) || 0;
-    document.getElementById('changeAmt').textContent = `₱${Math.max(0, received - grand).toFixed(2)}`;
-}
-function calculateSplit() {
-    const grand = getGrandTotal();
-    const cash = parseFloat(document.getElementById('splitCashAmt').value) || 0;
-    const gcash = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
-    document.getElementById('splitLiveCash').textContent = `₱${cash.toFixed(2)}`;
-    document.getElementById('splitLiveGcash').textContent = `₱${gcash.toFixed(2)}`;
-    document.getElementById('splitRemain').textContent = `₱${Math.max(0, grand - cash - gcash).toFixed(2)}`;
-}
-function getGrandTotal() {
-    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-    return subtotal - (document.getElementById('applyPwdDiscount').checked ? subtotal * 0.05 : 0);
-}
-function clearCart() {
-    if (cart.length && !confirm('Clear cart?')) return;
-    cart = []; renderCart();
-    document.getElementById('cashReceived').value = '';
-    document.getElementById('splitCashAmt').value = '';
-    document.getElementById('splitGcashAmt').value = '';
-}
-function finalizeSale() {
-    if (!cart.length) return alert('Cart is empty');
-    const grand = getGrandTotal();
-    const method = document.getElementById('paymentMethod').value;
-    let cashGiven = 0, gcashAmount = 0;
-    if (method === 'cash') {
-        cashGiven = parseFloat(document.getElementById('cashReceived').value) || 0;
-        if (cashGiven < grand) return alert(`❌ Insufficient cash — need ₱${grand.toFixed(2)}`);
-    } else if (method === 'gcash') {
-        gcashAmount = grand;
-    } else {
-        cashGiven = parseFloat(document.getElementById('splitCashAmt').value) || 0;
-        gcashAmount = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
-        if (cashGiven + gcashAmount < grand) return alert(`❌ Underpaid — need ₱${grand.toFixed(2)} total`);
-    }
-    // Deduct stock
-    for (const item of cart) {
-        const prod = data.products.find(p => p.id === item.id);
-        if (!prod || prod.stock < item.qty) return alert(`❌ ${item.name} out of stock — refresh`);
-        prod.stock -= item.qty;
-    }
-    const trans = {
-        id: generateTransId(),
-        storeId: data.currentUser.storeId,
-        cashierId: data.currentUser.id,
-        cashierName: data.currentUser.name,
-        date: getToday(),
-        time: new Date().toLocaleTimeString('en-PH'),
-        items: [...cart],
-        subtotal: cart.reduce((s,i)=>s+i.price*i.qty,0),
-        discount: document.getElementById('applyPwdDiscount').checked ? cart.reduce((s,i)=>s+i.price*i.qty,0)*0.05 : 0,
-        total: grand,
-        method, cashGiven, gcashAmount,
-        change: method === 'cash' ? cashGiven - grand : 0
-    };
-    data.transactions.push(trans);
-    if (data.shift) data.shift.transactions.push(trans.id);
-    saveData();
-    alert(`✅ SALE COMPLETE\nReceipt:\n${trans.id}\nTotal: ₱${grand.toFixed(2)}\nThank you!`);
-    clearCart();
-    filterProducts('');
-}
-function renderRecentTrans() {
-    const list = data.transactions
-        .filter(t => t.storeId === data.currentUser.storeId)
-        .slice(-MAX_RECENT_TRANS).reverse();
-    document.getElementById('recentTransList').innerHTML = !list.length
-        ? '<p>No transactions yet.</p>'
-        : list.map(t => `
-            <div class="trans-item">
-                <strong>${t.id}</strong> — ${t.date} ${t.time}
-                <br>Items: ${t.items.length} | ${t.method.toUpperCase()} — ₱${t.total.toFixed(2)}
-            </div>`).join('');
-}
-// --- Void Request ---
-function submitVoidRequest() {
-    const wrongId = document.getElementById('voidTransSelect').value;
-    const reason = document.getElementById('voidReasonText').value.trim();
-    if (!wrongId || !reason) return alert('Fill all fields');
-    data.voidRequests.push({
-        id: 'VR' + Date.now(),
-        storeId: data.currentUser.storeId,
-        cashierId: data.currentUser.id,
-        cashierName: data.currentUser.name,
-        wrongTransId: wrongId,
-        correctTransId: document.getElementById('voidCorrectTrans').value.trim() || null,
-        reason, status: 'pending', time: getTimeStamp()
-    });
-    saveData(); alert('✅ Request sent to Admin');
-    document.getElementById('voidReasonText').value = '';
-    document.getElementById('voidCorrectTrans').value = '';
-    renderMyVoidRequests();
-}
-function renderMyVoidRequests() {
-    document.getElementById('myVoidRequests').innerHTML = data.voidRequests
-        .filter(r => r.cashierId === data.currentUser.id)
-        .map(r => `
-            <div class="trans-item">
-                <strong>Req: ${r.id}</strong> — ${r.time}
-                <br>Tx: ${r.wrongTransId} | Status: ${r.status === 'pending' ? '⏳ Pending' : r.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
-            </div>`).join('');
-}
-// --- Stock Out ---
-function submitStockOut() {
-    const prodId = Number(document.getElementById('stockOutProduct').value);
-    const qty = parseInt(document.getElementById('stockOutQty').value);
-    const reason = document.getElementById('stockOutReason').value.trim();
-    const prod = data.products.find(p => p.id === prodId);
-    if (!prod || !qty || !reason) return alert('Fill all fields');
-    if (prod.stock < qty) return alert('❌ Not enough stock');
-    prod.stock -= qty;
-    data.stockOutLogs.unshift({
-        id: 'SO' + Date.now(), productId: prodId, productName: prod.name,
-        qty, reason, storeId: data.currentUser.storeId,
-        cashier: data.currentUser.name, time: getTimeStamp()
-    });
-    saveData(); alert('✅ Recorded');
-    document.getElementById('stockOutQty').value = '1';
-    document.getElementById('stockOutReason').value = '';
-    renderStockOutLog(); loadStockOutProductOptions();
-}
-function renderStockOutLog() {
-    document.getElementById('stockOutLog').innerHTML = data.stockOutLogs
-        .filter(l => l.storeId === data.currentUser.storeId).slice(0,5)
-        .map(l => `
-            <div class="trans-item">
-                ${l.productName} — ${l.qty} pcs<br>
-                Reason: ${l.reason} | ${l.time}
-            </div>`).join('');
-}
-// --- Cash In/Out ---
-function recordCashIn() {
-    const amt = parseFloat(document.getElementById('cashInAmount').value);
-    const reason = document.getElementById('cashInReason').value.trim();
-    if (!amt || !reason) return alert('Fill all fields');
-    data.cashInOutLogs.push({
-        type: 'in', amount: amt, reason, storeId: data.currentUser.storeId,
-        cashier: data.currentUser.name, time: getTimeStamp()
-    });
-    if (data.shift) data.shift.cashIn += amt;
-    saveData(); alert('✅ Recorded');
-    document.getElementById('cashInAmount').value = '';
-    document.getElementById('cashInReason').value = '';
-}
-function recordCashOut() {
-    const amt = parseFloat(document.getElementById('cashOutAmount').value);
-    const reason = document.getElementById('cashOutReason').value.trim();
-    if (!amt || !reason) return alert('Fill all fields');
-    data.cashInOutLogs.push({
-        type: 'out', amount: amt, reason, storeId: data.currentUser.storeId,
-        cashier: data.currentUser.name, time: getTimeStamp()
-    });
-    if (data.shift) data.shift.cashOut += amt;
-    saveData(); alert('✅ Recorded');
-    document.getElementById('cashOutAmount').value = '';
-    document.getElementById('cashOutReason').value = '';
-}
-// --- POS Chat ---
-function loadPosChat() {
-    const target = document.getElementById('chatRecipient').value;
-    renderChat('cashier-' + data.currentUser.id, target, 'chatMessageBox');
-}
-function sendChatMessage() {
-    const to = document.getElementById('chatRecipient').value;
-    const msg = document.getElementById('chatInputBox').value.trim();
-    if (!msg) return alert('Type message.');
-    data.chats.push({
-        from: 'cashier-' + data.currentUser.id, to, message: msg, time: getTimeStamp()
-    });
-    saveData(); document.getElementById('chatInputBox').value = ''; loadPosChat();
-}
-// --- Stock Count Response ---
-function loadCountInbox() {
-    const reqs = data.countRequests.filter(r => r.storeId === data.currentUser.storeId && r.status === 'pending');
-    document.getElementById('countRequestInbox').innerHTML = !reqs.length
-        ? '<p>No pending count requests.</p>'
-        : reqs.map(r => `
-            <div class="card" style="padding:10px;">
-                <strong>${r.id}</strong> — ${r.createdAt}
-                <br>${r.productIds.length} product(s) to count
-                <button class="sm" onclick="openCountResponse('${r.id}')">✅ Start Count</button>
-            </div>`).join('');
-}
-function openCountResponse(reqId) {
-    activeCountRequestId = reqId;
-    const req = data.countRequests.find(r => r.id === reqId);
-    if (!req) return;
-    activeProductIndex = 0;
-    showNextCountProduct();
-}
-function showNextCountProduct() {
-    const req = data.countRequests.find(r => r.id === activeCountRequestId);
-    if (!req || activeProductIndex >= req.productIds.length) {
-        alert('✅ All count responses submitted!');
-        document.getElementById('countResponseArea').classList.add('hidden');
-        activeCountRequestId = null;
-        return;
-    }
-    const prod = data.products.find(p => p.id === req.productIds[activeProductIndex]);
-    document.getElementById('countTargetName').textContent = `Request: ${req.id} — Product ${activeProductIndex+1}/${req.productIds.length}`;
-    document.getElementById('countProdNameDisplay').value = prod?.name || 'Unknown';
-    document.getElementById('countSysQtyDisplay').value = prod?.stock || 0;
-    document.getElementById('actualCountInput').value = '';
-    document.getElementById('countResponseArea').classList.remove('hidden');
-}
-function submitCountResponse() {
-    const actual = parseInt(document.getElementById('actualCountInput').value);
-    if (isNaN(actual) || actual < 0) return alert('Enter valid count');
-    const req = data.countRequests.find(r => r.id === activeCountRequestId);
-    if (!req) return;
-    const prodId = req.productIds[activeProductIndex];
-    req.responses.push({
-        productId: prodId, counted: actual,
-        by: data.currentUser.name, time: getTimeStamp()
-    });
-    if (req.responses.length >= req.productIds.length) req.status = 'completed';
-    saveData();
-    activeProductIndex++;
-    showNextCountProduct();
-}
-// --- End Shift / Lock ---
-function initiateEndShift() {
-    document.getElementById('endShiftModal').classList.remove('hidden');
-    computeDenomTotal();
-}
-function closeEndShiftModal() {
-    document.getElementById('endShiftModal').classList.add('hidden');
-}
-function computeDenomTotal() {
-    const t = 
-        (Number(document.getElementById('d1000').value) || 0) * 1000 +
-        (Number(document.getElementById('d500').value) || 0) * 500 +
-        (Number(document.getElementById('d200').value) || 0) * 200 +
-        (Number(document.getElementById('d100').value) || 0) * 100 +
-        (Number(document.getElementById('d50').value) || 0) * 50 +
-        (Number(document.getElementById('dCoins').value) || 0);
-    document.getElementById('denomTotalAmt').textContent = `₱${t.toFixed(2)}`;
-}
-function confirmEndShift() {
-    if (!confirm('Finalize and end shift? Make sure count is correct.')) return;
-    data.shift = null;
-    saveData();
-    closeEndShiftModal();
-    logout();
-    alert('✅ Shift closed — Logged out');
-}
-function unlockPOS() {
-    const entered = document.getElementById('unlockPassword').value.trim();
-    if (entered === data.currentUser.password) {
-        document.getElementById('lockModal').classList.add('hidden');
-        document.getElementById('unlockPassword').value = '';
-        resetActivityTimer();
-    } else {
-        alert('❌ Wrong password');
-    }
-}
-// ========== INIT ==========
-loadData();
-updateConnectionStatus();
-</script>
+  </script>
+
+  <!-- I dadagdag natin ang CSS mamaya para maganda ang itsura -->
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui; }
+    body { background: #f5f7fa; padding: 20px; max-width: 1200px; margin: 0 auto; }
+    .brand-bar { display: flex; justify-content: space-between; align-items: center; background: #1a1a2e; color: white; padding: 15px 25px; border-radius: 8px; margin-bottom: 20px; }
+    .status-online { color: #4ade80; font-weight: bold; }
+    .status-offline { color: #f87171; font-weight: bold; }
+    .panel { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .hidden { display: none !important; }
+    input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 16px; }
+    button { padding: 12px 20px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; margin-top: 5px; }
+    .btn-primary { background: #2563eb; color: white; width: 100%; }
+    .btn-secondary { background: #e5e7eb; color: #374151; }
+    .error-msg { color: #dc2626; margin-top: 10px; }
+    .role-badge { background: #dbeafe; color: #1e40af; padding: 8px 15px; border-radius: 20px; display: inline-block; margin-bottom: 15px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .tab-btn { background: transparent; border: none; padding: 10px 20px; color: #6b7280; }
+    .tab-btn.active { border-bottom: 2px solid #2563eb; color: #2563eb; font-weight: bold; }
+    .chat-layout { display: grid; grid-template-columns: 250px 1fr; gap: 20px; }
+    .conv-list { display: flex; flex-direction: column; gap: 10px; }
+    select { padding: 10px; border-radius: 6px; border: 1px solid #ddd; }
+    .messages { height: 350px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; padding: 15px; margin-bottom: 10px; }
+    .msg-input-row { display: flex; gap: 10px; }
+    .msg-input-row input { flex: 1; margin: 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+    h2, h3 { margin-bottom: 15px; color: #1f2937; }
+  </style>
+
 </body>
 </html>
