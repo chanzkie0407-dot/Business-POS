@@ -7,6 +7,7 @@
     <style>
         /* ==============================================
            PANGKALAHATANG PATAKARAN SA ESTILO
+           BAGONG DISENYO: PANGUNAHING BERDE KATULAD SA LARAWAN
            ============================================== */
         * {
             margin: 0;
@@ -16,18 +17,21 @@
         }
 
         :root {
-            --prim: #2c3e50;       /* Pangunahing Kulay */
-            --sec: #27ae60;        /* Matagumpay / Online */
-            --warn: #f39c12;       /* Babala / Nagsi-sync */
-            --danger: #e74c3c;     /* Panganib / Walang Koneksyon / Expired */
-            --info: #3498db;       /* Impormasyon */
-            --bg: #f8f9fa;         /* Kulay ng Likuran */
-            --border: #ddd;        /* Kulay ng Hangganan */
+            --prim: #4CAF50;       /* 🟢 PANGUNAHING BERDE — Katulad sa larawan */
+            --prim-dark: #388E3C;  /* Mas madilim na berde para sa pindutan */
+            --prim-light: #E8F5E9; /* Napakaliwanag na berde — likuran */
+            --sec: #2196F3;        /* Asul — impormasyon / pindutan */
+            --warn: #FF9800;       /* Kahel — babala / nagsi-sync */
+            --danger: #f44336;     /* Pula — panganib / nag-expire */
+            --bg: #F1F8E9;         /* 🟢 Napakaliwanag na berde — likuran ng pahina */
+            --border: #C8E6C9;     /* Hangganan — maputlang berde */
+            --text-dark: #2E7D32;  /* Madilim na berde — pamagat */
+            --text-normal: #333;   /* Karaniwang kulay ng teksto */
         }
 
         body {
             background-color: var(--bg);
-            color: #333;
+            color: var(--text-normal);
             font-size: 14px;
             line-height: 1.5;
         }
@@ -40,13 +44,14 @@
             top: 0;
             left: 0;
             right: 0;
-            padding: 7px 15px;
+            padding: 8px 15px;
             color: #fff;
             font-weight: bold;
             text-align: center;
             z-index: 9999;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
-        .status-online  { background-color: var(--sec); }
+        .status-online  { background-color: var(--prim); }
         .status-syncing { background-color: var(--warn); }
         .status-offline { background-color: var(--danger); }
 
@@ -54,7 +59,7 @@
            LUGAR NG NILALAMAN
            ============================================== */
         .container {
-            margin-top: 40px;
+            margin-top: 45px;
             padding: 15px;
             max-width: 1200px;
             margin-left: auto;
@@ -63,15 +68,17 @@
 
         .card {
             background: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 18px;
+            box-shadow: 0 3px 10px rgba(76, 175, 80, 0.12);
+            border: 1px solid var(--border);
         }
 
         h1, h2, h3, h4 {
-            color: var(--prim);
-            margin-bottom: 15px;
+            color: var(--text-dark);
+            margin-bottom: 18px;
+            font-weight: bold;
         }
 
         p { margin-bottom: 10px; }
@@ -81,11 +88,18 @@
            ============================================== */
         input, select, button, textarea {
             width: 100%;
-            padding: 10px 12px;
-            margin: 6px 0;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            font-size: 14px;
+            padding: 12px 14px;
+            margin: 7px 0;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--prim);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.15);
         }
 
         button {
@@ -94,19 +108,27 @@
             color: #fff;
             border: none;
             cursor: pointer;
-            margin-right: 6px;
+            margin-right: 8px;
             font-weight: bold;
+            padding: 12px 22px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
         }
-        button:hover { opacity: 0.92; }
-        button.success { background-color: var(--sec); }
+        button:hover {
+            background-color: var(--prim-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        button.success { background-color: var(--prim); }
         button.danger { background-color: var(--danger); }
-        button.info { background-color: var(--info); }
+        button.info { background-color: var(--sec); }
         button.warning { background-color: var(--warn); }
 
         label {
             font-weight: bold;
             display: inline-block;
-            margin-top: 8px;
+            margin-top: 10px;
+            color: var(--text-dark);
         }
 
         /* ==============================================
@@ -114,11 +136,15 @@
            ============================================== */
         .password-mask {
             font-family: "Courier New", monospace;
-            letter-spacing: 3px;
-            font-size: 16px;
-            color: #555;
-            margin-top: 4px;
+            letter-spacing: 4px;
+            font-size: 18px;
+            color: var(--prim-dark);
+            margin-top: 5px;
             user-select: none;
+            padding: 6px 10px;
+            background: var(--prim-light);
+            border-radius: 6px;
+            display: inline-block;
         }
 
         /* ==============================================
@@ -129,20 +155,26 @@
         .tabs {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 15px;
-            border-bottom: 1px solid var(--border);
+            margin-bottom: 18px;
+            border-bottom: 2px solid var(--border);
         }
         .tab {
-            padding: 10px 16px;
-            background: #eee;
+            padding: 12px 20px;
+            background: var(--prim-light);
             cursor: pointer;
-            margin-right: 4px;
-            border-radius: 4px 4px 0 0;
+            margin-right: 6px;
+            border-radius: 10px 10px 0 0;
             font-weight: bold;
+            color: var(--text-dark);
+            transition: all 0.2s ease;
+        }
+        .tab:hover {
+            background: var(--border);
         }
         .tab.active {
             background: var(--prim);
             color: #fff;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
         }
         .section { display: none; }
         .section.active { display: block; }
@@ -153,29 +185,66 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 12px;
+            border-radius: 8px;
+            overflow: hidden;
         }
         th, td {
-            padding: 9px 10px;
+            padding: 11px 14px;
             text-align: left;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
         }
-        th { background: #f0f0f0; }
+        th {
+            background: var(--prim);
+            color: #fff;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: var(--prim-light);
+        }
 
         .alert {
-            padding: 12px;
-            border-radius: 5px;
-            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 12px 0;
+            border-left: 5px solid transparent;
         }
-        .alert.warn  { background: #fff8e1; color: #8a6d00; }
-        .alert.danger { background: #ffebee; color: #c62828; }
-        .alert.success { background: #e8f5e9; color: #2e7d32; }
-        .alert.info  { background: #e3f2fd; color: #1565c0; }
+        .alert.warn  {
+            background: #FFF8E1;
+            color: #856404;
+            border-left-color: #FFC107;
+        }
+        .alert.danger {
+            background: #FFEBEE;
+            color: #C62828;
+            border-left-color: #F44336;
+        }
+        .alert.success {
+            background: #E8F5E9;
+            color: #2E7D32;
+            border-left-color: #4CAF50;
+        }
+        .alert.info  {
+            background: #E3F2FD;
+            color: #1565C0;
+            border-left-color: #2196F3;
+        }
 
         .pending  { color: var(--warn); font-weight: bold; }
-        .approved { color: var(--sec); font-weight: bold; }
+        .approved { color: var(--prim); font-weight: bold; }
         .rejected { color: var(--danger); font-weight: bold; }
+
+        /* ==============================================
+           PAMAGAT NG LOGIN — MAY ICON AT ESTILO
+           ============================================== */
+        #loginSection h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+        }
     </style>
 </head>
 <body>
@@ -194,7 +263,7 @@
 
     <!-- BAHAGI NG PAGPASOK -->
     <div id="loginSection" class="card section active">
-        <h2>🔐 Pagpasok — Fortis POS</h2>
+        <h2>🌿 Pagpasok — Fortis POS</h2>
         <div>
             <label>Tungkulin:</label>
             <select id="loginRole">
@@ -216,18 +285,18 @@
             <label>Password:</label>
             <input type="password" id="loginPass" placeholder="Ipasok ang password" oninput="updatePasswordMask(this.value)">
             <div class="password-mask" id="passMask">****</div>
-            <small style="color:#777;">Walang pahiwatig sa password — manatiling lihim</small>
+            <small style="color:#666; margin-top:6px; display:block;">🔒 Walang pahiwatig sa password — manatiling lihim</small>
         </div>
 
         <br>
-        <button class="success" onclick="login()">➡️ Pumasok</button>
+        <button class="success" onclick="login()">➡️ Pumasok sa Sistema</button>
     </div>
 
     <!-- BAHAGI: PAGBABAGO NG PASSWORD (UNANG PAGPASOK) -->
     <div id="forceChangePassSection" class="card section hidden">
         <h2>⚠️ Kailangan Baguhin ang Password</h2>
         <div class="alert warn">
-            Ito ang unang pagpasok mo o ginagamit pa ang karaniwang password.<br>
+            <strong>Paalala:</strong> Ito ang unang pagpasok mo o ginagamit pa ang karaniwang password.<br>
             Magtakda ng bagong password bago makapasok sa sistema.
         </div>
         <div>
@@ -252,7 +321,9 @@
             <strong>Ang serbisyo ay nag-expire na.</strong><br>
             Makipag-ugnayan sa <strong>Service Provider</strong> upang ma-renew at magamit muli ang sistema.
         </div>
-        <p>Plano ng Serbisyo: ₱199/Linggo · ₱325/2 Linggo · ₱579/Buwan</p>
+        <p style="margin-top:10px;"><strong>Plano ng Serbisyo:</strong><br>
+        ✅ ₱199 / Linggo &nbsp;|&nbsp; ✅ ₱325 / 2 Linggo &nbsp;|&nbsp; ✅ ₱579 / Buwan</p>
+        <br>
         <button class="danger" onclick="location.reload()">🔄 Subukan Muli</button>
     </div>
 
@@ -265,60 +336,6 @@
 </div>
 
 <!-- ==============================================
-     PANGUNAHING KODIGO NG JAVASCRIPT
-     ============================================== -->
-<script>
-    // ==============================================
-    // PATAKARAN SA PAGTAGO NG PASSWORD
-    // ==============================================
-    function updatePasswordMask(val) {
-        document.getElementById('passMask').textContent = val.replace(/./g, '*');
-    }
-    function updateMask1(val) {
-        document.getElementById('mask1').textContent = val.replace(/./g, '*');
-    }
-    function updateMask2(val) {
-        document.getElementById('mask2').textContent = val.replace(/./g, '*');
-    }
-
-    // ==============================================
-    // KATAYUAN NG KONEKSYON — AWTOMATIKONG PAGBABAGO
-    // ==============================================
-    function updateConnectionStatus() {
-        const bar = document.getElementById('statusBar');
-        if (navigator.onLine) {
-            bar.className = 'status-bar status-online';
-            bar.textContent = '✅ ONLINE — Naka-konekta at Naka-sync';
-        } else {
-            bar.className = 'status-bar status-offline';
-            bar.textContent = '🔌 OFFLINE — Ang datos ay ise-sync kapag may internet na';
-        }
-    }
-    window.addEventListener('online', updateConnectionStatus);
-    window.addEventListener('offline', updateConnectionStatus);
-    updateConnectionStatus(); // Suriin agad sa pagbukas
-
-    // ==============================================
-    // MGA PANGUNAHING TAKDANG HALAGA (IHAHABOL SA SUSUNOD)
-    // ==============================================
-    const DEFAULT_PASSWORDS = {
-        admin: '8888',
-        sp: '19970407chan'
-    };
-
-    // DITO IDADAGDAG ANG LOGIN, SERBISYO, AT IBA PA SA SUSUNOD...
-    function login() {
-        alert('✅ Ang estruktura ay handa na!\n\nIto ang Hakbang 1 — dadagdagan natin sa susunod.');
-    }
-    function logout() {
-        document.getElementById('loginSection').classList.add('active');
-        document.getElementById('forceChangePassSection').classList.remove('active');
-    }
-    function saveNewPassword() {
-        alert('✅ Handa na ang pagbabago ng password!\n\nDadagdagan natin ang ganap na kodigo sa Hakbang 2.');
-    }
-</script>
-    <!-- ==============================================
      PANGUNAHING KODIGO NG JAVASCRIPT — HAKBANG 2
      ============================================== -->
 <script>
@@ -371,7 +388,6 @@
     }
     function updateMask1(val) { updatePasswordMask(val, 'mask1'); }
     function updateMask2(val) { updatePasswordMask(val, 'mask2'); }
-    function updateLoginMask(val) { updatePasswordMask(val, 'passMask'); }
 
     // ==============================================
     // KATAYUAN NG KONEKSYON
@@ -418,11 +434,6 @@
         if (!systemData.serviceExpiry) return true; // 7 araw na libreng simula
         return new Date() < new Date(systemData.serviceExpiry);
     }
-    function daysRemaining() {
-        if (!systemData.serviceExpiry) return 7;
-        const ms = new Date(systemData.serviceExpiry) - new Date();
-        return Math.ceil(ms / (1000 * 60 * 60 * 24));
-    }
 
     // ==============================================
     // PAGPASOK SA SISTEMA
@@ -444,27 +455,36 @@
         if (role === 'cashier') {
             if (!storeId) { alert('Piliin muna ang tindahan!'); return; }
             const cashier = systemData.cashiers.find(c => c.password === pass);
-            if (!cashier) { alert('Maling Password!'); return; }
+            if (!cashier) { alert('❌ Maling Password!'); return; }
             systemData.currentUser = { role: 'cashier', name: cashier.name, storeId };
+            saveData();
             proceedToMain();
             return;
         }
 
         // Admin / SP — suriin ang default na password
         const defPass = DEFAULT_PASSWORDS[role];
-        if (pass !== defPass) {
-            // Kung hindi default, suriin kung may binago
-            if (role === 'admin' && systemData.adminPassword && pass !== systemData.adminPassword) {
-                alert('Maling Password!'); return;
-            }
-            if (role === 'sp' && systemData.spPassword && pass !== systemData.spPassword) {
-                alert('Maling Password!'); return;
-            }
+        let isCorrect = false;
+
+        if (pass === defPass) {
+            isCorrect = true;
+        } else if (role === 'admin' && systemData.adminPassword && pass === systemData.adminPassword) {
+            isCorrect = true;
+        } else if (role === 'sp' && systemData.spPassword && pass === systemData.spPassword) {
+            isCorrect = true;
+        }
+
+        if (!isCorrect) {
+            alert('❌ Maling Password!');
+            return;
         }
 
         // Kung default pa — PILITIN BAGUHIN
         if (pass === defPass && !systemData.passwordChanged[role]) {
-            systemData.currentUser = { role, name: role === 'admin' ? 'Admin' : 'Service Provider' };
+            systemData.currentUser = {
+                role,
+                name: role === 'admin' ? 'Admin / May-ari' : 'Service Provider'
+            };
             saveData();
             showSection('forceChangePassSection');
             return;
@@ -487,11 +507,11 @@
         const p2 = document.getElementById('newPass2').value;
 
         if (p1.length < 6) {
-            alert('Ang password ay dapat hindi bababa sa 6 na letra!');
+            alert('❌ Ang password ay dapat hindi bababa sa 6 na letra!');
             return;
         }
         if (p1 !== p2) {
-            alert('Hindi pareho ang dalawang password!');
+            alert('❌ Hindi pareho ang dalawang password!');
             return;
         }
 
@@ -523,6 +543,7 @@
     // PAGPASOK SA PANGUNAHING LUGAR
     // ==============================================
     function proceedToMain() {
+        // Burahin ang password sa patlang — WALANG NAITITIP
         document.getElementById('loginPass').value = '';
         document.getElementById('passMask').textContent = '****';
         document.getElementById('newPass1').value = '';
@@ -561,9 +582,10 @@
     window.onload = function() {
         loadData();
         updateConnectionStatus();
+        document.getElementById('loginRole').addEventListener('change', toggleStoreSelect);
 
         // Itakda ang 7 araw na libreng simula kung wala pa
-        if (!systemData.serviceExpiry && systemData.serviceExpiry !== 0) {
+        if (!systemData.serviceExpiry) {
             const expiry = new Date();
             expiry.setDate(expiry.getDate() + 7);
             systemData.serviceExpiry = expiry.toISOString();
