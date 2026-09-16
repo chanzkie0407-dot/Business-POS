@@ -76,12 +76,12 @@
     <select id="login-role">
       <option value="">-- Select Role --</option>
       <option value="admin">Admin / Owner</option>
-      <option value="cashier">Cashier</option>
       <option value="sp">Service Provider</option>
+      <option value="cashier">Cashier</option>
     </select>
   </div>
-  <div class="input-group">
-    <label>Username</label>
+  <div class="input-group" id="username-row">
+    <label id="user-label">Username</label>
     <input type="text" id="inp-user" placeholder="Username" autocomplete="off">
   </div>
   <div class="input-group">
@@ -559,8 +559,15 @@ function doLogout() {
   sessionStorage.removeItem('fu');
   // Clear all password fields
   document.querySelectorAll('input[type="password"]').forEach(i => i.value = '');
-  // Clear login fields too
-  ['inp-user','inp-pass','login-role'].forEach(id=>{ const el=document.getElementById(id); if(el)el.value=''; });
+  // Clear login fields — reset username field state
+  const roleSel = document.getElementById('login-role');
+  const userInp = document.getElementById('inp-user');
+  if(roleSel) roleSel.value = '';
+  if(userInp) {
+    userInp.value = '';
+    userInp.disabled = false;
+    document.getElementById('username-row').querySelector('label').textContent = 'Username';
+  }
   location.reload();
 }
 // ---------- RENDER UI HELPERS ----------
@@ -1385,13 +1392,29 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// --- LOGIN HANDLER ---
-document.getElementById('btn-login')?.addEventListener('click', async () => {
-  const role = document.getElementById('login-role').value;
-  const un = document.getElementById('inp-user').value.trim();
-  const pw = document.getElementById('inp-pass').value.trim();
-  if (!role || !un || !pw) return alert('Fill all login fields');
-  await doLogin(role, un, pw);
+// --- Auto-set username based on role ---
+document.getElementById('login-role')?.addEventListener('change', e => {
+  const role = e.target.value;
+  const userRow = document.getElementById('username-row');
+  const userInp = document.getElementById('inp-user');
+  
+  if (role === 'admin') {
+    userInp.value = 'admin';
+    userInp.disabled = true;
+    userRow.querySelector('label').textContent = 'Username (Fixed)';
+  } else if (role === 'sp') {
+    userInp.value = 'sp';
+    userInp.disabled = true;
+    userRow.querySelector('label').textContent = 'Username (Fixed)';
+  } else if (role === 'cashier') {
+    userInp.value = '';
+    userInp.disabled = false;
+    userRow.querySelector('label').textContent = 'Username';
+  } else {
+    userInp.value = '';
+    userInp.disabled = false;
+    userRow.querySelector('label').textContent = 'Username';
+  }
 });
 
 // --- OFFLINE STATUS SIMULATION ---
