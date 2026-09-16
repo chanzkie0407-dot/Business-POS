@@ -138,7 +138,6 @@
         Cashier accounts created by Admin only.
     </p>
 </div>
-
 <!-- PASSWORD CHANGE SECTION -->
 <div id="forcePassChange" class="card section hidden">
     <h2>⚠️ Change Default Password</h2>
@@ -150,7 +149,6 @@
     <button onclick="saveNewPassword()">✅ Save & Continue</button>
     <button class="danger" onclick="logout()">❌ Cancel</button>
 </div>
-
 <!-- ADMIN DASHBOARD -->
 <div id="adminDashboard" class="card section hidden">
     <h2>🔐 Admin / Owner Dashboard</h2>
@@ -165,7 +163,6 @@
         <div class="tab" onclick="showAdminTab('adminCountRequests')">🔢 Stock Count</div>
         <div class="tab" onclick="showAdminTab('adminChat')">💬 Chat</div>
     </div>
-
     <div id="adminStores" class="section active">
         <h3>Add New Store (1–20 stores)</h3>
         <div class="card" style="background: var(--prim-light);">
@@ -180,7 +177,6 @@
         <h4>Store List (<span id="storeCount">0</span>/20)</h4>
         <div id="storeList"></div>
     </div>
-
     <div id="adminCashiers" class="section hidden">
         <h3>Add Cashier (1–20 per store)</h3>
         <div class="card" style="background: var(--prim-light);">
@@ -197,7 +193,6 @@
         <h4>Cashier List</h4>
         <div id="cashierList"></div>
     </div>
-
     <div id="adminSalesOverview" class="section hidden">
         <h3>Sales Overview</h3>
         <label>Select Store:</label>
@@ -208,7 +203,6 @@
         <input type="date" id="salesDateTo" onchange="renderSalesOverview()">
         <div id="salesOverviewResult" class="card" style="margin-top:10px;"></div>
     </div>
-
     <div id="adminProducts" class="section hidden">
         <h3>Add Product</h3>
         <div class="card" style="background: var(--prim-light);">
@@ -227,19 +221,16 @@
         <h4>Product List</h4>
         <div id="productList"></div>
     </div>
-
     <div id="adminStocks" class="section hidden">
         <h3>Stocks Overview</h3>
         <label>Select Store:</label>
         <select id="stockStoreFilter" onchange="renderStocksOverview()"></select>
         <div id="stocksOverviewResult"></div>
     </div>
-
     <div id="adminVoidRequests" class="section hidden">
         <h3>Void / Refund Requests</h3>
         <div id="voidReqList"></div>
     </div>
-
     <div id="adminTransSummary" class="section hidden">
         <h3>Transaction Summary</h3>
         <label>Select Store:</label>
@@ -250,7 +241,6 @@
         <input type="date" id="transDateTo" onchange="renderTransSummary()">
         <div id="transSummaryResult"></div>
     </div>
-
     <div id="adminCountRequests" class="section hidden">
         <h3>Request Actual Stock Count</h3>
         <label>Select Store:</label>
@@ -261,7 +251,6 @@
         <h4>Count Responses</h4>
         <div id="countRespList"></div>
     </div>
-
     <div id="adminChat" class="section hidden">
         <h3>Chat Module</h3>
         <label>Send To:</label>
@@ -272,7 +261,6 @@
     </div>
     <br><button class="danger" onclick="logout()">🚪 Logout</button>
 </div>
-
 <!-- SP DASHBOARD -->
 <div id="spDashboard" class="card section hidden">
     <h2>🛠️ Service Provider Dashboard</h2>
@@ -282,7 +270,6 @@
         <div class="tab" onclick="showSPTab('spCashierLog')">📝 Cashier Password Log</div>
         <div class="tab" onclick="showSPTab('spChat')">💬 Chat with Admin</div>
     </div>
-
     <div id="spRenew" class="section active">
         <h3>Service Subscription</h3>
         <div class="alert success">✅ 7-Day Free Trial Active — Activated on first login</div>
@@ -296,7 +283,6 @@
         <br><br>
         <button onclick="renewService()">✅ Renew Now</button>
     </div>
-
     <div id="spAdminPass" class="section hidden">
         <h3>Change Admin Password</h3>
         <p style="color: #666; font-size: 13px; margin-bottom: 10px;">
@@ -312,12 +298,10 @@
         <input type="password" id="spNewSelfPass" autocomplete="new-password" required>
         <button class="info" onclick="spChangeOwnPass()">✅ Update SP Password</button>
     </div>
-
     <div id="spCashierLog" class="section hidden">
         <h3>Cashier Password Change Log</h3>
         <div id="cashierPassLogList"></div>
     </div>
-
     <div id="spChat" class="section hidden">
         <h3>Chat with Admin</h3>
         <div id="spChatDisplay" class="chat-box"></div>
@@ -326,7 +310,6 @@
     </div>
     <br><button class="danger" onclick="logout()">🚪 Logout</button>
 </div>
-
 <!-- CASHIER POS -->
 <div id="cashierPOS" class="section hidden">
     <div id="startShiftCard" class="card">
@@ -347,7 +330,6 @@
             <div class="tab" onclick="showPosTab('posStockCount')">🔢 Stock Count</div>
             <div class="tab danger" onclick="initiateEndShift()">🚪 End Shift / Logout</div>
         </div>
-
         <div id="posSales" class="section active">
             <div class="grid-pos">
                 <div>
@@ -394,12 +376,10 @@
                 </div>
             </div>
         </div>
-
         <div id="posHistory" class="section">
             <h3>Recent Transactions (Last 5)</h3>
             <div id="recentTransList"></div>
         </div>
-
         <div id="posVoid" class="section">
             <h3>Request Void / Cancel</h3>
             <label>Select Wrong Transaction:</label>
@@ -412,7 +392,6 @@
             <h4>My Requests</h4>
             <div id="myVoidRequests"></div>
         </div>
-
         <div id="posStockOut" class="section">
             <h3>Stock Out</h3>
             <label>Product:</label>
@@ -425,7 +404,6 @@
             <h4>Log</h4>
             <div id="stockOutLog"></div>
         </div>
-
         <div id="posCashIn" class="section">
             <h3>Cash In</h3>
             <label>Amount:</label>
@@ -434,7 +412,6 @@
             <textarea id="cashInReason" placeholder="Source / Explanation" required></textarea>
             <button onclick="recordCashIn()">✅ Record</button>
         </div>
-
         <div id="posCashOut" class="section">
             <h3>Cash Out</h3>
             <label>Amount:</label>
@@ -443,7 +420,6 @@
             <textarea id="cashOutReason" placeholder="Purpose / Explanation" required></textarea>
             <button onclick="recordCashOut()">✅ Record</button>
         </div>
-
         <div id="posChat" class="section">
             <h3>Send Message</h3>
             <label>Send To:</label>
@@ -455,19 +431,21 @@
             <textarea id="chatInputBox" placeholder="Type message..." required></textarea>
             <button onclick="sendChatMessage()">➡️ Send</button>
         </div>
-
         <div id="posStockCount" class="section">
             <h3>Stock Count Requests</h3>
             <div id="countRequestInbox"></div>
             <div id="countResponseArea" class="hidden">
                 <h4 id="countTargetName"></h4>
+                <label>Product:</label>
+                <input type="text" id="countProdNameDisplay" readonly style="background:#f0f0f0;">
+                <label>System Quantity:</label>
+                <input type="number" id="countSysQtyDisplay" readonly style="background:#f0f0f0;">
                 <label>Actual Counted Quantity:</label>
                 <input type="number" id="actualCountInput" min="0" placeholder="Enter actual count" required>
                 <button onclick="submitCountResponse()">✅ Submit Count</button>
             </div>
         </div>
     </div>
-
     <div id="endShiftModal" class="modal hidden">
         <h3>💰 End Shift — Count Cash</h3>
         <div class="denom-grid">
@@ -482,7 +460,6 @@
         <button onclick="confirmEndShift()">✅ Confirm & Logout</button>
         <button class="warning" onclick="closeEndShiftModal()">❌ Cancel</button>
     </div>
-
     <div id="lockModal" class="modal hidden">
         <h3>🔐 POS Locked — Enter Password</h3>
         <input type="password" id="unlockPassword" placeholder="Your password" autocomplete="off">
@@ -490,7 +467,6 @@
     </div>
 </div>
 </div>
-
 <script>
 // ========== DEFAULT CREDENTIALS ==========
 const DEFAULTS = { admin: '8888', sp: '19970407chan' };
@@ -503,7 +479,6 @@ const LOCK_TIMEOUT = 10 * 60 * 1000;
 const MAX_STORES = 20;
 const MAX_CASHIERS_PER_STORE = 20;
 const MAX_RECENT_TRANS = 5;
-
 // ========== DATA STORE ==========
 let data = {
     currentUser: null, serviceExpiry: null,
@@ -517,7 +492,7 @@ let data = {
 let cart = [];
 let lockTimer = null;
 let activeCountRequestId = null;
-
+let activeProductIndex = null;
 // ========== STORAGE HELPERS ==========
 function saveData() { localStorage.setItem('fortisPOS', JSON.stringify(data)); }
 function loadData() {
@@ -539,7 +514,6 @@ function getTimeStamp() { return new Date().toLocaleString('en-PH'); }
 function generateStoreCode() { return `#${String(data.stores.length + 1).padStart(3, '0')}`; }
 function generateBarcode() { return 'F' + Date.now().toString().slice(-10); }
 function generateTransId() { return 'TX' + Date.now(); }
-
 // ========== CONNECTION STATUS ==========
 function updateConnectionStatus() {
     const bar = document.getElementById('statusBar');
@@ -553,7 +527,6 @@ function updateConnectionStatus() {
 }
 window.addEventListener('online', updateConnectionStatus);
 window.addEventListener('offline', updateConnectionStatus);
-
 // ========== INACTIVITY LOCK ==========
 function resetActivityTimer() {
     data.lastActivity = Date.now();
@@ -566,7 +539,6 @@ function resetActivityTimer() {
 }
 document.addEventListener('mousemove', resetActivityTimer);
 document.addEventListener('keydown', resetActivityTimer);
-
 // ========== SECTION SWITCHING ==========
 function hideAllSections() {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -575,7 +547,6 @@ function showSection(sectionId) {
     hideAllSections();
     document.getElementById(sectionId).classList.add('active');
 }
-
 // ========== DROPDOWN HELPERS ==========
 function toggleStoreSelect() {
     const role = document.getElementById('loginRole').value;
@@ -591,7 +562,6 @@ function loadStoreDropdown(selectId, addEmpty = true) {
         sel.innerHTML += `<option value="${s.id}">${s.code} — ${s.name}</option>`;
     });
 }
-
 // ========== LOGIN ==========
 function login() {
     loadData();
@@ -599,11 +569,9 @@ function login() {
     const pass = document.getElementById('loginPass').value.trim();
     const storeSel = document.getElementById('loginStore');
     const storeId = storeSel?.value ? Number(storeSel.value) : null;
-
     if (data.serviceExpiry && new Date(data.serviceExpiry) < new Date() && role !== 'sp') {
         return alert('⏰ Subscription expired. Please contact Service Provider to renew.');
     }
-
     if (role === 'cashier') {
         if (!storeId) return alert('Please select a store first.');
         const cashier = data.cashiers.find(c => c.password === pass && c.storeId === storeId);
@@ -618,24 +586,20 @@ function login() {
         resetActivityTimer();
         return;
     }
-
     let valid = pass === DEFAULTS[role];
     if (role === 'admin' && !valid && data.adminPassword) valid = pass === data.adminPassword;
     if (role === 'sp' && !valid && data.spPassword) valid = pass === data.spPassword;
     if (!valid) return alert('❌ Incorrect password.');
-
     if (pass === DEFAULTS[role] && !data.passwordChanged[role]) {
         data.currentUser = { role, name: role === 'admin' ? 'Admin / Owner' : 'Service Provider' };
         saveData();
         showSection('forcePassChange');
         return;
     }
-
     data.currentUser = { role, name: role === 'admin' ? 'Admin / Owner' : 'Service Provider' };
     saveData();
     role === 'admin' ? showAdminDashboard() : showSPDashboard();
 }
-
 // ========== PASSWORD CHANGE ==========
 function saveNewPassword() {
     const p1 = document.getElementById('newPass1').value;
@@ -649,16 +613,15 @@ function saveNewPassword() {
     alert('✅ Password updated successfully!');
     data.currentUser.role === 'admin' ? showAdminDashboard() : showSPDashboard();
 }
-
 // ========== LOGOUT ==========
 function logout() {
     document.querySelectorAll('input[type="password"]').forEach(inp => inp.value = '');
     data.currentUser = null; data.shift = null;
+    activeCountRequestId = null;
     if (lockTimer) clearTimeout(lockTimer);
     saveData();
     showSection('loginSection');
 }
-
 // ========== ADMIN DASHBOARD ==========
 function showAdminDashboard() {
     showSection('adminDashboard');
@@ -676,7 +639,6 @@ function showAdminTab(tabId) {
     if (tabId === 'adminChat') loadAdminChat();
     if (tabId === 'adminCountRequests') loadCountProductChecklist();
 }
-
 // --- Stores ---
 function addStore() {
     if (data.stores.length >= MAX_STORES) return alert(`❌ Maximum ${MAX_STORES} stores allowed.`);
@@ -701,7 +663,6 @@ function renderStoreList() {
             ${s.location ? `<br><small>📍 ${s.location}</small>` : ''}
         </div>`).join('');
 }
-
 // --- Cashiers ---
 function createCashier() {
     const fn = document.getElementById('cFirstName').value.trim();
@@ -751,7 +712,6 @@ function deleteCashier(id) {
     data.cashiers = data.cashiers.filter(c => c.id !== id);
     saveData(); renderCashierList(); populateAdminChatTargets();
 }
-
 // --- Sales Overview ---
 function renderSalesOverview() {
     const storeId = Number(document.getElementById('salesStoreFilter').value);
@@ -776,7 +736,6 @@ function renderSalesOverview() {
         <p class="alert info"><strong>🟢 GCash Sales:</strong> ₱${totalGcash.toFixed(2)}</p>
         <p class="alert" style="background:#E8F5E9;"><strong>💰 GRAND TOTAL:</strong> ₱${grandTotal.toFixed(2)}</p>`;
 }
-
 // --- Products ---
 function addProduct() {
     const storeId = Number(document.getElementById('prodStore').value);
@@ -795,40 +754,43 @@ function addProduct() {
 }
 function renderProductList() {
     document.getElementById('productList').innerHTML = data.products.map(p => {
-        const store = data
-        store = data.stores.find(s => s.id === p.storeId);
+        const store = data.stores.find(s => s.id === p.storeId);
         return `
             <div class="card" style="padding: 10px;">
                 <strong>${p.name}</strong> — ₱${p.price.toFixed(2)}
                 <br>
-                <small>Store: ${store?.name || 'Unknown'} | Stock: ${p.stock} | Barcode: ${p.barcode}</small>
-                <button class="sm" style="margin-left: 8px;" onclick="editProduct(${p.id})">✏️ Edit</button>
-                <button class="danger sm" style="float:right;" onclick="deleteProduct(${p.id})">🗑️ Delete</button>
+                <small>Store: ${store?.name || 'Unknown'} | Stock: ${p.stock} | Bar
+                code: ${p.barcode}</small>
+                <button class="sm" onclick="editProduct(${p.id})">✏️ Edit</button>
+                <button class="danger sm" onclick="deleteProduct(${p.id})">🗑️ Delete</button>
             </div>`;
     }).join('') || '<p>No products added yet.</p>';
 }
+
 function editProduct(id) {
     const prod = data.products.find(p => p.id === id);
     if (!prod) return;
-    const newName = prompt('Product Name:', prod.name);
+    const newName = prompt('Enter new product name:', prod.name);
     if (newName === null) return;
-    const newPrice = prompt('Price:', prod.price);
+    const newPrice = prompt('Enter new price:', prod.price);
     if (newPrice === null) return;
-    const newStock = prompt('Stock Quantity:', prod.stock);
+    const newStock = prompt('Enter new stock quantity:', prod.stock);
     if (newStock === null) return;
-    const newBarcode = prompt('Barcode/SKU:', prod.barcode);
+    const newBarcode = prompt('Enter new barcode/SKU:', prod.barcode);
     if (newBarcode === null) return;
     
     prod.name = newName.trim() || prod.name;
     prod.price = parseFloat(newPrice) || prod.price;
-    prod.stock = parseInt(newStock) || 0;
+    prod.stock = parseInt(newStock) || prod.stock;
     prod.barcode = newBarcode.trim() || prod.barcode;
+    
     saveData();
     alert('✅ Product updated!');
     renderProductList();
 }
+
 function deleteProduct(id) {
-    if (!confirm('⚠️ Delete this product? Cannot undo.')) return;
+    if (!confirm('⚠️ Delete this product? This cannot be undone.')) return;
     data.products = data.products.filter(p => p.id !== id);
     saveData();
     renderProductList();
@@ -841,50 +803,64 @@ function renderStocksOverview() {
         document.getElementById('stocksOverviewResult').innerHTML = '<p>Select a store to view stocks.</p>';
         return;
     }
-    const storeProds = data.products.filter(p => p.storeId === storeId);
-    document.getElementById('stocksOverviewResult').innerHTML = storeProds.map(p => `
-        <div class="card" style="padding: 8px; margin: 4px 0;">
-            ${p.name} — Stock: 
-            <strong>${p.stock}</strong> 
-            ${p.stock <= 5 ? '<span class="badge badge-warn">Low Stock</span>' : ''}
-            ${p.stock === 0 ? '<span class="badge badge-danger">Out of Stock</span>' : ''}
-            <br><small>Price: ₱${p.price.toFixed(2)} | Code: ${p.barcode}</small>
+    const prods = data.products.filter(p => p.storeId === storeId);
+    document.getElementById('stocksOverviewResult').innerHTML = prods.map(p => `
+        <div class="card" style="padding: 10px;">
+            <strong>${p.name}</strong> — Stock: 
+            <span class="${p.stock <= 5 ? 'badge badge-danger' : p.stock <= 15 ? 'badge badge-warn' : 'badge badge-success'}">
+                ${p.stock}
+            </span>
+            | ₱${p.price.toFixed(2)} | Code: ${p.barcode}
         </div>`).join('') || '<p>No products for this store.</p>';
 }
 
-// --- Void Requests (Admin) ---
+// --- Void Requests ---
 function renderVoidRequests() {
-    document.getElementById('voidReqList').innerHTML = data.voidRequests.map(r => {
+    const container = document.getElementById('voidReqList');
+    if (!data.voidRequests.length) {
+        container.innerHTML = '<p>No void/refund requests yet.</p>';
+        return;
+    }
+    container.innerHTML = data.voidRequests.map(r => {
         const store = data.stores.find(s => s.id === r.storeId);
         return `
-            <div class="card" style="padding: 12px;">
-                <h4>❌ Void Request — ${r.status.toUpperCase()}</h4>
-                <p><strong>Store:</strong> ${store?.name || 'Unknown'}</p>
-                <p><strong>Transaction:</strong> ${r.wrongTransId}</p>
-                ${r.correctTransId ? `<p><strong>Correct Trans:</strong> ${r.correctTransId}</p>` : ''}
-                <p><strong>Reason:</strong> ${r.reason}</p>
-                <p><strong>By:</strong> ${r.cashierName} — ${r.time}</p>
-                ${r.status === 'pending' ? `
-                    <button class="success sm" onclick="approveVoid('${r.id}')">✅ Approve</button>
-                    <button class="danger sm" onclick="rejectVoid('${r.id}')">❌ Reject</button>
-                ` : `<p class="badge ${r.status === 'approved' ? 'badge-success' : 'badge-danger'}">${r.status === 'approved' ? '✅ Approved' : '❌ Rejected'}</p>`}
-            </div>`;
-    }).join('') || '<p>No void requests yet.</p>';
+        <div class="card" style="padding: 12px;">
+            <p><strong>Transaction:</strong> ${r.wrongTransId}</p>
+            <p><strong>Store:</strong> ${store?.name || 'Unknown'}</p>
+            <p><strong>Requested by:</strong> ${r.cashierName}</p>
+            <p><strong>Reason:</strong> ${r.reason}</p>
+            <p><strong>Status:</strong> 
+                <span class="badge ${r.status === 'pending' ? 'badge-warn' : r.status === 'approved' ? 'badge-success' : 'badge-danger'}">
+                    ${r.status.toUpperCase()}
+                </span>
+            </p>
+            ${r.status === 'pending' ? `
+                <button class="sm" onclick="approveVoid('${r.wrongTransId}')">✅ Approve</button>
+                <button class="danger sm" onclick="rejectVoid('${r.wrongTransId}')">❌ Reject</button>
+            ` : `<small>Handled: ${r.handledAt || '—'}</small>`}
+        </div>`;
+    }).join('');
 }
-function approveVoid(reqId) {
-    const req = data.voidRequests.find(r => r.id === reqId);
+
+function approveVoid(transId) {
+    const req = data.voidRequests.find(r => r.wrongTransId === transId);
     if (!req) return;
     req.status = 'approved';
+    req.handledAt = getTimeStamp();
+    req.handledBy = data.currentUser.name;
     saveData();
-    alert('✅ Void Approved — Transaction will be excluded from sales reports.');
+    alert('✅ Void approved — transaction marked as voided.');
     renderVoidRequests();
 }
-function rejectVoid(reqId) {
-    const req = data.voidRequests.find(r => r.id === reqId);
+
+function rejectVoid(transId) {
+    const req = data.voidRequests.find(r => r.wrongTransId === transId);
     if (!req) return;
     req.status = 'rejected';
+    req.handledAt = getTimeStamp();
+    req.handledBy = data.currentUser.name;
     saveData();
-    alert('❌ Void Rejected.');
+    alert('❌ Void rejected.');
     renderVoidRequests();
 }
 
@@ -902,21 +878,14 @@ function renderTransSummary() {
         t.storeId === storeId && t.date >= from && t.date <= to && !voidedIds.includes(t.id)
     );
     
-    let html = `<h4>📋 Transaction Summary</h4>
-        <p>From: ${from} To: ${to} | Total: ${trans.length} transactions</p>
-        <table><tr><th>Time</th><th>Trans #</th><th>Items</th><th>Total</th><th>Method</th><th>Cashier</th></tr>`;
-    
+    let html = `<h4>📋 Transactions (${from} to ${to})</h4><table><tr><th>ID</th><th>Time</th><th>Items</th><th>Total</th><th>Method</th><th>Cashier</th></tr>`;
     trans.forEach(t => {
         html += `<tr>
-            <td>${t.time}</td>
-            <td>${t.id}</td>
-            <td>${t.items.length}</td>
-            <td>₱${t.total.toFixed(2)}</td>
-            <td>${t.method === 'cash' ? '💵 Cash' : t.method === 'gcash' ? '🟢 GCash' : '💵+🟢 Split'}</td>
-            <td>${t.cashierName}</td>
+            <td>${t.id}</td><td>${t.time}</td><td>${t.items.length}</td>
+            <td>₱${t.total.toFixed(2)}</td><td>${t.method}</td><td>${t.cashierName}</td>
         </tr>`;
     });
-    html += '</table>';
+    html += `</table><p style="margin-top:8px;"><strong>Total Sales:</strong> ₱${trans.reduce((s,t)=>s+t.total,0).toFixed(2)}</p>`;
     document.getElementById('transSummaryResult').innerHTML = html;
 }
 
@@ -930,37 +899,56 @@ function loadCountProductChecklist() {
     const prods = data.products.filter(p => p.storeId === storeId);
     document.getElementById('countProductChecklist').innerHTML = prods.map(p => `
         <label class="checklist-item">
-            <input type="checkbox" class="count-prod-check" value="${p.id}" checked>
+            <input type="checkbox" class="count-prod-check" value="${p.id}">
             ${p.name} — System Qty: ${p.stock}
         </label>`).join('');
 }
+
 function sendCountRequest() {
     const storeId = Number(document.getElementById('countReqStore').value);
     const selected = Array.from(document.querySelectorAll('.count-prod-check:checked')).map(c => Number(c.value));
     if (!storeId || !selected.length) return alert('Select store and at least one product.');
     
-    data.countRequests.push({
-        id: 'CR' + Date.now(),
-        storeId,
-        productIds: selected,
-        requestedBy: data.currentUser.name,
-        requestedAt: getTimeStamp(),
-        status: 'pending',
-        responses: []
+    selected.forEach(prodId => {
+        const prod = data.products.find(p => p.id === prodId);
+        data.countRequests.push({
+            id: 'CR' + Date.now() + Math.random().toString(36).slice(2,6),
+            storeId,
+            productId: prodId,
+            productName: prod.name,
+            systemQty: prod.stock,
+            requestedAt: getTimeStamp(),
+            status: 'pending',
+            actualQty: null,
+            respondedAt: null
+        });
     });
     saveData();
-    alert('✅ Count request sent to store cashier.');
+    alert('✅ Count request(s) sent to cashier.');
+    loadCountProductChecklist();
 }
+
 function renderCountResponses() {
-    document.getElementById('countRespList').innerHTML = data.countRequests.map(r => {
+    const container = document.getElementById('countRespList');
+    if (!data.countRequests.length) {
+        container.innerHTML = '<p>No count responses yet.</p>';
+        return;
+    }
+    container.innerHTML = data.countRequests.map(r => {
         const store = data.stores.find(s => s.id === r.storeId);
         return `
-            <div class="card" style="padding: 10px;">
-                <strong>🔢 Count Request — ${r.id}</strong>
-                <br>Store: ${store?.name || 'Unknown'} | Status: ${r.status}
-                ${r.responses.length ? `<p>Responses submitted: ${r.responses.length}</p>` : '<p class="alert warn">Awaiting response...</p>'}
-            </div>`;
-    }).join('') || '<p>No count requests yet.</p>';
+        <div class="card" style="padding: 10px;">
+            <p><strong>Product:</strong> ${r.productName}</p>
+            <p><strong>Store:</strong> ${store?.name || 'Unknown'}</p>
+            <p>System: ${r.systemQty} | Actual: ${r.actualQty ?? '—'}</p>
+            <p><strong>Status:</strong> 
+                <span class="badge ${r.status === 'pending' ? 'badge-warn' : 'badge-success'}">
+                    ${r.status === 'pending' ? 'Awaiting Response' : 'Responded'}
+                </span>
+            </p>
+            ${r.status === 'responded' ? `<small>Responded: ${r.respondedAt}</small>` : ''}
+        </div>`;
+    }).join('');
 }
 
 // --- Admin Chat ---
@@ -969,14 +957,16 @@ function populateAdminChatTargets() {
     sel.innerHTML = '<option value="sp">🛠️ Service Provider</option>';
     data.cashiers.forEach(c => {
         const store = data.stores.find(s => s.id === c.storeId);
-        sel.innerHTML += `<option value="cashier-${c.id}">👤 ${c.firstName} ${c.lastName || ''} — ${store?.name || ''}</option>`;
+        sel.innerHTML += `<option value="cashier-${c.id}">👤 ${c.firstName} ${c.lastName || ''} — ${store?.name || 'Unknown'}</option>`;
     });
 }
+
 function loadAdminChat() {
     const target = document.getElementById('adminChatTarget').value;
     if (!target) return;
-    renderChatMessages('adminChatDisplay', 'admin', target);
+    renderChatMessages('admin', target, 'adminChatDisplay');
 }
+
 function adminSendMessage() {
     const target = document.getElementById('adminChatTarget').value;
     const msg = document.getElementById('adminChatMsg').value.trim();
@@ -985,7 +975,7 @@ function adminSendMessage() {
     data.chats.push({
         from: 'admin',
         to: target,
-        message: msg,
+        text: msg,
         time: getTimeStamp()
     });
     saveData();
@@ -993,51 +983,76 @@ function adminSendMessage() {
     loadAdminChat();
 }
 
+function renderChatMessages(sender, target, displayId) {
+    const msgs = data.chats.filter(m =>
+        (m.from === sender && m.to === target) ||
+        (m.from === target && m.to === sender)
+    ).sort((a,b) => new Date(a.time) - new Date(b.time));
+    
+    document.getElementById(displayId).innerHTML = msgs.map(m => `
+        <div class="${m.from === sender ? 'msg-me' : 'msg-other'}">
+            <small style="opacity:0.7;">${m.time}</small><br>
+            ${m.text}
+        </div>`).join('') || '<p style="color:#888;">No messages yet. Start the conversation!</p>';
+    
+    const box = document.getElementById(displayId);
+    box.scrollTop = box.scrollHeight;
+}
+
 // ========== SP DASHBOARD ==========
 function showSPDashboard() {
     showSection('spDashboard');
-    updateServiceStatus();
+    renderServiceStatus();
     renderCashierPassLog();
+    loadSPChat();
 }
+
 function showSPTab(tabId) {
     document.querySelectorAll('#spDashboard .section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('#spDashboard .tab').forEach(t => t.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     event.target.classList.add('active');
     if (tabId === 'spChat') loadSPChat();
+    if (tabId === 'spCashierLog') renderCashierPassLog();
 }
-function updateServiceStatus() {
-    const statusEl = document.getElementById('spServiceStatus');
+
+function renderServiceStatus() {
+    let expiry;
     if (!data.serviceExpiry) {
-        statusEl.innerHTML = '<p class="alert success">✅ Trial active — expires 7 days from first login</p>';
-        return;
+        expiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        data.serviceExpiry = expiry.toISOString();
+        saveData();
+    } else {
+        expiry = new Date(data.serviceExpiry);
     }
-    const expiry = new Date(data.serviceExpiry);
     const now = new Date();
     const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+    const isActive = expiry > now;
     
-    if (daysLeft <= 0) {
-        statusEl.innerHTML = '<p class="alert danger">❌ Subscription EXPIRED</p>';
-    } else if (daysLeft <= 3) {
-        statusEl.innerHTML = `<p class="alert warn">⚠️ ${daysLeft} day(s) remaining — Renew soon!</p>`;
-    } else {
-        statusEl.innerHTML = `<p class="alert success">✅ Active — ${daysLeft} day(s) remaining until ${expiry.toLocaleDateString()}</p>`;
-    }
+    document.getElementById('spServiceStatus').innerHTML = `
+        <p><strong>Expiry Date:</strong> ${expiry.toLocaleString('en-PH')}</p>
+        <p class="alert ${isActive ? 'success' : 'danger'}">
+            ${isActive ? `✅ Active — ${daysLeft} day(s) remaining` : '❌ EXPIRED — Service disabled'}
+        </p>`;
 }
+
 function renewService() {
     const plan = document.getElementById('planSelect').value;
-    const {days} = PLANS[plan];
-    const start = data.serviceExpiry && new Date(data.serviceExpiry) > new Date()
-        ? new Date(data.serviceExpiry)
-        : new Date();
+    if (!PLANS[plan]) return alert('Invalid plan.');
+    
+    const days = PLANS[plan].days;
+    const current = data.serviceExpiry ? new Date(data.serviceExpiry) : new Date();
+    const start = current > new Date() ? current : new Date();
     start.setDate(start.getDate() + days);
+    
     data.serviceExpiry = start.toISOString();
     saveData();
-    alert(`✅ Service renewed! Valid until ${start.toLocaleDateString()}`);
-    updateServiceStatus();
+    alert(`✅ Subscription renewed! ${days} days added. Expires: ${start.toLocaleString('en-PH')}`);
+    renderServiceStatus();
 }
+
 function spChangeAdminPass() {
-    const newPass = document.getElementById('spNewAdminPass').value;
+    const newPass = document.getElementById('spNewAdminPass').value.trim();
     if (newPass.length < 6) return alert('❌ Min 6 characters.');
     data.adminPassword = newPass;
     data.passwordChanged.admin = true;
@@ -1045,8 +1060,9 @@ function spChangeAdminPass() {
     alert('✅ Admin password updated.');
     document.getElementById('spNewAdminPass').value = '';
 }
+
 function spChangeOwnPass() {
-    const newPass = document.getElementById('spNewSelfPass').value;
+    const newPass = document.getElementById('spNewSelfPass').value.trim();
     if (newPass.length < 6) return alert('❌ Min 6 characters.');
     data.spPassword = newPass;
     data.passwordChanged.sp = true;
@@ -1054,44 +1070,31 @@ function spChangeOwnPass() {
     alert('✅ SP password updated.');
     document.getElementById('spNewSelfPass').value = '';
 }
+
 function renderCashierPassLog() {
-    document.getElementById('cashierPassLogList').innerHTML = data.cashierPassLog.map(l => `
-        <div class="card" style="padding: 8px;">
-            <strong>${l.cashierName}</strong> — ${l.time}
-            <br>Changed by: ${l.changedBy}
-            <br>Old: ${l.oldPass} → New: ${l.newPass}
-        </div>`).join('') || '<p>No password changes recorded.</p>';
+    document.getElementById('cashierPassLogList').innerHTML = data.cashierPassLog.length ?
+        data.cashierPassLog.map(l => `
+        <div class="card" style="padding: 8px; font-size:13px;">
+            <p><strong>${l.cashierName}</strong></p>
+            <p>Old: ${l.oldPass} → New: ${l.newPass}</p>
+            <p>Changed by: ${l.changedBy} — ${l.time}</p>
+        </div>`).join('') : '<p>No password changes recorded.</p>';
 }
+
 function loadSPChat() {
-    renderChatMessages('spChatDisplay', 'sp', 'admin');
+    renderChatMessages('sp', 'admin', 'spChatDisplay');
 }
+
 function spSendMessage() {
     const msg = document.getElementById('spChatMsg').value.trim();
     if (!msg) return alert('Type a message.');
+    
     data.chats.push({
-        from: 'sp',
-        to: 'admin',
-        message: msg,
-        time: getTimeStamp()
+        from: 'sp', to: 'admin', text: msg, time: getTimeStamp()
     });
     saveData();
     document.getElementById('spChatMsg').value = '';
     loadSPChat();
-}
-
-// ========== CHAT HELPER ==========
-function renderChatMessages(displayId, sender, target) {
-    const display = document.getElementById(displayId);
-    const msgs = data.chats.filter(m =>
-        (m.from === sender && m.to === target) ||
-        (m.from === target && m.to === sender)
-    );
-    display.innerHTML = msgs.map(m => `
-        <div class="${m.from === sender ? 'msg-me' : 'msg-other'}">
-            <small style="opacity:0.7;">${m.time}</small><br>
-            ${m.message}
-        </div>`).join('');
-    display.scrollTop = display.scrollHeight;
 }
 
 // ========== CASHIER POS ==========
@@ -1100,75 +1103,86 @@ function showCashierStartScreen() {
     if (data.shift) {
         document.getElementById('startShiftCard').classList.add('hidden');
         document.getElementById('posMain').classList.remove('hidden');
-        loadPOSStoreData();
+        loadPOSData();
     } else {
         document.getElementById('startShiftCard').classList.remove('hidden');
         document.getElementById('posMain').classList.add('hidden');
     }
 }
+
 function beginShift() {
-    const float = parseFloat(document.getElementById('openingFloat').value) || 0;
-    if (float < 0) return alert('Amount cannot be negative.');
+    const opening = parseFloat(document.getElementById('openingFloat').value);
+    if (isNaN(opening) || opening < 0) return alert('Enter valid opening amount.');
+    
     data.shift = {
-        storeId: data.currentUser.storeId,
-        cashierId: data.currentUser.id,
-        cashierName: data.currentUser.name,
-        openingFloat: float,
         startTime: getTimeStamp(),
-        openingDate: getToday()
+        openingFloat: opening,
+        cashIn: 0,
+        cashOut: 0,
+        salesTotal: 0,
+        transactions: []
     };
     saveData();
+    document.getElementById('startShiftCard').classList.add('hidden');
+    document.getElementById('posMain').classList.remove('hidden');
+    loadPOSData();
     alert('✅ Shift started!');
-    showCashierStartScreen();
 }
-function loadPOSStoreData() {
-    // Load dropdowns
-    loadStoreDropdown('storeSelect', false);
-    loadStoreDropdown('chatRecipient', false);
-    // Load products for this store
+
+function loadPOSData() {
     renderProductGrid();
-    // Load transaction lists
-    loadVoidTransSelect();
-    loadStockOutProductSelect();
-    loadRecentTrans();
-    loadCountRequests();
-    updateCartDisplay();
+    updateRecentTrans();
+    loadVoidDropdowns();
+    loadStockOutProducts();
+    loadChatRecipient();
+    loadCountInbox();
 }
+
 function showPosTab(tabId) {
     document.querySelectorAll('#posMain .section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('#posMain .tab').forEach(t => t.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     event.target.classList.add('active');
-    if (tabId === 'posChat') loadPOSChat();
-    if (tabId === 'posStockCount') loadCountRequests();
+    
+    if (tabId === 'posHistory') updateRecentTrans();
+    if (tabId === 'posVoid') loadVoidDropdowns();
+    if (tabId === 'posChat') loadChatRecipient();
+    if (tabId === 'posStockCount') loadCountInbox();
 }
 
 // --- Product Grid & Search ---
 function renderProductGrid(filter = '') {
-    const storeProds = data.products.filter(p =>
-        p.storeId === data.currentUser.storeId &&
-        (filter === '' ||
-         p.name.toLowerCase().includes(filter.toLowerCase()) ||
-         p.barcode.includes(filter))
-    );
-    document.getElementById('productGrid').innerHTML = storeProds.map(p => `
+    const storeId = data.currentUser.storeId;
+    let prods = data.products.filter(p => p.storeId === storeId && p.stock > 0);
+    
+    if (filter) {
+        const f = filter.toLowerCase();
+        prods = prods.filter(p =>
+            p.name.toLowerCase().includes(f) || p.barcode.includes(f)
+        );
+    }
+    
+    document.getElementById('productGrid').innerHTML = prods.map(p => `
         <div class="prod-card" onclick="addToCart(${p.id})">
             <div class="prod-icon">📦</div>
-            <strong>${p.name}</strong>
-            <br>₱${p.price.toFixed(2)}
-            <br><small>Stock: ${p.stock}</small>
-        </div>`).join('') || '<p>No matching products.</p>';
+            <div><strong>${p.name}</strong></div>
+            <div>₱${p.price.toFixed(2)}</div>
+            <small>Stock: ${p.stock}</small>
+        </div>`).join('') || '<p style="grid-column:1/-1;">No products found.</p>';
 }
+
 function filterProducts(val) {
     renderProductGrid(val);
 }
+
+// --- Cart ---
 function addToCart(prodId) {
-    const prod = data.products.find(p => p.id === prodId && p.storeId === data.currentUser.storeId);
-    if (!prod) return;
-    if (prod.stock <= 0) return alert('❌ Out of stock!');
+    const prod = data.products.find(p => p.id === prodId);
+    if (!prod || prod.stock <= 0) return alert('❌ Out of stock.');
     
-    const existing = cart.find(i => i.productId === prodId);
+    const existing = cart.find(item => item.productId === prodId);
     if (existing) {
+        if (existing.qty >= prod.stock) return alert('❌ Not enough stock available.');
         existing.qty++;
     } else {
         cart.push({
@@ -1180,44 +1194,49 @@ function addToCart(prodId) {
     }
     updateCartDisplay();
 }
+
+function removeFromCart(index) {
+    cart.splice(index, 1);
+    updateCartDisplay();
+}
+
+function changeQty(index, delta) {
+    const item = cart[index];
+    const prod = data.products.find(p => p.id === item.productId);
+    const newQty = item.qty + delta;
+    
+    if (newQty < 1) return removeFromCart(index);
+    if (newQty > prod.stock) return alert('❌ Not enough stock.');
+    
+    item.qty = newQty;
+    updateCartDisplay();
+}
+
 function updateCartDisplay() {
-    const disp = document.getElementById('cartDisplay');
+    const container = document.getElementById('cartDisplay');
     if (!cart.length) {
-        disp.innerHTML = '<p style="opacity:0.7;">Cart empty — scan or tap product</p>';
+        container.innerHTML = '<p style="opacity:0.7;">Cart is empty — scan or tap products</p>';
         recalculateTotals();
         return;
     }
-    disp.innerHTML = cart.map((item, idx) => `
+    
+    container.innerHTML = cart.map((item, idx) => `
         <div class="cart-item">
             <div>
-                <strong>${item.name}</strong> × ${item.qty}
-                <br>₱${(item.price * item.qty).toFixed(2)}
+                <strong>${item.name}</strong><br>
+                ₱${item.price.toFixed(2)} × ${item.qty}
             </div>
             <div style="display:flex;align-items:center;">
                 <button class="qty-btn" onclick="changeQty(${idx}, -1)">−</button>
-                <button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button>
-                <button class="qty-btn danger" onclick="removeFromCart(${idx})">×</button>
+                <button class="qty-btn" onclick="changeQty(${idx}, +1)">+</button>
+                <button class="qty-btn danger" onclick="removeFromCart(${idx})" style="margin-left:6px;">×</button>
             </div>
         </div>`).join('');
     recalculateTotals();
 }
-function changeQty(idx, delta) {
-    cart[idx].qty += delta;
-    if (cart[idx].qty <= 0) cart.splice(idx, 1);
-    updateCartDisplay();
-}
-function removeFromCart(idx) {
-    cart.splice(idx, 1);
-    updateCartDisplay();
-}
-function clearCart() {
-    if (!cart.length) return;
-    if (!confirm('🗑️ Clear all items from cart?')) return;
-    cart = [];
-    updateCartDisplay();
-}
+
 function recalculateTotals() {
-    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
     const applyDiscount = document.getElementById('applyPwdDiscount').checked;
     const discount = applyDiscount ? subtotal * 0.05 : 0;
     const grandTotal = subtotal - discount;
@@ -1230,63 +1249,80 @@ function recalculateTotals() {
     calculateSplit();
 }
 
-// --- Payment ---
 function togglePaymentFields() {
     const method = document.getElementById('paymentMethod').value;
     document.getElementById('cashFields').classList.toggle('hidden', method !== 'cash');
     document.getElementById('splitFields').classList.toggle('hidden', method !== 'split');
-    document.getElementById('splitLiveDisplay').classList.toggle('hidden', method !== 'split');
+    
+    if (method !== 'split') {
+        document.getElementById('splitLiveDisplay').classList.add('hidden');
+    } else {
+        document.getElementById('splitLiveDisplay').classList.remove('hidden');
+    }
 }
+
 function calculateChange() {
-    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[^0-9.]/g, '')) || 0;
+    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[₱,]/g, '')) || 0;
     const received = parseFloat(document.getElementById('cashReceived').value) || 0;
     const change = received - grandTotal;
     document.getElementById('changeAmt').textContent = `₱${Math.max(0, change).toFixed(2)}`;
 }
+
 function calculateSplit() {
-    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[^0-9.]/g, '')) || 0;
+    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[₱,]/g, '')) || 0;
     const cashAmt = parseFloat(document.getElementById('splitCashAmt').value) || 0;
     const gcashAmt = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
     const totalPaid = cashAmt + gcashAmt;
-    const remain = grandTotal - totalPaid;
+    const remaining = grandTotal - totalPaid;
     
     document.getElementById('splitLiveCash').textContent = `₱${cashAmt.toFixed(2)}`;
     document.getElementById('splitLiveGcash').textContent = `₱${gcashAmt.toFixed(2)}`;
-    document.getElementById('splitRemain').textContent = remain > 0 ? `₱${remain.toFixed(2)}` : 'Fully Paid';
+    document.getElementById('splitRemain').textContent = `₱${Math.max(0, remaining).toFixed(2)}`;
 }
+
+function clearCart() {
+    if (cart.length && !confirm('Clear cart?')) return;
+    cart = [];
+    document.getElementById('productSearch').value = '';
+    document.getElementById('cashReceived').value = '';
+    document.getElementById('splitCashAmt').value = '';
+    document.getElementById('splitGcashAmt').value = '';
+    document.getElementById('applyPwdDiscount').checked = false;
+    document.getElementById('splitLiveDisplay').classList.add('hidden');
+    renderProductGrid();
+    updateCartDisplay();
+}
+
 function finalizeSale() {
     if (!cart.length) return alert('❌ Cart is empty.');
     
-    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[^0-9.]/g, '')) || 0;
+    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[₱,]/g, '')) || 0;
     const method = document.getElementById('paymentMethod').value;
-    
     let cashGiven = 0, gcashAmount = 0;
+    
     if (method === 'cash') {
         cashGiven = parseFloat(document.getElementById('cashReceived').value) || 0;
-        if (cashGiven < grandTotal) return alert('❌ Insufficient cash amount.');
+        if (cashGiven < grandTotal) return alert('❌ Insufficient cash.');
     } else if (method === 'gcash') {
         gcashAmount = grandTotal;
-    } else {
+    } else if (method === 'split') {
         cashGiven = parseFloat(document.getElementById('splitCashAmt').value) || 0;
         gcashAmount = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
-        if (cashGiven + gcashAmount < grandTotal) return alert('❌ Insufficient total payment.');
+        if (cashGiven + gcashAmount < grandTotal) return alert('❌ Amount not fully paid.');
     }
     
     // Deduct stock
     for (const item of cart) {
         const prod = data.products.find(p => p.id === item.productId);
-        if (!prod || prod.stock < item.qty) {
-            return alert(`❌ Insufficient stock for ${item.name}`);
-        }
+        if (!prod || prod.stock < item.qty) return alert(`❌ Out of stock: ${item.name}`);
         prod.stock -= item.qty;
     }
     
-    // Record transaction
     const transId = generateTransId();
-    data.transactions.push({
+    const transaction = {
         id: transId,
         date: getToday(),
-        time: new Date().toLocaleTimeString('en-PH'),
+        time: getTimeStamp(),
         storeId: data.currentUser.storeId,
         cashierId: data.currentUser.id,
         cashierName: data.currentUser.name,
@@ -1296,58 +1332,54 @@ function finalizeSale() {
         total: grandTotal,
         method,
         cashGiven,
-        gcashAmount
-    });
+        gcashAmount,
+        change: method === 'cash' ? cashGiven - grandTotal : 0
+    };
+    
+    data.transactions.push(transaction);
+    if (data.shift) {
+        data.shift.transactions.push(transId);
+        data.shift.salesTotal += grandTotal;
+    }
     
     saveData();
-    alert(`✅ SALE COMPLETE!\nTrans #: ${transId}\nTotal: ₱${grandTotal.toFixed(2)}`);
-    
-    // Reset
-    cart = [];
-    document.getElementById('cashReceived').value = '';
-    document.getElementById('splitCashAmt').value = '';
-    document.getElementById('splitGcashAmt').value = '';
-    document.getElementById('applyPwdDiscount').checked = false;
-    document.getElementById('paymentMethod').value = 'cash';
-    togglePaymentFields();
-    updateCartDisplay();
-    loadRecentTrans();
-    renderProductGrid();
+    alert(`✅ SALE COMPLETE!\nReceipt:\n#${transId}\nTotal: ₱${grandTotal.toFixed(2)}\nThank you!`);
+    clearCart();
+    updateRecentTrans();
 }
 
 // --- Recent Transactions ---
-function loadRecentTrans() {
+function updateRecentTrans() {
+    const storeId = data.currentUser.storeId;
+    const voidedIds = data.voidRequests.filter(r => r.status === 'approved').map(r => r.wrongTransId);
     const recent = data.transactions
-        .filter(t => t.storeId === data.currentUser.storeId)
-        .sort((a, b) => b.id.localeCompare(a.id))
+        .filter(t => t.storeId === storeId && !voidedIds.includes(t.id))
+        .sort((a,b) => new Date(b.time) - new Date(a.time))
         .slice(0, MAX_RECENT_TRANS);
     
-    document.getElementById('recentTransList').innerHTML = recent.map(t => {
-        const isVoided = data.voidRequests.some(r => r.wrongTransId === t.id && r.status === 'approved');
-        return `
-            <div class="trans-item ${isVoided ? 'style=opacity:0.5;text-decoration:line-through;' : ''}">
-                <strong>${t.id}</strong> — ${t.date} ${t.time}
-                ${isVoided ? '<span class="badge badge-danger">VOIDED</span>' : ''}
-                <br>Items: ${t.items.length} | Total: ₱${t.total.toFixed(2)}
-                <br>Method: ${t.method === 'cash' ? '💵 Cash' : t.method === 'gcash' ? '🟢 GCash' : '💵+🟢 Split'}
-            </div>`;
-    }).join('') || '<p>No recent transactions.</p>';
+    document.getElementById('recentTransList').innerHTML = recent.length ?
+        recent.map(t => `
+        <div class="trans-item">
+            <p><strong>${t.id}</strong> — ${t.time}</p>
+            <p>Items: ${t.items.length} | Total: ₱${t.total.toFixed(2)} | ${t.method.toUpperCase()}</p>
+        </div>`).join('') : '<p>No recent transactions.</p>';
 }
 
 // --- Void Request ---
-function loadVoidTransSelect() {
-    const sel = document.getElementById('voidTransSelect');
-    const storeTrans = data.transactions.filter(t => t.storeId === data.currentUser.storeId);
-    sel.innerHTML = '<option value="">-- Select Transaction --</option>';
-    storeTrans.forEach(t => {
-        sel.innerHTML += `<option value="${t.id}">${t.id} — ₱${t.total.toFixed(2)} (${t.date})</option>`;
-    });
+function loadVoidDropdowns() {
+    const storeId = data.currentUser.storeId;
+    const voidedIds = data.voidRequests.filter(r => r.status === 'approved').map(r => r.wrongTransId);
+    const recent = data.transactions.filter(t => t.storeId === storeId && !voidedIds.includes(t.id));
+    
+    document.getElementById('voidTransSelect').innerHTML = '<option value="">-- Select Transaction --</option>' +
+        recent.map(t => `<option value="${t.id}">${t.id} — ₱${t.total.toFixed(2)} (${t.time})</option>`).join('');
+    
     renderMyVoidRequests();
 }
+
 function submitVoidRequest() {
     const wrongTransId = document.getElementById('voidTransSelect').value;
     if (!wrongTransId) return alert('Select transaction to void.');
-    const correctTransId = document.getElementById('voidCorrectTrans').value.trim();
     const reason = document.getElementById('voidReasonText').value.trim();
     if (!reason) return alert('Enter reason.');
     
@@ -1357,56 +1389,49 @@ function submitVoidRequest() {
         cashierId: data.currentUser.id,
         cashierName: data.currentUser.name,
         wrongTransId,
-        correctTransId,
+        correctTransId: document.getElementById('voidCorrectTrans').value.trim() || null,
         reason,
-        time: getTimeStamp(),
-        status: 'pending'
+        status: 'pending',
+        requestedAt: getTimeStamp()
     });
     saveData();
     alert('✅ Void request sent to Admin.');
-    document.getElementById('voidTransSelect').value = '';
-    document.getElementById('voidCorrectTrans').value = '';
     document.getElementById('voidReasonText').value = '';
-    renderMyVoidRequests();
+    document.getElementById('voidCorrectTrans').value = '';
+    loadVoidDropdowns();
 }
+
 function renderMyVoidRequests() {
-    document.getElementById('myVoidRequests').innerHTML = data.voidRequests
-        .filter(r => r.storeId === data.currentUser.storeId)
-        .map(r => `
-            <div class="card" style="padding: 8px;">
-                ${r.id} — <span class="badge ${
-                    r.status === 'pending' ? 'badge-warn' :
-                    r.status === 'approved' ? 'badge-success' : 'badge-danger'
-                }">${r.status}</span>
-                <br>Trans: ${r.wrongTransId}
-                <br>Reason: ${r.reason}
-            </div>`).join('') || '<p>No requests submitted yet.</p>';
+    const myReqs = data.voidRequests.filter(r => r.cashierId === data.currentUser.id);
+    document.getElementById('myVoidRequests').innerHTML = myReqs.length ?
+        myReqs.map(r => `
+        <div class="card" style="padding:8px;">
+            <p><strong>${r.wrongTransId}</strong></p>
+            <p>Reason: ${r.reason}</p>
+            <p>Status: <span class="badge ${r.status === 'pending' ? 'badge-warn' : r.status === 'approved' ? 'badge-success' : 'badge-danger'}">${r.status.toUpperCase()}</span></p>
+        </div>`).join('') : '<p>No requests sent yet.</p>';
 }
 
 // --- Stock Out ---
-function loadStockOutProductSelect() {
-    const sel = document.getElementById('stockOutProduct');
+function loadStockOutProducts() {
     const prods = data.products.filter(p => p.storeId === data.currentUser.storeId);
-    sel.innerHTML = '<option value="">-- Select Product --</option>';
-    prods.forEach(p => {
-        sel.innerHTML += `<option value="${p.id}">${p.name} — Stock: ${p.stock}</option>`;
-    });
+    document.getElementById('stockOutProduct').innerHTML = '<option value="">-- Select Product --</option>' +
+        prods.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`).join('');
     renderStockOutLog();
 }
+
 function submitStockOut() {
     const prodId = Number(document.getElementById('stockOutProduct').value);
     const qty = parseInt(document.getElementById('stockOutQty').value);
     const reason = document.getElementById('stockOutReason').value.trim();
-    const prod = data.products.find(p => p.id === prodId);
     
     if (!prodId || !qty || !reason) return alert('Fill all fields.');
-    if (!prod) return alert('Product not found.');
-    if (prod.stock < qty) return alert(`❌ Insufficient stock. Current: ${prod.stock}`);
+    const prod = data.products.find(p => p.id === prodId);
+    if (!prod || prod.stock < qty) return alert('❌ Insufficient stock.');
     
     prod.stock -= qty;
     data.stockOutLogs.unshift({
         id: 'SO' + Date.now(),
-        productId: prodId,
         productName: prod.name,
         quantity: qty,
         reason,
@@ -1416,157 +1441,166 @@ function submitStockOut() {
     });
     saveData();
     alert('✅ Stock out recorded.');
-    document.getElementById('stockOutQty').value = '1';
     document.getElementById('stockOutReason').value = '';
-    loadStockOutProductSelect();
-    renderProductGrid();
+    loadStockOutProducts();
 }
+
 function renderStockOutLog() {
-    document.getElementById('stockOutLog').innerHTML = data.stockOutLogs
-        .filter(l => l.storeId === data.currentUser.storeId)
-        .map(l => `
-            <div class="trans-item">
-                <strong>${l.productName}</strong> — −${l.quantity}
-                <br>Reason: ${l.reason} | By: ${l.cashierName} — ${l.time}
-            </div>`).join('') || '<p>No stock out records.</p>';
+    const log = data.stockOutLogs.filter(l => l.storeId === data.currentUser.storeId);
+    document.getElementById('stockOutLog').innerHTML = log.length ?
+        log.map(l => `
+        <div class="trans-item">
+            <p><strong>${l.productName}</strong> — ${l.quantity} units</p>
+            <p>Reason: ${l.reason}</p>
+            <small>${l.time} — ${l.cashierName}</small>
+        </div>`).join('') : '<p>No stock-out records.</p>';
 }
 
 // --- Cash In / Out ---
 function recordCashIn() {
-    const amount = parseFloat(document.getElementById('cashInAmount').value);
+    const amt = parseFloat(document.getElementById('cashInAmount').value);
     const reason = document.getElementById('cashInReason').value.trim();
-    if (!amount || amount <= 0 || !reason) return alert('Fill all fields correctly.');
+    if (!amt || amt <= 0 || !reason) return alert('Fill all fields correctly.');
     
     data.cashInOutLogs.unshift({
         type: 'in',
-        amount,
+        amount: amt,
         reason,
         storeId: data.currentUser.storeId,
         cashierName: data.currentUser.name,
         time: getTimeStamp()
     });
+    if (data.shift) data.shift.cashIn += amt;
     saveData();
     alert('✅ Cash In recorded.');
     document.getElementById('cashInAmount').value = '';
     document.getElementById('cashInReason').value = '';
 }
+
 function recordCashOut() {
-    const amount = parseFloat(document.getElementById('cashOutAmount').value);
+    const amt = parseFloat(document.getElementById('cashOutAmount').value);
     const reason = document.getElementById('cashOutReason').value.trim();
-    if (!amount || amount <= 0 || !reason) return alert('Fill all fields correctly.');
+    if (!amt || amt <= 0 || !reason) return alert('Fill all fields correctly.');
     
     data.cashInOutLogs.unshift({
         type: 'out',
-        amount,
+        amount: amt,
         reason,
         storeId: data.currentUser.storeId,
         cashierName: data.currentUser.name,
         time: getTimeStamp()
     });
+    if (data.shift) data.shift.cashOut += amt;
     saveData();
     alert('✅ Cash Out recorded.');
     document.getElementById('cashOutAmount').value = '';
     document.getElementById('cashOutReason').value = '';
 }
 
-// --- POS Chat ---
-function loadPOSChat() {
-    const target = document.getElementById('chatRecipient').value;
-    if (!target) return;
-    renderChatMessages('chatMessageBox', 'cashier-' + data.currentUser.id, target);
+// --- Chat ---
+function loadChatRecipient() {
+    renderChatMessages(data.currentUser.role, 'admin', 'chatMessageBox');
 }
+
 function sendChatMessage() {
-    const target = document.getElementById('chatRecipient').value;
-    const msg = document.getElementById('chatInputBox').value.trim();
-    if (!target || !msg) return alert('Select recipient and type message.');
+    const to = document.getElementById('chatRecipient').value;
+    const text = document.getElementById('chatInputBox').value.trim();
+    if (!text) return alert('Type a message.');
     
     data.chats.push({
-        from: 'cashier-' + data.currentUser.id,
-        to: target,
-        message: msg,
+        from: data.currentUser.role === 'cashier' ? `cashier-${data.currentUser.id}` : 'cashier',
+        to,
+        text,
         time: getTimeStamp()
     });
     saveData();
     document.getElementById('chatInputBox').value = '';
-    loadPOSChat();
+    loadChatRecipient();
 }
 
 // --- Stock Count Response ---
-function loadCountRequests() {
-    const inbox = data.countRequests.filter(r => r.storeId === data.currentUser.storeId && r.status === 'pending');
-    if (!inbox.length) {
-        document.getElementById('countRequestInbox').innerHTML = '<p class="alert info">No pending count requests.</p>';
+function loadCountInbox() {
+    const pending = data.countRequests.filter(r => r.storeId === data.currentUser.storeId && r.status === 'pending');
+    if (!pending.length) {
+        document.getElementById('countRequestInbox').innerHTML = '<p>No pending count requests.</p>';
         document.getElementById('countResponseArea').classList.add('hidden');
         return;
     }
-    document.getElementById('countRequestInbox').innerHTML = inbox.map(r => `
-        <div class="card" style="padding: 10px;">
-            <strong>🔢 Count Request: ${r.id}</strong>
-            <br>Requested: ${r.requestedAt}
-            <button class="sm" onclick="openCountResponse('${r.id}')">✏️ Enter Count</button>
-        </div>`).join('');
+    document.getElementById('countRequestInbox').innerHTML = `
+        <h4>Pending Requests</h4>
+        ${pending.map(r => `
+            <button class="sm" style="margin:4px 0; width:100%; text-align:left;" onclick="openCountResponse('${r.id}')">
+                📋 ${r.productName} — System: ${r.systemQty}
+            </button>
+        `).join('')}
+    `;
+    document.getElementById('countResponseArea').classList.add('hidden');
 }
+
 function openCountResponse(reqId) {
-    activeCountRequestId = reqId;
     const req = data.countRequests.find(r => r.id === reqId);
     if (!req) return;
-    document.getElementById('countTargetName').textContent = `Count for Request: ${reqId}`;
+    activeCountRequestId = reqId;
+    
     document.getElementById('countResponseArea').classList.remove('hidden');
+    document.getElementById('countTargetName').textContent = req.productName;
+    document.getElementById('countProdNameDisplay').value = req.productName;
+    document.getElementById('countSysQtyDisplay').value = req.systemQty;
+    document.getElementById('actualCountInput').value = '';
 }
+
 function submitCountResponse() {
-    const actualQty = parseInt(document.getElementById('actualCountInput').value);
-    if (!activeCountRequestId || isNaN(actualQty) || actualQty < 0) return alert('Enter valid quantity.');
+    const actual = parseInt(document.getElementById('actualCountInput').value);
+    if (isNaN(actual) || actual < 0) return alert('Enter valid quantity.');
     
     const req = data.countRequests.find(r => r.id === activeCountRequestId);
     if (!req) return;
     
-    req.responses.push({
-        cashierId: data.currentUser.id,
-        cashierName: data.currentUser.name,
-        actualQty,
-        submittedAt: getTimeStamp()
-    });
-    if (req.responses.length >= 1) req.status = 'responded';
-    
+    req.status = 'responded';
+    req.actualQty = actual;
+    req.respondedAt = getTimeStamp();
     saveData();
-    alert('✅ Count submitted!');
-    document.getElementById('actualCountInput').value = '';
-    document.getElementById('countResponseArea').classList.add('hidden');
+    alert('✅ Count submitted.');
     activeCountRequestId = null;
-    loadCountRequests();
+    loadCountInbox();
 }
 
 // --- End Shift ---
 function initiateEndShift() {
-    if (!confirm('🚪 End shift and logout?')) return;
+    if (!confirm('⚠️ End your shift and logout? This will finalize your shift.')) return;
     document.getElementById('endShiftModal').classList.remove('hidden');
     computeDenomTotal();
 }
-function computeDenomTotal() {
-    const d1000 = (parseInt(document.getElementById('d1000').value) || 0) * 1000;
-    const d500 = (parseInt(document.getElementById('d500').value) || 0) * 500;
-    const d200 = (parseInt(document.getElementById('d200').value) || 0) * 200;
-    const d100 = (parseInt(document.getElementById('d100').value) || 0) * 100;
-    const d50 = (parseInt(document.getElementById('d50').value) || 0) * 50;
-    const dCoins = parseFloat(document.getElementById('dCoins').value) || 0;
-    
-    const total = d1000 + d500 + d200 + d100 + d50 + dCoins;
-    document.getElementById('denomTotalAmt').textContent = `₱${total.toFixed(2)}`;
-}
+
 function closeEndShiftModal() {
     document.getElementById('endShiftModal').classList.add('hidden');
 }
+
+function computeDenomTotal() {
+    const d1000 = parseInt(document.getElementById('d1000').value) || 0;
+    const d500 = parseInt(document.getElementById('d500').value) || 0;
+    const d200 = parseInt(document.getElementById('d200').value) || 0;
+    const d100 = parseInt(document.getElementById('d100').value) || 0;
+    const d50 = parseInt(document.getElementById('d50').value) || 0;
+    const dCoins = parseFloat(document.getElementById('dCoins').value) || 0;
+    
+    const total = d1000*1000 + d500*500 + d200*200 + d100*100 + d50*50 + dCoins;
+    document.getElementById('denomTotalAmt').textContent = `₱${total.toFixed(2)}`;
+}
+
 function confirmEndShift() {
-    if (!confirm('⚠️ Finalize and logout? Cannot undo.')) return;
-    // Shift summary can be expanded here
-    alert(`✅ Shift Ended — ${data.shift.cashierName}\nOpening Float: ₱${data.shift.openingFloat.toFixed(2)}\nLogged out successfully.`);
+    const remitText = document.getElementById('denomTotalAmt').textContent;
+    if (!confirm(`Confirm remittance: ${remitText}\nThis will end your shift.`)) return;
+    
     data.shift = null;
+    if (lockTimer) clearTimeout(lockTimer);
     saveData();
+    alert('✅ Shift ended. Thank you!');
     closeEndShiftModal();
     logout();
 }
 
-// --- POS Unlock ---
+// --- Lock Screen ---
 function unlockPOS() {
     const entered = document.getElementById('unlockPassword').value.trim();
     if (entered === data.currentUser.password) {
@@ -1579,24 +1613,8 @@ function unlockPOS() {
 }
 
 // ========== INITIALIZE ==========
-window.onload = function() {
-    loadData();
-    updateConnectionStatus();
-    // Auto-set default dates for reports
-    const today = getToday();
-    document.getElementById('salesDateFrom').value = today;
-    document.getElementById('salesDateTo').value = today;
-    document.getElementById('transDateFrom').value = today;
-    document.getElementById('transDateTo').value = today;
-    
-    // Auto-set expiry on first login
-    if (!data.serviceExpiry) {
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + 7);
-        data.serviceExpiry = expiry.toISOString();
-        saveData();
-    }
-};
+loadData();
+updateConnectionStatus();
 </script>
 </body>
 </html>
