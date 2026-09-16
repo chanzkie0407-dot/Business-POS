@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fortis POS — Business Point of Sales</title>
     <style>
-        /* ==============================================
-           PANGKALAHATANG PATAKARAN SA ESTILO
-           BAGONG DISENYO: PANGUNAHING BERDE KATULAD SA LARAWAN
-           ============================================== */
         * {
             margin: 0;
             padding: 0;
@@ -16,16 +12,16 @@
             font-family: Arial, sans-serif;
         }
         :root {
-            --prim: #4CAF50;       /* 🟢 PANGUNAHING BERDE — Katulad sa larawan */
-            --prim-dark: #388E3C;  /* Mas madilim na berde para sa pindutan */
-            --prim-light: #E8F5E9; /* Napakaliwanag na berde — likuran */
-            --sec: #2196F3;        /* Asul — impormasyon / pindutan */
-            --warn: #FF9800;       /* Kahel — babala / nagsi-sync */
-            --danger: #f44336;     /* Pula — panganib / nag-expire */
-            --bg: #F1F8E9;         /* 🟢 Napakaliwanag na berde — likuran ng pahina */
-            --border: #C8E6C9;     /* Hangganan — maputlang berde */
-            --text-dark: #2E7D32;  /* Madilim na berde — pamagat */
-            --text-normal: #333;   /* Karaniwang kulay ng teksto */
+            --prim: #4CAF50;
+            --prim-dark: #388E3C;
+            --prim-light: #E8F5E9;
+            --sec: #2196F3;
+            --warn: #FF9800;
+            --danger: #f44336;
+            --bg: #F1F8E9;
+            --border: #C8E6C9;
+            --text-dark: #2E7D32;
+            --text-normal: #333;
         }
         body {
             background-color: var(--bg);
@@ -33,9 +29,6 @@
             font-size: 14px;
             line-height: 1.5;
         }
-        /* ==============================================
-           BARAHAN NG KATAYUAN SA ITAAS
-           ============================================== */
         .status-bar {
             position: fixed;
             top: 0;
@@ -51,9 +44,6 @@
         .status-online  { background-color: var(--prim); }
         .status-syncing { background-color: var(--warn); }
         .status-offline { background-color: var(--danger); }
-        /* ==============================================
-           LUGAR NG NILALAMAN
-           ============================================== */
         .container {
             margin-top: 45px;
             padding: 15px;
@@ -75,9 +65,6 @@
             font-weight: bold;
         }
         p { margin-bottom: 10px; }
-        /* ==============================================
-           MGA PATALASTA AT LUGAR NG PAGPASOK
-           ============================================== */
         input, select, button, textarea {
             width: 100%;
             padding: 12px 14px;
@@ -119,9 +106,6 @@
             margin-top: 10px;
             color: var(--text-dark);
         }
-        /* ==============================================
-           PATAKARAN SA PAGTAGO NG PASSWORD
-           ============================================== */
         .password-mask {
             font-family: "Courier New", monospace;
             letter-spacing: 4px;
@@ -134,9 +118,6 @@
             border-radius: 6px;
             display: inline-block;
         }
-        /* ==============================================
-           MGA TABI AT NAKATAGONG BAHAGI
-           ============================================== */
         .hidden { display: none !important; }
         .tabs {
             display: flex;
@@ -164,9 +145,6 @@
         }
         .section { display: none; }
         .section.active { display: block; }
-        /* ==============================================
-           TALAHAN AT ABISO
-           ============================================== */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -214,19 +192,6 @@
             color: #1565C0;
             border-left-color: #2196F3;
         }
-        .pending  { color: var(--warn); font-weight: bold; }
-        .approved { color: var(--prim); font-weight: bold; }
-        .rejected { color: var(--danger); font-weight: bold; }
-        /* ==============================================
-           PAMAGAT NG LOGIN — MAY ICON AT ESTILO
-           ============================================== */
-        #loginSection h2 {
-            text-align: center;
-            font-size: 24px;
-            margin-bottom: 25px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border);
-        }
         .days-badge {
             display: inline-block;
             padding: 6px 14px;
@@ -240,19 +205,14 @@
     </style>
 </head>
 <body>
-<!-- ==============================================
-     BARAHAN NG KATAYUAN — NAKATIKA SA ITAAS
-     ============================================== -->
 <div id="statusBar" class="status-bar status-offline">
     🔌 OFFLINE — Ang datos ay ise-sync kapag may internet na
 </div>
-<!-- ==============================================
-     PANGUNAHING LUGAR NG NILALAMAN
-     ============================================== -->
+
 <div class="container">
-    <!-- BAHAGI NG PAGPASOK -->
+    <!-- LOGIN SECTION -->
     <div id="loginSection" class="card section active">
-        <h2>🌿 Pagpasok — Fortis POS</h2>
+        <h2 style="text-align:center; font-size:24px; margin-bottom:25px; padding-bottom:10px; border-bottom:2px solid var(--border);">🌿 Pagpasok — Fortis POS</h2>
         <div>
             <label>Tungkulin:</label>
             <select id="loginRole">
@@ -277,7 +237,7 @@
         <button class="success" onclick="login()">➡️ Pumasok sa Sistema</button>
     </div>
 
-    <!-- BAHAGI: PAGBABAGO NG PASSWORD (UNANG PAGPASOK) -->
+    <!-- FORCE CHANGE PASSWORD SECTION -->
     <div id="forceChangePassSection" class="card section hidden">
         <h2>⚠️ Kailangan Baguhin ang Password</h2>
         <div class="alert warn">
@@ -299,7 +259,7 @@
         <button class="danger" onclick="logout()">❌ Lumabas</button>
     </div>
 
-    <!-- BAHAGI: NAKAKULONG NA SISTEMA (NAG-EXPIRE ANG SERBISYO) -->
+    <!-- EXPIRED SECTION -->
     <div id="expiredSection" class="card section hidden">
         <h2>🚫 Hindi Na Aktibo ang Serbisyo</h2>
         <div class="alert danger">
@@ -309,49 +269,36 @@
         <p style="margin-top:10px;"><strong>Plano ng Serbisyo:</strong><br>
         ✅ ₱199 / Linggo &nbsp;|&nbsp; ✅ ₱325 / 2 Linggo &nbsp;|&nbsp; ✅ ₱579 / Buwan</p>
         <br>
-        <button class="danger" onclick="location.reload()">🔄 Subukan Muli</button>
+        <button class="danger" onclick="clearAndReload()">🔄 Burahin at Subukan Muli</button>
     </div>
 
-    <!-- ==============================================
-         ✅ HAKBANG 3 — BAHAGI 2: DASHBOARD NG ADMIN
-         ============================================== -->
+    <!-- ADMIN DASHBOARD -->
     <div id="adminDashboard" class="card section hidden">
         <h2>🔐 Admin Dashboard</h2>
         <div class="tabs">
             <div class="tab active" onclick="showAdminTab('adminServiceTab')">📊 Katayuan ng Serbisyo</div>
             <div class="tab" onclick="showAdminTab('adminReportsTab')">📋 Mga Ulat</div>
         </div>
-
-        <!-- KATAYUAN NG SERBISYO — MAKIKITA NG ADMIN PERO HINDI MAKAPAGBAGO -->
         <div id="adminServiceTab" class="section active">
             <h3>Katayuan ng Serbisyo</h3>
             <div id="adminServiceStatus"></div>
-            <p style="margin-top:10px; color:#666; font-style:italic;">
-                ⚠️ Tanging Service Provider lamang ang makapag-renew ng serbisyo.
-            </p>
+            <p style="margin-top:10px; color:#666; font-style:italic;">⚠️ Tanging Service Provider lamang ang makapag-renew ng serbisyo.</p>
         </div>
-
-        <!-- MGA ULAT — TINGNAN LANG -->
         <div id="adminReportsTab" class="section hidden">
             <h3>Mga Ulat</h3>
             <p>Darating sa Hakbang 11 — Ulat ng Benta at Transaksyon</p>
         </div>
-
         <br>
         <button class="danger" onclick="logout()">🚪 Lumabas</button>
     </div>
 
-    <!-- ==============================================
-         ✅ HAKBANG 3 — BAHAGI 2: DASHBOARD NG SP
-         ============================================== -->
+    <!-- SP DASHBOARD -->
     <div id="spDashboard" class="card section hidden">
         <h2>🛠️ Service Provider Dashboard</h2>
         <div class="tabs">
             <div class="tab active" onclick="showSPTab('spRenewTab')">💰 Pag-renew ng Serbisyo</div>
             <div class="tab" onclick="showSPTab('spPasswordLogTab')">📋 Ulat ng Pagbabago ng Password</div>
         </div>
-
-        <!-- PAG-RENEW — TANGING SP LAMANG ANG MAKAPAGBAGO -->
         <div id="spRenewTab" class="section active">
             <h3>Palawigin / I-renew ang Serbisyo</h3>
             <div id="spServiceStatus"></div>
@@ -365,368 +312,252 @@
             <br><br>
             <button class="success" onclick="renewService()">✅ I-renew at Palawigin</button>
         </div>
-
-        <!-- ULAT NG PAGBABAGO NG PASSWORD -->
         <div id="spPasswordLogTab" class="section hidden">
             <h3>Talaan ng Pagbabago ng Password</h3>
             <p style="color:#666; font-size:13px;">Dito makikita kung kailan at sino ang nagbago ng password.</p>
             <div id="passwordLogList"></div>
         </div>
-
         <br>
         <button class="danger" onclick="logout()">🚪 Lumabas</button>
     </div>
-
-    <!-- ==============================================
-         DITO IDADAGDAG ANG MGA SUSUNOD NA BAHAGI:
-         - Cashier Dashboard (Hakbang 7)
-     ============================================== -->
 </div>
 
-<!-- ==============================================
-     PANGUNAHING KODIGO NG JAVASCRIPT — HAKBANG 3
-     ============================================== -->
 <script>
-    // ==============================================
-    // PANIMULANG DATOS AT TAKDANG HALAGA
-    // ==============================================
-    const DEFAULT_PASSWORDS = {
-        admin: '8888',
-        sp: '19970407chan'
-    };
-    const SERVICE_PLANS = {
-        weekly:     { label: 'Lingguhan', price: 199, days: 7 },
-        biweekly:   { label: 'Tuwing 2 Linggo', price: 325, days: 14 },
-        monthly:    { label: 'Buwanan', price: 579, days: 30 }
-    };
-    let systemData = {
-        currentUser: null,
-        serviceExpiry: null,
-        passwordChanged: { admin: false, sp: false },
-        stores: [ { id: 1, name: 'Tindahan 1' } ],
-        cashiers: [],
-        products: [],
-        shifts: [],
-        transactions: [],
-        requests: [],
-        messages: [],
-        passwordChangeLogs: [] // Blg 17: Ulat ng pagbabago ng password
-    };
+const DEFAULT_PASSWORDS = { admin: '8888', sp: '19970407chan' };
+const SERVICE_PLANS = {
+    weekly:   { label: 'Lingguhan', price: 199, days: 7 },
+    biweekly: { label: 'Tuwing 2 Linggo', price: 325, days: 14 },
+    monthly:  { label: 'Buwanan', price: 579, days: 30 }
+};
 
-    // ==============================================
-    // PAGTATAGO NG DATOS SA LOKAL NA LAGUYAN
-    // ==============================================
-    function saveData() {
-        localStorage.setItem('fortisData', JSON.stringify(systemData));
-    }
-    function loadData() {
-        const saved = localStorage.getItem('fortisData');
-        if (saved) systemData = { ...systemData, ...JSON.parse(saved) };
-    }
+let systemData = {
+    currentUser: null,
+    serviceExpiry: null,
+    passwordChanged: { admin: false, sp: false },
+    stores: [{ id: 1, name: 'Tindahan 1' }],
+    cashiers: [], products: [], shifts: [], transactions: [], requests: [], messages: [],
+    passwordChangeLogs: []
+};
 
-    // ==============================================
-    // PATAKARAN SA PAGTAGO NG PASSWORD
-    // ==============================================
-    function updatePasswordMask(val, elementId) {
-        document.getElementById(elementId).textContent = val.replace(/./g, '*');
-    }
-    function updateMask1(val) { updatePasswordMask(val, 'mask1'); }
-    function updateMask2(val) { updatePasswordMask(val, 'mask2'); }
+function saveData() { localStorage.setItem('fortisData', JSON.stringify(systemData)); }
+function loadData() {
+    const saved = localStorage.getItem('fortisData');
+    if (saved) systemData = Object.assign({}, systemData, JSON.parse(saved));
+}
+function clearAndReload() { localStorage.clear(); location.reload(); }
 
-    // ==============================================
-    // KATAYUAN NG KONEKSYON
-    // ==============================================
-    function updateConnectionStatus() {
-        const bar = document.getElementById('statusBar');
-        if (navigator.onLine) {
-            bar.className = 'status-bar status-online';
-            bar.textContent = '✅ ONLINE — Naka-konekta at Naka-sync';
-        } else {
-            bar.className = 'status-bar status-offline';
-            bar.textContent = '🔌 OFFLINE — Ang datos ay ise-sync kapag may internet na';
-        }
-    }
-    window.addEventListener('online', updateConnectionStatus);
-    window.addEventListener('offline', updateConnectionStatus);
+function updatePasswordMask(val, id) {
+    document.getElementById(id).textContent = val.replace(/./g, '*');
+}
+function updateMask1(v) { updatePasswordMask(v, 'mask1'); }
+function updateMask2(v) { updatePasswordMask(v, 'mask2'); }
 
-    // ==============================================
-    // PAGPILI NG TINDAHAN — KUNG CASHIER
-    // ==============================================
-    function toggleStoreSelect() {
-        const role = document.getElementById('loginRole').value;
-        const storeDiv = document.getElementById('storeSelectDiv');
-        if (role === 'cashier') {
-            storeDiv.classList.remove('hidden');
-            loadStoreOptions();
-        } else {
-            storeDiv.classList.add('hidden');
-        }
+function updateConnectionStatus() {
+    const bar = document.getElementById('statusBar');
+    if (navigator.onLine) {
+        bar.className = 'status-bar status-online';
+        bar.textContent = '✅ ONLINE — Naka-konekta at Naka-sync';
+    } else {
+        bar.className = 'status-bar status-offline';
+        bar.textContent = '🔌 OFFLINE — Ang datos ay ise-sync kapag may internet na';
     }
-    function loadStoreOptions() {
-        const sel = document.getElementById('loginStore');
-        sel.innerHTML = '<option value="">-- Pumili ng tindahan --</option>';
-        systemData.stores.forEach(s => {
-            sel.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-        });
+}
+window.addEventListener('online', updateConnectionStatus);
+window.addEventListener('offline', updateConnectionStatus);
+
+function toggleStoreSelect() {
+    const role = document.getElementById('loginRole').value;
+    const div = document.getElementById('storeSelectDiv');
+    if (role === 'cashier') { div.classList.remove('hidden'); loadStoreOptions(); }
+    else { div.classList.add('hidden'); }
+}
+function loadStoreOptions() {
+    const sel = document.getElementById('loginStore');
+    sel.innerHTML = '<option value="">-- Pumili ng tindahan --</option>';
+    systemData.stores.forEach(s => sel.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+}
+
+function isServiceActive() {
+    if (!systemData.serviceExpiry) return true;
+    return new Date() < new Date(systemData.serviceExpiry);
+}
+function daysRemaining() {
+    if (!systemData.serviceExpiry) return 7;
+    return Math.ceil((new Date(systemData.serviceExpiry) - new Date()) / 86400000);
+}
+function formatExpiryDate() {
+    if (!systemData.serviceExpiry) return 'Hindi pa itinakda';
+    return new Date(systemData.serviceExpiry).toLocaleString('fil-PH');
+}
+
+function renewService() {
+    if (!systemData.currentUser || systemData.currentUser.role !== 'sp') {
+        alert('❌ Tanging Service Provider lamang ang makapag-renew!');
+        return;
     }
-    document.getElementById('loginRole').addEventListener('change', toggleStoreSelect);
+    const plan = SERVICE_PLANS[document.getElementById('planSelect').value];
+    let newExp = (systemData.serviceExpiry && new Date(systemData.serviceExpiry) > new Date())
+        ? new Date(systemData.serviceExpiry) : new Date();
+    newExp.setDate(newExp.getDate() + plan.days);
+    systemData.serviceExpiry = newExp.toISOString();
+    saveData();
+    alert(`✅ Na-renew!\nPlano: ${plan.label}\nHalaga: ₱${plan.price}\nDagdag: ${plan.days} araw\nMag-e-expire sa: ${newExp.toLocaleString('fil-PH')}`);
+    refreshServiceStatus();
+}
 
-    // ==============================================
-    // ✅ BAHAGI 2 — Blg 11–15: SERBISYO AT PAG-RENEW
-    // ==============================================
-    function isServiceActive() {
-        if (!systemData.serviceExpiry) return true; // 7 araw na libreng simula
-        return new Date() < new Date(systemData.serviceExpiry);
+function refreshServiceStatus() {
+    const days = daysRemaining(), active = isServiceActive(), expiry = formatExpiryDate();
+    let badge = 'days-green';
+    if (days <= 3) badge = 'days-orange';
+    if (days <= 0) badge = 'days-red';
+    const html = `
+        <div class="alert ${active?'success':'danger'}">
+            <strong>Katayuan:</strong> ${active?'✅ Aktibo':'🚫 Nag-expire na'}
+            <span class="days-badge ${badge}">${days} araw natitira</span>
+            <br><br><strong>Mag-e-expire sa:</strong> ${expiry}
+        </div>`;
+    if (document.getElementById('adminServiceStatus'))
+        document.getElementById('adminServiceStatus').innerHTML = html;
+    if (document.getElementById('spServiceStatus'))
+        document.getElementById('spServiceStatus').innerHTML = html;
+}
+
+function refreshPasswordLog() {
+    const list = document.getElementById('passwordLogList');
+    if (!systemData.passwordChangeLogs.length) {
+        list.innerHTML = '<p style="color:#888; font-style:italic;">Wala pang talaan ng pagbabago ng password.</p>';
+        return;
     }
-    function daysRemaining() {
-        if (!systemData.serviceExpiry) return 7;
-        const ms = new Date(systemData.serviceExpiry) - new Date();
-        return Math.ceil(ms / (1000 * 60 * 60 * 24));
-    }
-    function formatExpiryDate() {
-        if (!systemData.serviceExpiry) return 'Hindi pa itinakda';
-        return new Date(systemData.serviceExpiry).toLocaleString('fil-PH');
-    }
+    list.innerHTML = '<table><tr><th>Petsa at Oras</th><th>Nagbago</th><th>Gawain</th></tr>';
+    systemData.passwordChangeLogs.slice().reverse().forEach(l => {
+        list.innerHTML += `<tr><td>${l.time}</td><td>${l.who}</td><td>${l.action}</td></tr>`;
+    });
+    list.innerHTML += '</table>';
+}
 
-    // ✅ Blg 14: Tanging SP lamang ang makapag-renew
-    function renewService() {
-        if (!systemData.currentUser || systemData.currentUser.role !== 'sp') {
-            alert('❌ Tanging Service Provider lamang ang makapag-renew!');
-            return;
-        }
-        const planKey = document.getElementById('planSelect').value;
-        const plan = SERVICE_PLANS[planKey];
+function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
 
-        // Dagdagan ang kasalukuyang petsa (huwag palitan — DAGDAGAN)
-        let newExpiry;
-        if (systemData.serviceExpiry && new Date(systemData.serviceExpiry) > new Date()) {
-            newExpiry = new Date(systemData.serviceExpiry);
-        } else {
-            newExpiry = new Date();
-        }
-        newExpiry.setDate(newExpiry.getDate() + plan.days);
-        systemData.serviceExpiry = newExpiry.toISOString();
-        saveData();
+function login() {
+    loadData();
+    if (!isServiceActive()) { showSection('expiredSection'); return; }
+    const role = document.getElementById('loginRole').value;
+    const pass = document.getElementById('loginPass').value;
+    const storeId = document.getElementById('loginStore').value;
 
-        alert(`✅ Na-renew!\nPlano: ${plan.label}\nHalaga: ₱${plan.price}\nDagdag: ${plan.days} araw\nMag-e-expire sa: ${newExpiry.toLocaleString('fil-PH')}`);
-        refreshServiceStatus();
-    }
-
-    // Ipakita ang katayuan ng serbisyo
-    function refreshServiceStatus() {
-        const days = daysRemaining();
-        const expiry = formatExpiryDate();
-        const active = isServiceActive();
-        let badgeClass = 'days-green';
-        if (days <= 3) badgeClass = 'days-orange';
-        if (days <= 0) badgeClass = 'days-red';
-
-        const html = `
-            <div class="alert ${active ? 'success' : 'danger'}">
-                <strong>Katayuan:</strong> ${active ? '✅ Aktibo' : '🚫 Nag-expire na'}
-                <span class="days-badge ${badgeClass}">${days} araw natitira</span>
-                <br><br>
-                <strong>Mag-e-expire sa:</strong> ${expiry}
-            </div>
-        `;
-        // Ipakita sa Admin at SP
-        if (document.getElementById('adminServiceStatus'))
-            document.getElementById('adminServiceStatus').innerHTML = html;
-        if (document.getElementById('spServiceStatus'))
-            document.getElementById('spServiceStatus').innerHTML = html;
+    if (role === 'cashier') {
+        if (!storeId) { alert('Piliin muna ang tindahan!'); return; }
+        const c = systemData.cashiers.find(x => x.password === pass);
+        if (!c) { alert('❌ Maling Password!'); return; }
+        systemData.currentUser = { role: 'cashier', name: c.name, storeId };
+        saveData(); proceedToMain(); return;
     }
 
-    // ✅ Blg 17: Ulat ng Pagbabago ng Password
-    function refreshPasswordLog() {
-        const list = document.getElementById('passwordLogList');
-        if (!systemData.passwordChangeLogs.length) {
-            list.innerHTML = '<p style="color:#888; font-style:italic;">Wala pang talaan ng pagbabago ng password.</p>';
-            return;
-        }
-        list.innerHTML = '<table><tr><th>Petsa at Oras</th><th>Nagbago</th><th>Gawain</th></tr>';
-        systemData.passwordChangeLogs.slice().reverse().forEach(log => {
-            list.innerHTML += `<tr><td>${log.time}</td><td>${log.who}</td><td>${log.action}</td></tr>`;
-        });
-        list.innerHTML += '</table>';
-    }
+    const defPass = DEFAULT_PASSWORDS[role];
+    let ok = pass === defPass;
+    if (role === 'admin' && !ok && systemData.adminPassword) ok = pass === systemData.adminPassword;
+    if (role === 'sp' && !ok && systemData.spPassword) ok = pass === systemData.spPassword;
+    if (!ok) { alert('❌ Maling Password!'); return; }
 
-    // ==============================================
-    // PAGPASOK SA SISTEMA
-    // ==============================================
-    function login() {
-        loadData();
-        if (!isServiceActive()) {
-            showSection('expiredSection');
-            return;
-        }
-        const role = document.getElementById('loginRole').value;
-        const pass = document.getElementById('loginPass').value;
-        const storeId = document.getElementById('loginStore').value;
-
-        // Cashier
-        if (role === 'cashier') {
-            if (!storeId) { alert('Piliin muna ang tindahan!'); return; }
-            const cashier = systemData.cashiers.find(c => c.password === pass);
-            if (!cashier) { alert('❌ Maling Password!'); return; }
-            systemData.currentUser = { role: 'cashier', name: cashier.name, storeId };
-            saveData();
-            proceedToMain();
-            return;
-        }
-
-        // Admin / SP
-        const defPass = DEFAULT_PASSWORDS[role];
-        let isCorrect = false;
-        if (pass === defPass) {
-            isCorrect = true;
-        } else if (role === 'admin' && systemData.adminPassword && pass === systemData.adminPassword) {
-            isCorrect = true;
-        } else if (role === 'sp' && systemData.spPassword && pass === systemData.spPassword) {
-            isCorrect = true;
-        }
-        if (!isCorrect) {
-            alert('❌ Maling Password!');
-            return;
-        }
-
-        // Kung default pa — PILITIN BAGUHIN
-        if (pass === defPass && !systemData.passwordChanged[role]) {
-            systemData.currentUser = {
-                role,
-                name: role === 'admin' ? 'Admin / May-ari' : 'Service Provider'
-            };
-            saveData();
-            showSection('forceChangePassSection');
-            return;
-        }
-
+    if (pass === defPass && !systemData.passwordChanged[role]) {
         systemData.currentUser = {
-            role,
-            name: role === 'admin' ? 'Admin / May-ari' : 'Service Provider'
+            role, name: role === 'admin' ? 'Admin / May-ari' : 'Service Provider'
         };
-        saveData();
-        proceedToMain();
+        saveData(); showSection('forceChangePassSection'); return;
     }
 
-    // ==============================================
-    // PAGBABAGO NG PASSWORD — UNANG PAGPASOK
-    // ==============================================
-    function saveNewPassword() {
-        const p1 = document.getElementById('newPass1').value;
-        const p2 = document.getElementById('newPass2').value;
-        if (p1.length < 6) {
-            alert('❌ Ang password ay dapat hindi bababa sa 6 na letra!');
-            return;
-        }
-        if (p1 !== p2) {
-            alert('❌ Hindi pareho ang dalawang password!');
-            return;
-        }
-        const role = systemData.currentUser.role;
-
-        // ✅ Blg 17: Itala ang pagbabago ng password — ipapadala sa SP
-        if (role === 'admin') {
-            systemData.passwordChangeLogs.push({
-                time: new Date().toLocaleString('fil-PH'),
-                who: 'Admin',
-                action: `Binago ang password — Luma: ${DEFAULT_PASSWORDS.admin} → Bago: ${p1.substring(0,3)}***`
-            });
-        }
-        if (role === 'sp') {
-            systemData.passwordChangeLogs.push({
-                time: new Date().toLocaleString('fil-PH'),
-                who: 'Service Provider',
-                action: `Binago ang sariling password — Luma: ${DEFAULT_PASSWORDS.sp.substring(0,5)}*** → Bago: ${p1.substring(0,3)}***`
-            });
-        }
-
-        if (role === 'admin') systemData.adminPassword = p1;
-        else if (role === 'sp') systemData.spPassword = p1;
-        systemData.passwordChanged[role] = true;
-        saveData();
-
-        alert('✅ Matagumpay na nabago ang password!\nMaaari ka nang pumasok.');
-        proceedToMain();
-    }
-
-    // ==============================================
-    // ✅ PAGPASOK SA DASHBOARD — AYON SA TUNGKULIN
-    // ==============================================
-    function proceedToMain() {
-        // Burahin ang password — WALANG NAITITIP
-        document.getElementById('loginPass').value = '';
-        document.getElementById('passMask').textContent = '****';
-        document.getElementById('newPass1').value = '';
-        document.getElementById('newPass2').value = '';
-        document.getElementById('mask1').textContent = '******';
-        document.getElementById('mask2').textContent = '******';
-
-        const role = systemData.currentUser.role;
-
-        if (role === 'admin') {
-            showSection('adminDashboard');
-            refreshServiceStatus();
-        } else if (role === 'sp') {
-            showSection('spDashboard');
-            refreshServiceStatus();
-            refreshPasswordLog();
-        } else if (role === 'cashier') {
-            alert(`✅ Pumasok bilang: ${systemData.currentUser.name}\n\n(Darating pa ang Dashboard ng Cashier sa Hakbang 7!)`);
-        }
-    }
-
-    // ==============================================
-    // PAGPAPALIT NG TAB — Admin at SP
-    // ==============================================
-    function showAdminTab(tabId) {
-        document.querySelectorAll('#adminDashboard .section').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('#adminDashboard .tab').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.target.classList.add('active');
-    }
-    function showSPTab(tabId) {
-        document.querySelectorAll('#spDashboard .section').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('#spDashboard .tab').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.target.classList.add('active');
-        if (tabId === 'spPasswordLogTab') refreshPasswordLog();
-    }
-
-    // ==============================================
-    // LUMABAS — BURAHIN ANG LAHAT
-    // ==============================================
-    function logout() {
-        systemData.currentUser = null;
-        saveData();
-        showSection('loginSection');
-        document.getElementById('loginPass').value = '';
-        document.getElementById('passMask').textContent = '****';
-        document.getElementById('newPass1').value = '';
-        document.getElementById('newPass2').value = '';
-    }
-
-    function showSection(id) {
-        document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
-    // ==============================================
-    // SIMULA SA PAGBUKAS
-    // ==============================================
-    window.onload = function() {
-        loadData();
-        updateConnectionStatus();
-        document.getElementById('loginRole').addEventListener('change', toggleStoreSelect);
-
-        // ✅ Blg 11: Itakda ang 7 araw na LIBRE
-        if (!systemData.serviceExpiry) {
-            const expiry = new Date();
-            expiry.setDate(expiry.getDate() + 7);
-            systemData.serviceExpiry = expiry.toISOString();
-            saveData();
-        }
+    systemData.currentUser = {
+        role, name: role === 'admin' ? 'Admin / May-ari' : 'Service Provider'
     };
-</script>
+    saveData(); proceedToMain();
+}
 
+function saveNewPassword() {
+    const p1 = document.getElementById('newPass1').value;
+    const p2 = document.getElementById('newPass2').value;
+    if (p1.length < 6) { alert('❌ Hindi bababa sa 6 na letra!'); return; }
+    if (p1 !== p2) { alert('❌ Hindi pareho ang dalawang password!'); return; }
+    const role = systemData.currentUser.role;
+
+    if (role === 'admin') {
+        systemData.passwordChangeLogs.push({
+            time: new Date().toLocaleString('fil-PH'), who: 'Admin',
+            action: `Binago ang password — Luma: ${DEFAULT_PASSWORDS.admin} → Bago: ${p1.substring(0,3)}***`
+        });
+        systemData.adminPassword = p1;
+    } else {
+        systemData.passwordChangeLogs.push({
+            time: new Date().toLocaleString('fil-PH'), who: 'Service Provider',
+            action: `Binago ang sariling password — Luma: ${DEFAULT_PASSWORDS.sp.substring(0,5)}*** → Bago: ${p1.substring(0,3)}***`
+        });
+        systemData.spPassword = p1;
+    }
+    systemData.passwordChanged[role] = true;
+    saveData();
+    alert('✅ Matagumpay na nabago ang password!\nMaaari ka nang pumasok.');
+    proceedToMain();
+}
+
+function proceedToMain() {
+    // Linisin ang mga patlang
+    document.getElementById('loginPass').value = '';
+    document.getElementById('passMask').textContent = '****';
+    const np1 = document.getElementById('newPass1');
+    const np2 = document.getElementById('newPass2');
+    const m1 = document.getElementById('mask1');
+    const m2 = document.getElementById('mask2');
+    if (np1) np1.value = '';
+    if (np2) np2.value = '';
+    if (m1) m1.textContent = '******';
+    if (m2) m2.textContent = '******';
+
+    const role = systemData.currentUser.role;
+    if (role === 'admin') {
+        showSection('adminDashboard');
+        refreshServiceStatus();
+    } else if (role === 'sp') {
+        showSection('spDashboard');
+        refreshServiceStatus();
+        refreshPasswordLog();
+    } else {
+        alert(`✅ Pumasok bilang: ${systemData.currentUser.name}\n(Darating pa ang Cashier Dashboard sa Hakbang 7!)`);
+    }
+}
+
+function showAdminTab(tabId) {
+    document.querySelectorAll('#adminDashboard .section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('#adminDashboard .tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+}
+function showSPTab(tabId) {
+    document.querySelectorAll('#spDashboard .section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('#spDashboard .tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+    if (tabId === 'spPasswordLogTab') refreshPasswordLog();
+}
+
+function logout() {
+    systemData.currentUser = null;
+    saveData();
+    showSection('loginSection');
+    document.getElementById('loginPass').value = '';
+    document.getElementById('passMask').textContent = '****';
+}
+
+window.onload = function() {
+    loadData();
+    updateConnectionStatus();
+    document.getElementById('loginRole').addEventListener('change', toggleStoreSelect);
+    if (!systemData.serviceExpiry) {
+        const exp = new Date(); exp.setDate(exp.getDate() + 7);
+        systemData.serviceExpiry = exp.toISOString();
+        saveData();
+    }
+};
+</script>
 </body>
 </html>
