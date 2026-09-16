@@ -115,7 +115,7 @@
     🔌 OFFLINE — Data saved locally, will sync when online
 </div>
 <div class="container">
-<!-- ====================================== LOGIN SECTION -->
+<!-- LOGIN SECTION -->
 <div id="loginSection" class="card section active">
     <h2 style="text-align: center;">🌿 Fortis POS — Business Point of Sales</h2>
     <label>Role:</label>
@@ -138,7 +138,8 @@
         Cashier accounts created by Admin only.
     </p>
 </div>
-<!-- ====================================== PASSWORD CHANGE SECTION -->
+
+<!-- PASSWORD CHANGE SECTION -->
 <div id="forcePassChange" class="card section hidden">
     <h2>⚠️ Change Default Password</h2>
     <div class="alert warn">You are using the default password. You must change it before proceeding.</div>
@@ -149,7 +150,8 @@
     <button onclick="saveNewPassword()">✅ Save & Continue</button>
     <button class="danger" onclick="logout()">❌ Cancel</button>
 </div>
-<!-- ====================================== ADMIN DASHBOARD -->
+
+<!-- ADMIN DASHBOARD -->
 <div id="adminDashboard" class="card section hidden">
     <h2>🔐 Admin / Owner Dashboard</h2>
     <div class="tabs">
@@ -163,7 +165,7 @@
         <div class="tab" onclick="showAdminTab('adminCountRequests')">🔢 Stock Count</div>
         <div class="tab" onclick="showAdminTab('adminChat')">💬 Chat</div>
     </div>
-    <!-- ========== STORES ========== -->
+
     <div id="adminStores" class="section active">
         <h3>Add New Store (1–20 stores)</h3>
         <div class="card" style="background: var(--prim-light);">
@@ -178,7 +180,7 @@
         <h4>Store List (<span id="storeCount">0</span>/20)</h4>
         <div id="storeList"></div>
     </div>
-    <!-- ========== CASHIERS ========== -->
+
     <div id="adminCashiers" class="section hidden">
         <h3>Add Cashier (1–20 per store)</h3>
         <div class="card" style="background: var(--prim-light);">
@@ -195,7 +197,7 @@
         <h4>Cashier List</h4>
         <div id="cashierList"></div>
     </div>
-    <!-- ========== SALES OVERVIEW ========== -->
+
     <div id="adminSalesOverview" class="section hidden">
         <h3>Sales Overview</h3>
         <label>Select Store:</label>
@@ -206,7 +208,7 @@
         <input type="date" id="salesDateTo" onchange="renderSalesOverview()">
         <div id="salesOverviewResult" class="card" style="margin-top:10px;"></div>
     </div>
-    <!-- ========== PRODUCTS ========== -->
+
     <div id="adminProducts" class="section hidden">
         <h3>Add Product</h3>
         <div class="card" style="background: var(--prim-light);">
@@ -225,19 +227,19 @@
         <h4>Product List</h4>
         <div id="productList"></div>
     </div>
-    <!-- ========== STOCKS OVERVIEW ========== -->
+
     <div id="adminStocks" class="section hidden">
         <h3>Stocks Overview</h3>
         <label>Select Store:</label>
         <select id="stockStoreFilter" onchange="renderStocksOverview()"></select>
         <div id="stocksOverviewResult"></div>
     </div>
-    <!-- ========== VOID REQUESTS ========== -->
+
     <div id="adminVoidRequests" class="section hidden">
         <h3>Void / Refund Requests</h3>
         <div id="voidReqList"></div>
     </div>
-    <!-- ========== TRANSACTION SUMMARY ========== -->
+
     <div id="adminTransSummary" class="section hidden">
         <h3>Transaction Summary</h3>
         <label>Select Store:</label>
@@ -248,7 +250,7 @@
         <input type="date" id="transDateTo" onchange="renderTransSummary()">
         <div id="transSummaryResult"></div>
     </div>
-    <!-- ========== STOCK COUNT REQUESTS ========== -->
+
     <div id="adminCountRequests" class="section hidden">
         <h3>Request Actual Stock Count</h3>
         <label>Select Store:</label>
@@ -259,7 +261,7 @@
         <h4>Count Responses</h4>
         <div id="countRespList"></div>
     </div>
-    <!-- ========== ADMIN CHAT ========== -->
+
     <div id="adminChat" class="section hidden">
         <h3>Chat Module</h3>
         <label>Send To:</label>
@@ -270,7 +272,8 @@
     </div>
     <br><button class="danger" onclick="logout()">🚪 Logout</button>
 </div>
-<!-- ====================================== SP DASHBOARD -->
+
+<!-- SP DASHBOARD -->
 <div id="spDashboard" class="card section hidden">
     <h2>🛠️ Service Provider Dashboard</h2>
     <div class="tabs">
@@ -279,6 +282,7 @@
         <div class="tab" onclick="showSPTab('spCashierLog')">📝 Cashier Password Log</div>
         <div class="tab" onclick="showSPTab('spChat')">💬 Chat with Admin</div>
     </div>
+
     <div id="spRenew" class="section active">
         <h3>Service Subscription</h3>
         <div class="alert success">✅ 7-Day Free Trial Active — Activated on first login</div>
@@ -292,6 +296,7 @@
         <br><br>
         <button onclick="renewService()">✅ Renew Now</button>
     </div>
+
     <div id="spAdminPass" class="section hidden">
         <h3>Change Admin Password</h3>
         <p style="color: #666; font-size: 13px; margin-bottom: 10px;">
@@ -307,10 +312,12 @@
         <input type="password" id="spNewSelfPass" autocomplete="new-password" required>
         <button class="info" onclick="spChangeOwnPass()">✅ Update SP Password</button>
     </div>
+
     <div id="spCashierLog" class="section hidden">
         <h3>Cashier Password Change Log</h3>
         <div id="cashierPassLogList"></div>
     </div>
+
     <div id="spChat" class="section hidden">
         <h3>Chat with Admin</h3>
         <div id="spChatDisplay" class="chat-box"></div>
@@ -319,7 +326,8 @@
     </div>
     <br><button class="danger" onclick="logout()">🚪 Logout</button>
 </div>
-<!-- ====================================== CASHIER POS -->
+
+<!-- CASHIER POS -->
 <div id="cashierPOS" class="section hidden">
     <div id="startShiftCard" class="card">
         <h2>💵 Start Shift</h2>
@@ -339,10 +347,13 @@
             <div class="tab" onclick="showPosTab('posStockCount')">🔢 Stock Count</div>
             <div class="tab danger" onclick="initiateEndShift()">🚪 End Shift / Logout</div>
         </div>
+
         <div id="posSales" class="section active">
             <div class="grid-pos">
                 <div>
-                    <input type="text" id="productSearch" class="search-bar" placeholder="🔍 Scan barcode or search product..." oninput="filterProducts(this.value)">
+                    <input type="text" id="productSearch" class="search-bar" placeholder="🔍 Scan barcode or search product..." 
+                           oninput="filterProducts(this.value)"
+                           onkeydown="if(event.key==='Enter'){filterProducts(this.value); this.select();}">
                     <div id="productGrid" class="prod-grid"></div>
                 </div>
                 <div class="pos-panel">
@@ -383,10 +394,12 @@
                 </div>
             </div>
         </div>
+
         <div id="posHistory" class="section">
             <h3>Recent Transactions (Last 5)</h3>
             <div id="recentTransList"></div>
         </div>
+
         <div id="posVoid" class="section">
             <h3>Request Void / Cancel</h3>
             <label>Select Wrong Transaction:</label>
@@ -399,6 +412,7 @@
             <h4>My Requests</h4>
             <div id="myVoidRequests"></div>
         </div>
+
         <div id="posStockOut" class="section">
             <h3>Stock Out</h3>
             <label>Product:</label>
@@ -411,6 +425,7 @@
             <h4>Log</h4>
             <div id="stockOutLog"></div>
         </div>
+
         <div id="posCashIn" class="section">
             <h3>Cash In</h3>
             <label>Amount:</label>
@@ -419,6 +434,7 @@
             <textarea id="cashInReason" placeholder="Source / Explanation" required></textarea>
             <button onclick="recordCashIn()">✅ Record</button>
         </div>
+
         <div id="posCashOut" class="section">
             <h3>Cash Out</h3>
             <label>Amount:</label>
@@ -427,6 +443,7 @@
             <textarea id="cashOutReason" placeholder="Purpose / Explanation" required></textarea>
             <button onclick="recordCashOut()">✅ Record</button>
         </div>
+
         <div id="posChat" class="section">
             <h3>Send Message</h3>
             <label>Send To:</label>
@@ -438,6 +455,7 @@
             <textarea id="chatInputBox" placeholder="Type message..." required></textarea>
             <button onclick="sendChatMessage()">➡️ Send</button>
         </div>
+
         <div id="posStockCount" class="section">
             <h3>Stock Count Requests</h3>
             <div id="countRequestInbox"></div>
@@ -449,6 +467,7 @@
             </div>
         </div>
     </div>
+
     <div id="endShiftModal" class="modal hidden">
         <h3>💰 End Shift — Count Cash</h3>
         <div class="denom-grid">
@@ -463,6 +482,7 @@
         <button onclick="confirmEndShift()">✅ Confirm & Logout</button>
         <button class="warning" onclick="closeEndShiftModal()">❌ Cancel</button>
     </div>
+
     <div id="lockModal" class="modal hidden">
         <h3>🔐 POS Locked — Enter Password</h3>
         <input type="password" id="unlockPassword" placeholder="Your password" autocomplete="off">
@@ -470,54 +490,39 @@
     </div>
 </div>
 </div>
+
 <script>
 // ========== DEFAULT CREDENTIALS ==========
-const DEFAULTS = {
-    admin: '8888',
-    sp: '19970407chan'
-};
+const DEFAULTS = { admin: '8888', sp: '19970407chan' };
 const PLANS = {
     weekly: { days: 7, price: 199 },
     biweekly: { days: 14, price: 325 },
     monthly: { days: 30, price: 579 }
 };
-const LOCK_TIMEOUT = 10 * 60 * 1000; // 10 minutes inactivity = auto-lock
+const LOCK_TIMEOUT = 10 * 60 * 1000;
 const MAX_STORES = 20;
 const MAX_CASHIERS_PER_STORE = 20;
 const MAX_RECENT_TRANS = 5;
+
 // ========== DATA STORE ==========
 let data = {
-    currentUser: null,
-    serviceExpiry: null,
+    currentUser: null, serviceExpiry: null,
     passwordChanged: { admin: false, sp: false },
-    adminPassword: null,
-    spPassword: null,
-    stores: [],
-    cashiers: [],
-    cashierPassLog: [],
-    products: [],
-    transactions: [],
-    voidRequests: [],
-    countRequests: [],
-    chats: [],
-    stockOutLogs: [],
-    cashInOutLogs: [],
-    shift: null,
+    adminPassword: null, spPassword: null,
+    stores: [], cashiers: [], cashierPassLog: [], products: [],
+    transactions: [], voidRequests: [], countRequests: [], chats: [],
+    stockOutLogs: [], cashInOutLogs: [], shift: null,
     lastActivity: Date.now()
 };
 let cart = [];
 let lockTimer = null;
 let activeCountRequestId = null;
+
 // ========== STORAGE HELPERS ==========
-function saveData() {
-    localStorage.setItem('fortisPOS', JSON.stringify(data));
-}
+function saveData() { localStorage.setItem('fortisPOS', JSON.stringify(data)); }
 function loadData() {
     const stored = localStorage.getItem('fortisPOS');
-    if (stored) {
-        const parsed = JSON.parse(stored);
-        data = { ...data, ...parsed };
-    }
+    if (stored) data = { ...data, ...JSON.parse(stored) };
     if (!data.stores.length) {
         data.stores = [{ id: 1, code: '#001', name: 'Main Store', location: 'Davao City' }];
         saveData();
@@ -529,23 +534,12 @@ function clearAndReload() {
         location.reload();
     }
 }
-function getToday() {
-    return new Date().toISOString().split('T')[0];
-}
-function getTimeStamp() {
-    const now = new Date();
-    return now.toLocaleString('en-PH');
-}
-function generateStoreCode() {
-    const num = String(data.stores.length + 1).padStart(3, '0');
-    return `#${num}`;
-}
-function generateBarcode() {
-    return 'F' + Date.now().toString().slice(-10);
-}
-function generateTransId() {
-    return 'TX' + Date.now();
-}
+function getToday() { return new Date().toISOString().split('T')[0]; }
+function getTimeStamp() { return new Date().toLocaleString('en-PH'); }
+function generateStoreCode() { return `#${String(data.stores.length + 1).padStart(3, '0')}`; }
+function generateBarcode() { return 'F' + Date.now().toString().slice(-10); }
+function generateTransId() { return 'TX' + Date.now(); }
+
 // ========== CONNECTION STATUS ==========
 function updateConnectionStatus() {
     const bar = document.getElementById('statusBar');
@@ -559,6 +553,7 @@ function updateConnectionStatus() {
 }
 window.addEventListener('online', updateConnectionStatus);
 window.addEventListener('offline', updateConnectionStatus);
+
 // ========== INACTIVITY LOCK ==========
 function resetActivityTimer() {
     data.lastActivity = Date.now();
@@ -571,6 +566,7 @@ function resetActivityTimer() {
 }
 document.addEventListener('mousemove', resetActivityTimer);
 document.addEventListener('keydown', resetActivityTimer);
+
 // ========== SECTION SWITCHING ==========
 function hideAllSections() {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -579,6 +575,7 @@ function showSection(sectionId) {
     hideAllSections();
     document.getElementById(sectionId).classList.add('active');
 }
+
 // ========== DROPDOWN HELPERS ==========
 function toggleStoreSelect() {
     const role = document.getElementById('loginRole').value;
@@ -594,6 +591,7 @@ function loadStoreDropdown(selectId, addEmpty = true) {
         sel.innerHTML += `<option value="${s.id}">${s.code} — ${s.name}</option>`;
     });
 }
+
 // ========== LOGIN ==========
 function login() {
     loadData();
@@ -601,94 +599,74 @@ function login() {
     const pass = document.getElementById('loginPass').value.trim();
     const storeSel = document.getElementById('loginStore');
     const storeId = storeSel?.value ? Number(storeSel.value) : null;
-    if (data.serviceExpiry && new Date(data.serviceExpiry) < new Date()) {
-        if (role !== 'sp') {
-            return alert('⏰ Subscription expired. Please contact Service Provider to renew.');
-        }
+
+    if (data.serviceExpiry && new Date(data.serviceExpiry) < new Date() && role !== 'sp') {
+        return alert('⏰ Subscription expired. Please contact Service Provider to renew.');
     }
+
     if (role === 'cashier') {
         if (!storeId) return alert('Please select a store first.');
-        const cashier = data.cashiers.find(c =>
-            c.password === pass && c.storeId === storeId
-        );
+        const cashier = data.cashiers.find(c => c.password === pass && c.storeId === storeId);
         if (!cashier) return alert('❌ Invalid password or no access to this store.');
         data.currentUser = {
-            role: 'cashier',
-            id: cashier.id,
+            role: 'cashier', id: cashier.id,
             name: `${cashier.firstName} ${cashier.lastName || ''}`.trim(),
-            storeId: storeId,
-            password: cashier.password
+            storeId, password: cashier.password
         };
         saveData();
         showCashierStartScreen();
         resetActivityTimer();
         return;
     }
-    const defaultPass = DEFAULTS[role];
-    let valid = pass === defaultPass;
-    if (role === 'admin' && !valid && data.adminPassword) {
-        valid = pass === data.adminPassword;
-    }
-    if (role === 'sp' && !valid && data.spPassword) {
-        valid = pass === data.spPassword;
-    }
+
+    let valid = pass === DEFAULTS[role];
+    if (role === 'admin' && !valid && data.adminPassword) valid = pass === data.adminPassword;
+    if (role === 'sp' && !valid && data.spPassword) valid = pass === data.spPassword;
     if (!valid) return alert('❌ Incorrect password.');
-    if (pass === defaultPass && !data.passwordChanged[role]) {
-        data.currentUser = {
-            role,
-            name: role === 'admin' ? 'Admin / Owner' : 'Service Provider'
-        };
+
+    if (pass === DEFAULTS[role] && !data.passwordChanged[role]) {
+        data.currentUser = { role, name: role === 'admin' ? 'Admin / Owner' : 'Service Provider' };
         saveData();
         showSection('forcePassChange');
         return;
     }
-    data.currentUser = {
-        role,
-        name: role === 'admin' ? 'Admin / Owner' : 'Service Provider'
-    };
+
+    data.currentUser = { role, name: role === 'admin' ? 'Admin / Owner' : 'Service Provider' };
     saveData();
-    if (role === 'admin') showAdminDashboard();
-    else showSPDashboard();
+    role === 'admin' ? showAdminDashboard() : showSPDashboard();
 }
+
 // ========== PASSWORD CHANGE ==========
 function saveNewPassword() {
     const p1 = document.getElementById('newPass1').value;
     const p2 = document.getElementById('newPass2').value;
     if (p1.length < 6) return alert('❌ Password must be at least 6 characters.');
     if (p1 !== p2) return alert('❌ Passwords do not match.');
-    const role = data.currentUser.role;
-    if (role === 'admin') data.adminPassword = p1;
+    if (data.currentUser.role === 'admin') data.adminPassword = p1;
     else data.spPassword = p1;
-    data.passwordChanged[role] = true;
+    data.passwordChanged[data.currentUser.role] = true;
     saveData();
     alert('✅ Password updated successfully!');
-    if (role === 'admin') showAdminDashboard();
-    else showSPDashboard();
+    data.currentUser.role === 'admin' ? showAdminDashboard() : showSPDashboard();
 }
+
 // ========== LOGOUT ==========
 function logout() {
     document.querySelectorAll('input[type="password"]').forEach(inp => inp.value = '');
-    data.currentUser = null;
-    data.shift = null;
+    data.currentUser = null; data.shift = null;
     if (lockTimer) clearTimeout(lockTimer);
     saveData();
     showSection('loginSection');
 }
+
 // ========== ADMIN DASHBOARD ==========
 function showAdminDashboard() {
     showSection('adminDashboard');
-    loadStoreDropdown('cStore');
-    loadStoreDropdown('prodStore');
-    loadStoreDropdown('salesStoreFilter');
-    loadStoreDropdown('stockStoreFilter');
-    loadStoreDropdown('transStoreFilter');
-    loadStoreDropdown('countReqStore');
+    ['cStore','prodStore','salesStoreFilter','stockStoreFilter','transStoreFilter','countReqStore']
+        .forEach(id => loadStoreDropdown(id));
     populateAdminChatTargets();
-    renderStoreList();
-    renderCashierList();
-    renderProductList();
-    renderVoidRequests();
-    renderCountResponses();
+    renderStoreList(); renderCashierList(); renderProductList();
+    renderVoidRequests(); renderCountResponses();
 }
 function showAdminTab(tabId) {
     document.querySelectorAll('#adminDashboard .section').forEach(s => s.classList.remove('active'));
@@ -698,27 +676,17 @@ function showAdminTab(tabId) {
     if (tabId === 'adminChat') loadAdminChat();
     if (tabId === 'adminCountRequests') loadCountProductChecklist();
 }
+
 // --- Stores ---
 function addStore() {
-    if (data.stores.length >= MAX_STORES) {
-        return alert(`❌ Maximum ${MAX_STORES} stores allowed.`);
-    }
+    if (data.stores.length >= MAX_STORES) return alert(`❌ Maximum ${MAX_STORES} stores allowed.`);
     const name = document.getElementById('newStoreName').value.trim();
     if (!name) return alert('Enter store name.');
     const code = document.getElementById('newStoreCode').value.trim() || generateStoreCode();
     const location = document.getElementById('newStoreLocation').value.trim();
-    if (data.stores.some(s => s.code === code)) {
-        return alert('❌ Store No/Code already exists.');
-    }
-    data.stores.push({
-        id: Date.now(),
-        code,
-        name,
-        location
-    });
-    saveData();
-    alert('✅ Store added!');
-    renderStoreList();
+    if (data.stores.some(s => s.code === code)) return alert('❌ Store No/Code already exists.');
+    data.stores.push({ id: Date.now(), code, name, location });
+    saveData(); alert('✅ Store added!'); renderStoreList();
     ['cStore','prodStore','salesStoreFilter','stockStoreFilter','transStoreFilter','countReqStore']
         .forEach(id => loadStoreDropdown(id));
     document.getElementById('newStoreName').value = '';
@@ -731,9 +699,9 @@ function renderStoreList() {
         <div class="card" style="padding: 10px;">
             <strong>${s.code}</strong> — ${s.name}
             ${s.location ? `<br><small>📍 ${s.location}</small>` : ''}
-        </div>
-    `).join('');
+        </div>`).join('');
 }
+
 // --- Cashiers ---
 function createCashier() {
     const fn = document.getElementById('cFirstName').value.trim();
@@ -742,21 +710,11 @@ function createCashier() {
     const pw = document.getElementById('cPassword').value.trim();
     if (!fn || !pw || !storeId) return alert('Fill in all required fields.');
     if (!/^\d{4}$/.test(pw)) return alert('❌ Password must be exactly 4 digits.');
-    const storeCashiers = data.cashiers.filter(c => c.storeId === storeId);
-    if (storeCashiers.length >= MAX_CASHIERS_PER_STORE) {
+    if (data.cashiers.filter(c => c.storeId === storeId).length >= MAX_CASHIERS_PER_STORE) {
         return alert(`❌ Maximum ${MAX_CASHIERS_PER_STORE} cashiers per store.`);
     }
-    data.cashiers.push({
-        id: Date.now(),
-        firstName: fn,
-        lastName: ln,
-        password: pw,
-        storeId
-    });
-    saveData();
-    alert('✅ Cashier account created!');
-    renderCashierList();
-    populateAdminChatTargets();
+    data.cashiers.push({ id: Date.now(), firstName: fn, lastName: ln, password: pw, storeId });
+    saveData(); alert('✅ Cashier account created!'); renderCashierList(); populateAdminChatTargets();
     document.getElementById('cFirstName').value = '';
     document.getElementById('cLastName').value = '';
     document.getElementById('cPassword').value = '';
@@ -770,37 +728,30 @@ function renderCashierList() {
                 <br><small>Password: ${'•'.repeat(4)}</small>
                 <button class="sm" style="margin-left:10px;" onclick="changeCashierPass(${c.id})">🔑 Change Pass</button>
                 <button class="danger sm" style="float:right;" onclick="deleteCashier(${c.id})">Remove</button>
-            </div>
-        `;
+            </div>`;
     }).join('') || '<p>No cashiers yet.</p>';
 }
 function changeCashierPass(id) {
     const cashier = data.cashiers.find(c => c.id === id);
     if (!cashier) return;
-    const oldPass = cashier.password;
     const newPass = prompt(`Enter NEW 4-digit password for ${cashier.firstName}:`);
     if (!newPass) return;
     if (!/^\d{4}$/.test(newPass)) return alert('❌ Must be exactly 4 digits.');
     data.cashierPassLog.unshift({
         cashierId: cashier.id,
         cashierName: `${cashier.firstName} ${cashier.lastName || ''}`.trim(),
-        oldPass: oldPass,
-        newPass: newPass,
-        changedBy: data.currentUser.name,
-        time: getTimeStamp()
+        oldPass: cashier.password, newPass,
+        changedBy: data.currentUser.name, time: getTimeStamp()
     });
     cashier.password = newPass;
-    saveData();
-    alert('✅ Password updated. Log recorded.');
-    renderCashierList();
+    saveData(); alert('✅ Password updated. Log recorded.'); renderCashierList();
 }
 function deleteCashier(id) {
     if (!confirm('Remove this cashier account?')) return;
     data.cashiers = data.cashiers.filter(c => c.id !== id);
-    saveData();
-    renderCashierList();
-    populateAdminChatTargets();
+    saveData(); renderCashierList(); populateAdminChatTargets();
 }
+
 // --- Sales Overview ---
 function renderSalesOverview() {
     const storeId = Number(document.getElementById('salesStoreFilter').value);
@@ -823,9 +774,9 @@ function renderSalesOverview() {
         <p><strong>Total Transactions:</strong> ${trans.length}</p>
         <p class="alert success"><strong>💵 Cash Sales:</strong> ₱${totalCash.toFixed(2)}</p>
         <p class="alert info"><strong>🟢 GCash Sales:</strong> ₱${totalGcash.toFixed(2)}</p>
-        <p class="alert" style="background:#E8F5E9;"><strong>💰 GRAND TOTAL:</strong> ₱${grandTotal.toFixed(2)}</p>
-    `;
+        <p class="alert" style="background:#E8F5E9;"><strong>💰 GRAND TOTAL:</strong> ₱${grandTotal.toFixed(2)}</p>`;
 }
+
 // --- Products ---
 function addProduct() {
     const storeId = Number(document.getElementById('prodStore').value);
@@ -835,17 +786,8 @@ function addProduct() {
     let barcode = document.getElementById('prodBarcode').value.trim() || generateBarcode();
     if (!name || !price || !storeId) return alert('Fill required fields.');
     if (price <= 0) return alert('Price must be greater than 0.');
-    data.products.push({
-        id: Date.now(),
-        storeId,
-        name,
-        price,
-        stock,
-        barcode
-    });
-    saveData();
-    alert('✅ Product added!');
-    renderProductList();
+    data.products.push({ id: Date.now(), storeId, name, price, stock, barcode });
+    saveData(); alert('✅ Product added!'); renderProductList();
     document.getElementById('prodName').value = '';
     document.getElementById('prodPrice').value = '';
     document.getElementById('prodStock').value = '';
@@ -853,70 +795,88 @@ function addProduct() {
 }
 function renderProductList() {
     document.getElementById('productList').innerHTML = data.products.map(p => {
-        const store = data.stores.find(s => s.id === p.storeId);
+        const store = data
+        store = data.stores.find(s => s.id === p.storeId);
         return `
             <div class="card" style="padding: 10px;">
                 <strong>${p.name}</strong> — ₱${p.price.toFixed(2)}
-                <br>Store: ${store?.name || '?'} | Stock: ${p.stock} | Code: ${p.barcode}
-            </div>
-        `
-                `).join('') || '<p>No products added yet.</p>';
+                <br>
+                <small>Store: ${store?.name || 'Unknown'} | Stock: ${p.stock} | Barcode: ${p.barcode}</small>
+                <button class="sm" style="margin-left: 8px;" onclick="editProduct(${p.id})">✏️ Edit</button>
+                <button class="danger sm" style="float:right;" onclick="deleteProduct(${p.id})">🗑️ Delete</button>
+            </div>`;
+    }).join('') || '<p>No products added yet.</p>';
 }
+function editProduct(id) {
+    const prod = data.products.find(p => p.id === id);
+    if (!prod) return;
+    const newName = prompt('Product Name:', prod.name);
+    if (newName === null) return;
+    const newPrice = prompt('Price:', prod.price);
+    if (newPrice === null) return;
+    const newStock = prompt('Stock Quantity:', prod.stock);
+    if (newStock === null) return;
+    const newBarcode = prompt('Barcode/SKU:', prod.barcode);
+    if (newBarcode === null) return;
+    
+    prod.name = newName.trim() || prod.name;
+    prod.price = parseFloat(newPrice) || prod.price;
+    prod.stock = parseInt(newStock) || 0;
+    prod.barcode = newBarcode.trim() || prod.barcode;
+    saveData();
+    alert('✅ Product updated!');
+    renderProductList();
+}
+function deleteProduct(id) {
+    if (!confirm('⚠️ Delete this product? Cannot undo.')) return;
+    data.products = data.products.filter(p => p.id !== id);
+    saveData();
+    renderProductList();
+}
+
+// --- Stocks Overview ---
 function renderStocksOverview() {
     const storeId = Number(document.getElementById('stockStoreFilter').value);
     if (!storeId) {
-        document.getElementById('stocksOverviewResult').innerHTML = '<p>Select a store.</p>';
+        document.getElementById('stocksOverviewResult').innerHTML = '<p>Select a store to view stocks.</p>';
         return;
     }
-    const products = data.products.filter(p => p.storeId === storeId);
-    document.getElementById('stocksOverviewResult').innerHTML = products.length
-        ? `<table>
-            <tr><th>Product</th><th>Price</th><th>Stock</th><th>Barcode</th></tr>
-            ${products.map(p => `
-                <tr>
-                    <td>${p.name}</td>
-                    <td>₱${p.price.toFixed(2)}</td>
-                    <td>${p.stock}</td>
-                    <td>${p.barcode}</td>
-                </tr>`).join('')}
-           </table>`
-        : '<p>No products for this store.</p>';
+    const storeProds = data.products.filter(p => p.storeId === storeId);
+    document.getElementById('stocksOverviewResult').innerHTML = storeProds.map(p => `
+        <div class="card" style="padding: 8px; margin: 4px 0;">
+            ${p.name} — Stock: 
+            <strong>${p.stock}</strong> 
+            ${p.stock <= 5 ? '<span class="badge badge-warn">Low Stock</span>' : ''}
+            ${p.stock === 0 ? '<span class="badge badge-danger">Out of Stock</span>' : ''}
+            <br><small>Price: ₱${p.price.toFixed(2)} | Code: ${p.barcode}</small>
+        </div>`).join('') || '<p>No products for this store.</p>';
 }
-// --- Void Requests ---
+
+// --- Void Requests (Admin) ---
 function renderVoidRequests() {
-    document.getElementById('voidReqList').innerHTML = data.voidRequests.length
-        ? data.voidRequests.map(r => `
-            <div class="card trans-item">
+    document.getElementById('voidReqList').innerHTML = data.voidRequests.map(r => {
+        const store = data.stores.find(s => s.id === r.storeId);
+        return `
+            <div class="card" style="padding: 12px;">
+                <h4>❌ Void Request — ${r.status.toUpperCase()}</h4>
+                <p><strong>Store:</strong> ${store?.name || 'Unknown'}</p>
                 <p><strong>Transaction:</strong> ${r.wrongTransId}</p>
-                <p><strong>Cashier:</strong> ${r.cashierName}</p>
+                ${r.correctTransId ? `<p><strong>Correct Trans:</strong> ${r.correctTransId}</p>` : ''}
                 <p><strong>Reason:</strong> ${r.reason}</p>
-                <p><strong>Status:</strong> 
-                    <span class="badge ${r.status === 'pending' ? 'badge-warn' : r.status === 'approved' ? 'badge-success' : 'badge-danger'}">
-                        ${r.status.charAt(0).toUpperCase() + r.status.slice(1)}
-                    </span>
-                </p>
+                <p><strong>By:</strong> ${r.cashierName} — ${r.time}</p>
                 ${r.status === 'pending' ? `
-                    <button class="sm" onclick="approveVoid('${r.id}')">✅ Approve</button>
+                    <button class="success sm" onclick="approveVoid('${r.id}')">✅ Approve</button>
                     <button class="danger sm" onclick="rejectVoid('${r.id}')">❌ Reject</button>
-                ` : ''}
-            </div>`).join('')
-        : '<p>No void requests yet.</p>';
+                ` : `<p class="badge ${r.status === 'approved' ? 'badge-success' : 'badge-danger'}">${r.status === 'approved' ? '✅ Approved' : '❌ Rejected'}</p>`}
+            </div>`;
+    }).join('') || '<p>No void requests yet.</p>';
 }
 function approveVoid(reqId) {
     const req = data.voidRequests.find(r => r.id === reqId);
     if (!req) return;
     req.status = 'approved';
-    const trans = data.transactions.find(t => t.id === req.wrongTransId);
-    if (trans) {
-        trans.voided = true;
-        // Return stock
-        trans.items.forEach(it => {
-            const prod = data.products.find(p => p.id === it.productId);
-            if (prod) prod.stock += it.qty;
-        });
-    }
     saveData();
-    alert('✅ Void approved. Stock restored.');
+    alert('✅ Void Approved — Transaction will be excluded from sales reports.');
     renderVoidRequests();
 }
 function rejectVoid(reqId) {
@@ -924,9 +884,10 @@ function rejectVoid(reqId) {
     if (!req) return;
     req.status = 'rejected';
     saveData();
-    alert('❌ Void rejected.');
+    alert('❌ Void Rejected.');
     renderVoidRequests();
 }
+
 // --- Transaction Summary ---
 function renderTransSummary() {
     const storeId = Number(document.getElementById('transStoreFilter').value);
@@ -940,120 +901,103 @@ function renderTransSummary() {
     const trans = data.transactions.filter(t =>
         t.storeId === storeId && t.date >= from && t.date <= to && !voidedIds.includes(t.id)
     );
-    document.getElementById('transSummaryResult').innerHTML = trans.length
-        ? `<table>
-            <tr><th>Date</th><th>Transaction ID</th><th>Cashier</th><th>Amount</th><th>Method</th></tr>
-            ${trans.map(t => `
-                <tr>
-                    <td>${t.date}</td>
-                    <td>${t.id}</td>
-                    <td>${t.cashierName}</td>
-                    <td>₱${t.total.toFixed(2)}</td>
-                    <td>${t.method}</td>
-                </tr>`).join('')}
-           </table>`
-        : '<p>No transactions for this period.</p>';
+    
+    let html = `<h4>📋 Transaction Summary</h4>
+        <p>From: ${from} To: ${to} | Total: ${trans.length} transactions</p>
+        <table><tr><th>Time</th><th>Trans #</th><th>Items</th><th>Total</th><th>Method</th><th>Cashier</th></tr>`;
+    
+    trans.forEach(t => {
+        html += `<tr>
+            <td>${t.time}</td>
+            <td>${t.id}</td>
+            <td>${t.items.length}</td>
+            <td>₱${t.total.toFixed(2)}</td>
+            <td>${t.method === 'cash' ? '💵 Cash' : t.method === 'gcash' ? '🟢 GCash' : '💵+🟢 Split'}</td>
+            <td>${t.cashierName}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    document.getElementById('transSummaryResult').innerHTML = html;
 }
-// --- Stock Count ---
+
+// --- Stock Count Requests ---
 function loadCountProductChecklist() {
     const storeId = Number(document.getElementById('countReqStore').value);
     if (!storeId) {
         document.getElementById('countProductChecklist').innerHTML = '<p>Select a store first.</p>';
         return;
     }
-    const products = data.products.filter(p => p.storeId === storeId);
-    document.getElementById('countProductChecklist').innerHTML = products.map(p => `
+    const prods = data.products.filter(p => p.storeId === storeId);
+    document.getElementById('countProductChecklist').innerHTML = prods.map(p => `
         <label class="checklist-item">
-            <input type="checkbox" class="count-prod-checkbox" value="${p.id}" data-name="${p.name}">
+            <input type="checkbox" class="count-prod-check" value="${p.id}" checked>
             ${p.name} — System Qty: ${p.stock}
         </label>`).join('');
 }
 function sendCountRequest() {
     const storeId = Number(document.getElementById('countReqStore').value);
-    const checkboxes = document.querySelectorAll('.count-prod-checkbox:checked');
-    if (!storeId || checkboxes.length === 0) return alert('Select store and at least one product.');
-    const selected = Array.from(checkboxes).map(cb => ({
-        productId: Number(cb.value),
-        productName: cb.dataset.name
-    }));
+    const selected = Array.from(document.querySelectorAll('.count-prod-check:checked')).map(c => Number(c.value));
+    if (!storeId || !selected.length) return alert('Select store and at least one product.');
+    
     data.countRequests.push({
         id: 'CR' + Date.now(),
         storeId,
-        products: selected,
+        productIds: selected,
+        requestedBy: data.currentUser.name,
         requestedAt: getTimeStamp(),
         status: 'pending',
-        response: null
+        responses: []
     });
     saveData();
-    alert('✅ Count request sent.');
-    loadCountProductChecklist();
+    alert('✅ Count request sent to store cashier.');
 }
 function renderCountResponses() {
-    document.getElementById('countRespList').innerHTML = data.countRequests.length
-        ? data.countRequests.map(r => `
-            <div class="card trans-item">
-                <p><strong>Request:</strong> ${r.id}</p>
-                <p><strong>Store:</strong> ${data.stores.find(s => s.id === r.storeId)?.name}</p>
-                <p><strong>Status:</strong> 
-                    <span class="badge ${r.status === 'pending' ? 'badge-warn' : 'badge-success'}">
-                        ${r.status}
-                    </span>
-                </p>
-                ${r.response ? `<p><strong>Response:</strong> ${r.response}</p>` : ''}
-            </div>`).join('')
-        : '<p>No count requests yet.</p>';
+    document.getElementById('countRespList').innerHTML = data.countRequests.map(r => {
+        const store = data.stores.find(s => s.id === r.storeId);
+        return `
+            <div class="card" style="padding: 10px;">
+                <strong>🔢 Count Request — ${r.id}</strong>
+                <br>Store: ${store?.name || 'Unknown'} | Status: ${r.status}
+                ${r.responses.length ? `<p>Responses submitted: ${r.responses.length}</p>` : '<p class="alert warn">Awaiting response...</p>'}
+            </div>`;
+    }).join('') || '<p>No count requests yet.</p>';
 }
-// --- Chat ---
+
+// --- Admin Chat ---
 function populateAdminChatTargets() {
     const sel = document.getElementById('adminChatTarget');
     sel.innerHTML = '<option value="sp">🛠️ Service Provider</option>';
     data.cashiers.forEach(c => {
-        sel.innerHTML += `<option value="cashier-${c.id}">👤 ${c.firstName} ${c.lastName || ''}</option>`;
+        const store = data.stores.find(s => s.id === c.storeId);
+        sel.innerHTML += `<option value="cashier-${c.id}">👤 ${c.firstName} ${c.lastName || ''} — ${store?.name || ''}</option>`;
     });
 }
 function loadAdminChat() {
     const target = document.getElementById('adminChatTarget').value;
     if (!target) return;
-    const display = document.getElementById('adminChatDisplay');
-    display.innerHTML = '';
-    const messages = data.chats.filter(m =>
-        (m.from === 'admin' && m.to === target) ||
-        (m.from === target && m.to === 'admin')
-    );
-    messages.forEach(m => {
-        display.innerHTML += `<div class="${m.from === 'admin' ? 'msg-me' : 'msg-other'}">
-            <strong>${m.from}:</strong> ${m.text}<br><small>${m.time}</small>
-        </div>`;
-    });
-    display.scrollTop = display.scrollHeight;
+    renderChatMessages('adminChatDisplay', 'admin', target);
 }
 function adminSendMessage() {
-    const to = document.getElementById('adminChatTarget').value;
-    const text = document.getElementById('adminChatMsg').value.trim();
-    if (!to || !text) return alert('Select recipient and type message.');
+    const target = document.getElementById('adminChatTarget').value;
+    const msg = document.getElementById('adminChatMsg').value.trim();
+    if (!target || !msg) return alert('Select recipient and type message.');
+    
     data.chats.push({
         from: 'admin',
-        to,
-        text,
+        to: target,
+        message: msg,
         time: getTimeStamp()
     });
     saveData();
     document.getElementById('adminChatMsg').value = '';
     loadAdminChat();
 }
+
 // ========== SP DASHBOARD ==========
 function showSPDashboard() {
     showSection('spDashboard');
     updateServiceStatus();
-    document.getElementById('cashierPassLogList').innerHTML = data.cashierPassLog.length
-        ? data.cashierPassLog.map(l => `
-            <div class="card trans-item">
-                <p><strong>${l.cashierName}</strong></p>
-                <p>Old: ${l.oldPass} → New: ${l.newPass}</p>
-                <p>By: ${l.changedBy} | ${l.time}</p>
-            </div>`).join('')
-        : '<p>No password changes yet.</p>';
-    loadSPChat();
+    renderCashierPassLog();
 }
 function showSPTab(tabId) {
     document.querySelectorAll('#spDashboard .section').forEach(s => s.classList.remove('active'));
@@ -1063,29 +1007,33 @@ function showSPTab(tabId) {
     if (tabId === 'spChat') loadSPChat();
 }
 function updateServiceStatus() {
-    const div = document.getElementById('spServiceStatus');
+    const statusEl = document.getElementById('spServiceStatus');
     if (!data.serviceExpiry) {
-        div.innerHTML = `<p class="badge badge-success">Trial active — expires in 7 days from first login</p>`;
+        statusEl.innerHTML = '<p class="alert success">✅ Trial active — expires 7 days from first login</p>';
+        return;
+    }
+    const expiry = new Date(data.serviceExpiry);
+    const now = new Date();
+    const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+    
+    if (daysLeft <= 0) {
+        statusEl.innerHTML = '<p class="alert danger">❌ Subscription EXPIRED</p>';
+    } else if (daysLeft <= 3) {
+        statusEl.innerHTML = `<p class="alert warn">⚠️ ${daysLeft} day(s) remaining — Renew soon!</p>`;
     } else {
-        const expiry = new Date(data.serviceExpiry);
-        const now = new Date();
-        const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-        if (daysLeft <= 0) {
-            div.innerHTML = `<p class="badge badge-danger">⚠️ Subscription expired — please renew now</p>`;
-        } else {
-            div.innerHTML = `<p class="badge badge-success">✅ Active — ${daysLeft} day(s) remaining (until ${expiry.toLocaleDateString('en-PH')})</p>`;
-        }
+        statusEl.innerHTML = `<p class="alert success">✅ Active — ${daysLeft} day(s) remaining until ${expiry.toLocaleDateString()}</p>`;
     }
 }
 function renewService() {
     const plan = document.getElementById('planSelect').value;
-    if (!PLANS[plan]) return;
-    const days = PLANS[plan].days;
-    const expiry = new Date();
-    expiry.setDate(expiry.getDate() + days);
-    data.serviceExpiry = expiry.toISOString();
+    const {days} = PLANS[plan];
+    const start = data.serviceExpiry && new Date(data.serviceExpiry) > new Date()
+        ? new Date(data.serviceExpiry)
+        : new Date();
+    start.setDate(start.getDate() + days);
+    data.serviceExpiry = start.toISOString();
     saveData();
-    alert(`✅ Subscription renewed — ${days} days added.`);
+    alert(`✅ Service renewed! Valid until ${start.toLocaleDateString()}`);
     updateServiceStatus();
 }
 function spChangeAdminPass() {
@@ -1106,107 +1054,125 @@ function spChangeOwnPass() {
     alert('✅ SP password updated.');
     document.getElementById('spNewSelfPass').value = '';
 }
+function renderCashierPassLog() {
+    document.getElementById('cashierPassLogList').innerHTML = data.cashierPassLog.map(l => `
+        <div class="card" style="padding: 8px;">
+            <strong>${l.cashierName}</strong> — ${l.time}
+            <br>Changed by: ${l.changedBy}
+            <br>Old: ${l.oldPass} → New: ${l.newPass}
+        </div>`).join('') || '<p>No password changes recorded.</p>';
+}
 function loadSPChat() {
-    const display = document.getElementById('spChatDisplay');
-    display.innerHTML = '';
-    const messages = data.chats.filter(m =>
-        m.to === 'sp' || m.from === 'sp'
-    );
-    messages.forEach(m => {
-        display.innerHTML += `<div class="${m.from === 'sp' ? 'msg-me' : 'msg-other'}">
-            <strong>${m.from}:</strong> ${m.text}<br><small>${m.time}</small>
-        </div>`;
-    });
-    display.scrollTop = display.scrollHeight;
+    renderChatMessages('spChatDisplay', 'sp', 'admin');
 }
 function spSendMessage() {
-    const text = document.getElementById('spChatMsg').value.trim();
-    if (!text) return alert('Type message.');
+    const msg = document.getElementById('spChatMsg').value.trim();
+    if (!msg) return alert('Type a message.');
     data.chats.push({
         from: 'sp',
         to: 'admin',
-        text,
+        message: msg,
         time: getTimeStamp()
     });
     saveData();
     document.getElementById('spChatMsg').value = '';
     loadSPChat();
 }
+
+// ========== CHAT HELPER ==========
+function renderChatMessages(displayId, sender, target) {
+    const display = document.getElementById(displayId);
+    const msgs = data.chats.filter(m =>
+        (m.from === sender && m.to === target) ||
+        (m.from === target && m.to === sender)
+    );
+    display.innerHTML = msgs.map(m => `
+        <div class="${m.from === sender ? 'msg-me' : 'msg-other'}">
+            <small style="opacity:0.7;">${m.time}</small><br>
+            ${m.message}
+        </div>`).join('');
+    display.scrollTop = display.scrollHeight;
+}
+
 // ========== CASHIER POS ==========
 function showCashierStartScreen() {
     showSection('cashierPOS');
     if (data.shift) {
         document.getElementById('startShiftCard').classList.add('hidden');
         document.getElementById('posMain').classList.remove('hidden');
-        loadPOSData();
+        loadPOSStoreData();
     } else {
         document.getElementById('startShiftCard').classList.remove('hidden');
         document.getElementById('posMain').classList.add('hidden');
     }
 }
 function beginShift() {
-    const opening = parseFloat(document.getElementById('openingFloat').value) || 0;
-    if (opening < 0) return alert('Amount cannot be negative.');
+    const float = parseFloat(document.getElementById('openingFloat').value) || 0;
+    if (float < 0) return alert('Amount cannot be negative.');
     data.shift = {
-        openedAt: getTimeStamp(),
-        openedBy: data.currentUser.name,
-        openingFloat: opening,
-        cashIn: 0,
-        cashOut: 0,
-        salesCash: 0,
-        salesGcash: 0,
-        closingRemittance: null
+        storeId: data.currentUser.storeId,
+        cashierId: data.currentUser.id,
+        cashierName: data.currentUser.name,
+        openingFloat: float,
+        startTime: getTimeStamp(),
+        openingDate: getToday()
     };
     saveData();
-    document.getElementById('startShiftCard').classList.add('hidden');
-    document.getElementById('posMain').classList.remove('hidden');
-    loadPOSData();
+    alert('✅ Shift started!');
+    showCashierStartScreen();
 }
-function loadPOSData() {
+function loadPOSStoreData() {
+    // Load dropdowns
+    loadStoreDropdown('storeSelect', false);
+    loadStoreDropdown('chatRecipient', false);
+    // Load products for this store
     renderProductGrid();
-    updateCartDisplay();
+    // Load transaction lists
+    loadVoidTransSelect();
+    loadStockOutProductSelect();
     loadRecentTrans();
-    loadVoidDropdowns();
-    loadStockOutProducts();
-    loadCountInbox();
-    loadChatMessages();
+    loadCountRequests();
+    updateCartDisplay();
 }
 function showPosTab(tabId) {
     document.querySelectorAll('#posMain .section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('#posMain .tab').forEach(t => t.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     event.target.classList.add('active');
-    if (tabId === 'posVoid') loadMyVoidRequests();
+    if (tabId === 'posChat') loadPOSChat();
+    if (tabId === 'posStockCount') loadCountRequests();
 }
+
+// --- Product Grid & Search ---
 function renderProductGrid(filter = '') {
-    const prods = data.products.filter(p =>
+    const storeProds = data.products.filter(p =>
         p.storeId === data.currentUser.storeId &&
         (filter === '' ||
          p.name.toLowerCase().includes(filter.toLowerCase()) ||
          p.barcode.includes(filter))
     );
-    document.getElementById('productGrid').innerHTML = prods.map(p => `
+    document.getElementById('productGrid').innerHTML = storeProds.map(p => `
         <div class="prod-card" onclick="addToCart(${p.id})">
             <div class="prod-icon">📦</div>
-            <div><strong>${p.name}</strong></div>
-            <div>₱${p.price.toFixed(2)}</div>
-            <div style="font-size:11px;">Stock: ${p.stock}</div>
-        </div>`).join('');
+            <strong>${p.name}</strong>
+            <br>₱${p.price.toFixed(2)}
+            <br><small>Stock: ${p.stock}</small>
+        </div>`).join('') || '<p>No matching products.</p>';
 }
 function filterProducts(val) {
     renderProductGrid(val);
 }
-function addToCart(productId) {
-    const prod = data.products.find(p => p.id === productId);
+function addToCart(prodId) {
+    const prod = data.products.find(p => p.id === prodId && p.storeId === data.currentUser.storeId);
     if (!prod) return;
-    if (prod.stock <= 0) return alert('❌ Out of stock.');
-    const existing = cart.find(it => it.productId === productId);
+    if (prod.stock <= 0) return alert('❌ Out of stock!');
+    
+    const existing = cart.find(i => i.productId === prodId);
     if (existing) {
-        if (existing.qty + 1 > prod.stock) return alert('❌ Not enough stock.');
         existing.qty++;
     } else {
         cart.push({
-            productId: productId,
+            productId: prod.id,
             name: prod.name,
             price: prod.price,
             qty: 1
@@ -1215,197 +1181,234 @@ function addToCart(productId) {
     updateCartDisplay();
 }
 function updateCartDisplay() {
-    const display = document.getElementById('cartDisplay');
-    display.innerHTML = cart.length === 0 ? '<p style="opacity:0.7;">Cart empty</p>' : cart.map(it => `
+    const disp = document.getElementById('cartDisplay');
+    if (!cart.length) {
+        disp.innerHTML = '<p style="opacity:0.7;">Cart empty — scan or tap product</p>';
+        recalculateTotals();
+        return;
+    }
+    disp.innerHTML = cart.map((item, idx) => `
         <div class="cart-item">
-            <span>${it.name} × ${it.qty}</span>
-            <span>
-                <button class="qty-btn" onclick="changeQty(${it.productId}, -1)">−</button>
-                ₱${(it.price * it.qty).toFixed(2)}
-                <button class="qty-btn" onclick="changeQty(${it.productId}, 1)">+</button>
-            </span>
+            <div>
+                <strong>${item.name}</strong> × ${item.qty}
+                <br>₱${(item.price * item.qty).toFixed(2)}
+            </div>
+            <div style="display:flex;align-items:center;">
+                <button class="qty-btn" onclick="changeQty(${idx}, -1)">−</button>
+                <button class="qty-btn" onclick="changeQty(${idx}, 1)">+</button>
+                <button class="qty-btn danger" onclick="removeFromCart(${idx})">×</button>
+            </div>
         </div>`).join('');
     recalculateTotals();
 }
-function changeQty(productId, delta) {
-    const item = cart.find(it => it.productId === productId);
-    if (!item) return;
-    const prod = data.products.find(p => p.id === productId);
-    if (delta > 0 && item.qty + delta > prod.stock) return alert('❌ Not enough stock.');
-    item.qty += delta;
-    if (item.qty <= 0) cart = cart.filter(it => it.productId !== productId);
+function changeQty(idx, delta) {
+    cart[idx].qty += delta;
+    if (cart[idx].qty <= 0) cart.splice(idx, 1);
+    updateCartDisplay();
+}
+function removeFromCart(idx) {
+    cart.splice(idx, 1);
+    updateCartDisplay();
+}
+function clearCart() {
+    if (!cart.length) return;
+    if (!confirm('🗑️ Clear all items from cart?')) return;
+    cart = [];
     updateCartDisplay();
 }
 function recalculateTotals() {
-    const subtotal = cart.reduce((s, it) => s + it.price * it.qty, 0);
-    const applyDisc = document.getElementById('applyPwdDiscount').checked;
-    const discount = applyDisc ? subtotal * 0.05 : 0;
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const applyDiscount = document.getElementById('applyPwdDiscount').checked;
+    const discount = applyDiscount ? subtotal * 0.05 : 0;
     const grandTotal = subtotal - discount;
+    
     document.getElementById('subtotal').textContent = `₱${subtotal.toFixed(2)}`;
     document.getElementById('discountAmt').textContent = `₱${discount.toFixed(2)}`;
     document.getElementById('grandTotal').textContent = `₱${grandTotal.toFixed(2)}`;
+    
     calculateChange();
     calculateSplit();
 }
+
+// --- Payment ---
 function togglePaymentFields() {
     const method = document.getElementById('paymentMethod').value;
     document.getElementById('cashFields').classList.toggle('hidden', method !== 'cash');
     document.getElementById('splitFields').classList.toggle('hidden', method !== 'split');
     document.getElementById('splitLiveDisplay').classList.toggle('hidden', method !== 'split');
-    calculateChange();
-    calculateSplit();
 }
 function calculateChange() {
-    const total = parseFloat(document.getElementById('grandTotal').textContent.replace(/[₱,]/g, '')) || 0;
+    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[^0-9.]/g, '')) || 0;
     const received = parseFloat(document.getElementById('cashReceived').value) || 0;
-    const change = received - total;
+    const change = received - grandTotal;
     document.getElementById('changeAmt').textContent = `₱${Math.max(0, change).toFixed(2)}`;
 }
 function calculateSplit() {
-    if (document.getElementById('paymentMethod').value !== 'split') return;
-    const total = parseFloat(document.getElementById('grandTotal').textContent.replace(/[₱,]/g, '')) || 0;
-    const cash = parseFloat(document.getElementById('splitCashAmt').value) || 0;
-    const gcash = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
-    document.getElementById('splitLiveCash').textContent = `₱${cash.toFixed(2)}`;
-    document.getElementById('splitLiveGcash').textContent = `₱${gcash.toFixed(2)}`;
-    document.getElementById('splitRemain').textContent = `₱${Math.max(0, total - cash - gcash).toFixed(2)}`;
-}
-function clearCart() {
-    if (cart.length > 0 && !confirm('Clear cart?')) return;
-    cart = [];
-    document.getElementById('applyPwdDiscount').checked = false;
-    document.getElementById('cashReceived').value = '';
-    document.getElementById('splitCashAmt').value = '';
-    document.getElementById('splitGcashAmt').value = '';
-    updateCartDisplay();
+    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[^0-9.]/g, '')) || 0;
+    const cashAmt = parseFloat(document.getElementById('splitCashAmt').value) || 0;
+    const gcashAmt = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
+    const totalPaid = cashAmt + gcashAmt;
+    const remain = grandTotal - totalPaid;
+    
+    document.getElementById('splitLiveCash').textContent = `₱${cashAmt.toFixed(2)}`;
+    document.getElementById('splitLiveGcash').textContent = `₱${gcashAmt.toFixed(2)}`;
+    document.getElementById('splitRemain').textContent = remain > 0 ? `₱${remain.toFixed(2)}` : 'Fully Paid';
 }
 function finalizeSale() {
-    if (cart.length === 0) return alert('❌ Cart is empty.');
-    const total = parseFloat(document.getElementById('grandTotal').textContent.replace(/[₱,]/g, '')) || 0;
+    if (!cart.length) return alert('❌ Cart is empty.');
+    
+    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[^0-9.]/g, '')) || 0;
     const method = document.getElementById('paymentMethod').value;
+    
     let cashGiven = 0, gcashAmount = 0;
     if (method === 'cash') {
         cashGiven = parseFloat(document.getElementById('cashReceived').value) || 0;
-        if (cashGiven < total) return alert('❌ Insufficient cash.');
+        if (cashGiven < grandTotal) return alert('❌ Insufficient cash amount.');
     } else if (method === 'gcash') {
-        gcashAmount = total;
+        gcashAmount = grandTotal;
     } else {
         cashGiven = parseFloat(document.getElementById('splitCashAmt').value) || 0;
         gcashAmount = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
-        if (cashGiven + gcashAmount < total) return alert('❌ Payment not complete.');
+        if (cashGiven + gcashAmount < grandTotal) return alert('❌ Insufficient total payment.');
     }
+    
     // Deduct stock
     for (const item of cart) {
         const prod = data.products.find(p => p.id === item.productId);
-        if (!prod || prod.stock < item.qty) return alert(`❌ ${item.name} out of stock.`);
+        if (!prod || prod.stock < item.qty) {
+            return alert(`❌ Insufficient stock for ${item.name}`);
+        }
         prod.stock -= item.qty;
     }
+    
     // Record transaction
     const transId = generateTransId();
     data.transactions.push({
         id: transId,
         date: getToday(),
-        time: getTimeStamp(),
+        time: new Date().toLocaleTimeString('en-PH'),
         storeId: data.currentUser.storeId,
         cashierId: data.currentUser.id,
         cashierName: data.currentUser.name,
         items: [...cart],
         subtotal: cart.reduce((s, i) => s + i.price * i.qty, 0),
         discount: document.getElementById('applyPwdDiscount').checked ? cart.reduce((s, i) => s + i.price * i.qty, 0) * 0.05 : 0,
-        total,
+        total: grandTotal,
         method,
         cashGiven,
-        gcashAmount,
-        voided: false
+        gcashAmount
     });
-    // Update shift totals
-    if (method === 'cash') data.shift.salesCash += total;
-    else if (method === 'gcash') data.shift.salesGcash += total;
-    else { data.shift.salesCash += cashGiven; data.shift.salesGcash += gcashAmount; }
+    
     saveData();
-    alert(`✅ Sale Complete!\nTransaction: ${transId}\nTotal: ₱${total.toFixed(2)}`);
-    clearCart();
-    renderProductGrid();
+    alert(`✅ SALE COMPLETE!\nTrans #: ${transId}\nTotal: ₱${grandTotal.toFixed(2)}`);
+    
+    // Reset
+    cart = [];
+    document.getElementById('cashReceived').value = '';
+    document.getElementById('splitCashAmt').value = '';
+    document.getElementById('splitGcashAmt').value = '';
+    document.getElementById('applyPwdDiscount').checked = false;
+    document.getElementById('paymentMethod').value = 'cash';
+    togglePaymentFields();
+    updateCartDisplay();
     loadRecentTrans();
+    renderProductGrid();
 }
+
+// --- Recent Transactions ---
 function loadRecentTrans() {
-    const voidedIds = data.voidRequests.filter(r => r.status === 'approved').map(r => r.wrongTransId);
     const recent = data.transactions
-        .filter(t => t.storeId === data.currentUser.storeId && !voidedIds.includes(t.id))
+        .filter(t => t.storeId === data.currentUser.storeId)
         .sort((a, b) => b.id.localeCompare(a.id))
         .slice(0, MAX_RECENT_TRANS);
-    document.getElementById('recentTransList').innerHTML = recent.length
-        ? recent.map(t => `
-            <div class="card trans-item">
-                <p><strong>${t.id}</strong> — ${t.date} | ${t.method}</p>
-                <p>Items: ${t.items.length} | Total: ₱${t.total.toFixed(2)}</p>
-            </div>`).join('')
-        : '<p>No transactions yet.</p>';
+    
+    document.getElementById('recentTransList').innerHTML = recent.map(t => {
+        const isVoided = data.voidRequests.some(r => r.wrongTransId === t.id && r.status === 'approved');
+        return `
+            <div class="trans-item ${isVoided ? 'style=opacity:0.5;text-decoration:line-through;' : ''}">
+                <strong>${t.id}</strong> — ${t.date} ${t.time}
+                ${isVoided ? '<span class="badge badge-danger">VOIDED</span>' : ''}
+                <br>Items: ${t.items.length} | Total: ₱${t.total.toFixed(2)}
+                <br>Method: ${t.method === 'cash' ? '💵 Cash' : t.method === 'gcash' ? '🟢 GCash' : '💵+🟢 Split'}
+            </div>`;
+    }).join('') || '<p>No recent transactions.</p>';
 }
-function loadVoidDropdowns() {
+
+// --- Void Request ---
+function loadVoidTransSelect() {
     const sel = document.getElementById('voidTransSelect');
-    const storeTrans = data.transactions.filter(t =>
-        t.storeId === data.currentUser.storeId && !t.voided
-    );
-    sel.innerHTML = '<option value="">-- Select Transaction --</option>' +
-        storeTrans.map(t => `<option value="${t.id}">${t.id} — ₱${t.total.toFixed(2)}</option>`).join('');
+    const storeTrans = data.transactions.filter(t => t.storeId === data.currentUser.storeId);
+    sel.innerHTML = '<option value="">-- Select Transaction --</option>';
+    storeTrans.forEach(t => {
+        sel.innerHTML += `<option value="${t.id}">${t.id} — ₱${t.total.toFixed(2)} (${t.date})</option>`;
+    });
+    renderMyVoidRequests();
 }
 function submitVoidRequest() {
-    const wrongId = document.getElementById('voidTransSelect').value;
-    const correctId = document.getElementById('voidCorrectTrans').value.trim();
+    const wrongTransId = document.getElementById('voidTransSelect').value;
+    if (!wrongTransId) return alert('Select transaction to void.');
+    const correctTransId = document.getElementById('voidCorrectTrans').value.trim();
     const reason = document.getElementById('voidReasonText').value.trim();
-    if (!wrongId || !reason) return alert('Fill required fields.');
+    if (!reason) return alert('Enter reason.');
+    
     data.voidRequests.push({
         id: 'VR' + Date.now(),
         storeId: data.currentUser.storeId,
         cashierId: data.currentUser.id,
         cashierName: data.currentUser.name,
-        wrongTransId: wrongId,
-        correctTransId: correctId || null,
+        wrongTransId,
+        correctTransId,
         reason,
-        status: 'pending',
-        requestedAt: getTimeStamp()
+        time: getTimeStamp(),
+        status: 'pending'
     });
     saveData();
     alert('✅ Void request sent to Admin.');
     document.getElementById('voidTransSelect').value = '';
     document.getElementById('voidCorrectTrans').value = '';
     document.getElementById('voidReasonText').value = '';
-    loadMyVoidRequests();
+    renderMyVoidRequests();
 }
-function loadMyVoidRequests() {
+function renderMyVoidRequests() {
     document.getElementById('myVoidRequests').innerHTML = data.voidRequests
-        .filter(r => r.cashierId === data.currentUser.id)
+        .filter(r => r.storeId === data.currentUser.storeId)
         .map(r => `
-            <div class="trans-item">
-                <p>${r.wrongTransId} — 
-                    <span class="badge ${r.status === 'pending' ? 'badge-warn' : r.status === 'approved' ? 'badge-success' : 'badge-danger'}">
-                        ${r.status}
-                    </span>
-                </p>
-                <small>${r.reason}</small>
-            </div>`).join('') || '<p>No requests yet.</p>';
+            <div class="card" style="padding: 8px;">
+                ${r.id} — <span class="badge ${
+                    r.status === 'pending' ? 'badge-warn' :
+                    r.status === 'approved' ? 'badge-success' : 'badge-danger'
+                }">${r.status}</span>
+                <br>Trans: ${r.wrongTransId}
+                <br>Reason: ${r.reason}
+            </div>`).join('') || '<p>No requests submitted yet.</p>';
 }
-function loadStockOutProducts() {
+
+// --- Stock Out ---
+function loadStockOutProductSelect() {
     const sel = document.getElementById('stockOutProduct');
-    sel.innerHTML = '<option value="">-- Select Product --</option>' +
-        data.products.filter(p => p.storeId === data.currentUser.storeId).map(p =>
-            `<option value="${p.id}">${p.name} — Stock: ${p.stock}</option>`
-        ).join('');
+    const prods = data.products.filter(p => p.storeId === data.currentUser.storeId);
+    sel.innerHTML = '<option value="">-- Select Product --</option>';
+    prods.forEach(p => {
+        sel.innerHTML += `<option value="${p.id}">${p.name} — Stock: ${p.stock}</option>`;
+    });
+    renderStockOutLog();
 }
 function submitStockOut() {
-    const productId = Number(document.getElementById('stockOutProduct').value);
+    const prodId = Number(document.getElementById('stockOutProduct').value);
     const qty = parseInt(document.getElementById('stockOutQty').value);
     const reason = document.getElementById('stockOutReason').value.trim();
-    if (!productId || !qty || !reason) return alert('Fill all fields.');
-    const prod = data.products.find(p => p.id === productId);
-    if (!prod || prod.stock < qty) return alert('❌ Insufficient stock.');
+    const prod = data.products.find(p => p.id === prodId);
+    
+    if (!prodId || !qty || !reason) return alert('Fill all fields.');
+    if (!prod) return alert('Product not found.');
+    if (prod.stock < qty) return alert(`❌ Insufficient stock. Current: ${prod.stock}`);
+    
     prod.stock -= qty;
-    data.stockOutLogs.push({
+    data.stockOutLogs.unshift({
         id: 'SO' + Date.now(),
-        productId,
+        productId: prodId,
         productName: prod.name,
-        qty,
+        quantity: qty,
         reason,
         storeId: data.currentUser.storeId,
         cashierName: data.currentUser.name,
@@ -1413,155 +1416,187 @@ function submitStockOut() {
     });
     saveData();
     alert('✅ Stock out recorded.');
-    loadStockOutProducts();
     document.getElementById('stockOutQty').value = '1';
     document.getElementById('stockOutReason').value = '';
+    loadStockOutProductSelect();
+    renderProductGrid();
+}
+function renderStockOutLog() {
     document.getElementById('stockOutLog').innerHTML = data.stockOutLogs
         .filter(l => l.storeId === data.currentUser.storeId)
-        .map(l => `<div class="trans-item"><p>${l.productName} − ${l.qty} — ${l.reason}</p><small>${l.cashierName} | ${l.time}</small></div>`).join('');
+        .map(l => `
+            <div class="trans-item">
+                <strong>${l.productName}</strong> — −${l.quantity}
+                <br>Reason: ${l.reason} | By: ${l.cashierName} — ${l.time}
+            </div>`).join('') || '<p>No stock out records.</p>';
 }
+
+// --- Cash In / Out ---
 function recordCashIn() {
     const amount = parseFloat(document.getElementById('cashInAmount').value);
     const reason = document.getElementById('cashInReason').value.trim();
-    if (!amount || amount <= 0 || !reason) return alert('Fill valid amount and reason.');
-    data.shift.cashIn += amount;
-    data.cashInOutLogs.push({
-        type: 'cashIn',
+    if (!amount || amount <= 0 || !reason) return alert('Fill all fields correctly.');
+    
+    data.cashInOutLogs.unshift({
+        type: 'in',
         amount,
         reason,
-        shiftOpenedAt: data.shift.openedAt,
+        storeId: data.currentUser.storeId,
         cashierName: data.currentUser.name,
         time: getTimeStamp()
     });
     saveData();
-    alert('✅ Cash in recorded.');
+    alert('✅ Cash In recorded.');
     document.getElementById('cashInAmount').value = '';
     document.getElementById('cashInReason').value = '';
 }
 function recordCashOut() {
     const amount = parseFloat(document.getElementById('cashOutAmount').value);
     const reason = document.getElementById('cashOutReason').value.trim();
-    if (!amount || amount <= 0 || !reason) return alert('Fill valid amount and reason.');
-    data.shift.cashOut += amount;
-    data.cashInOutLogs.push({
-        type: 'cashOut',
+    if (!amount || amount <= 0 || !reason) return alert('Fill all fields correctly.');
+    
+    data.cashInOutLogs.unshift({
+        type: 'out',
         amount,
         reason,
-        shiftOpenedAt: data.shift.openedAt,
+        storeId: data.currentUser.storeId,
         cashierName: data.currentUser.name,
         time: getTimeStamp()
     });
     saveData();
-    alert('✅ Cash out recorded.');
+    alert('✅ Cash Out recorded.');
     document.getElementById('cashOutAmount').value = '';
     document.getElementById('cashOutReason').value = '';
 }
-function loadChatMessages() {
-    const recipient = document.getElementById('chatRecipient').value;
-    const display = document.getElementById('chatMessageBox');
-    display.innerHTML = '';
-    const messages = data.chats.filter(m =>
-        (m.from === 'admin' && m.to === 'cashier-' + data.currentUser.id) ||
-        (m.from === 'sp' && m.to === 'cashier-' + data.currentUser.id) ||
-        (m.from === 'cashier-' + data.currentUser.id && (m.to === 'admin' || m.to === 'sp'))
-    );
-    messages.forEach(m => {
-        display.innerHTML += `<div class="${m.from.startsWith('cashier') ? 'msg-me' : 'msg-other'}">
-            <strong>${m.from}:</strong> ${m.text}<br><small>${m.time}</small>
-        </div>`;
-    });
-    display.scrollTop = display.scrollHeight;
+
+// --- POS Chat ---
+function loadPOSChat() {
+    const target = document.getElementById('chatRecipient').value;
+    if (!target) return;
+    renderChatMessages('chatMessageBox', 'cashier-' + data.currentUser.id, target);
 }
 function sendChatMessage() {
-    const to = document.getElementById('chatRecipient').value;
-    const text = document.getElementById('chatInputBox').value.trim();
-    if (!text) return alert('Type message.');
+    const target = document.getElementById('chatRecipient').value;
+    const msg = document.getElementById('chatInputBox').value.trim();
+    if (!target || !msg) return alert('Select recipient and type message.');
+    
     data.chats.push({
         from: 'cashier-' + data.currentUser.id,
-        to,
-        text,
+        to: target,
+        message: msg,
         time: getTimeStamp()
     });
     saveData();
     document.getElementById('chatInputBox').value = '';
-    loadChatMessages();
+    loadPOSChat();
 }
-function loadCountInbox() {
-    const inbox = document.getElementById('countRequestInbox');
-    const requests = data.countRequests.filter(r =>
-        r.storeId === data.currentUser.storeId && r.status === 'pending'
-    );
-    inbox.innerHTML = requests.length
-        ? `<p>Pending requests: ${requests.length}</p>` + requests.map(r => `
-            <div class="card" style="cursor:pointer;" onclick="openCountResponse('${r.id}')">
-                <p><strong>${r.id}</strong> — ${r.products.length} product(s)</p>
-                <small>Requested: ${r.requestedAt}</small>
-            </div>`).join('')
-        : '<p>No pending requests.</p>';
+
+// --- Stock Count Response ---
+function loadCountRequests() {
+    const inbox = data.countRequests.filter(r => r.storeId === data.currentUser.storeId && r.status === 'pending');
+    if (!inbox.length) {
+        document.getElementById('countRequestInbox').innerHTML = '<p class="alert info">No pending count requests.</p>';
+        document.getElementById('countResponseArea').classList.add('hidden');
+        return;
+    }
+    document.getElementById('countRequestInbox').innerHTML = inbox.map(r => `
+        <div class="card" style="padding: 10px;">
+            <strong>🔢 Count Request: ${r.id}</strong>
+            <br>Requested: ${r.requestedAt}
+            <button class="sm" onclick="openCountResponse('${r.id}')">✏️ Enter Count</button>
+        </div>`).join('');
 }
 function openCountResponse(reqId) {
     activeCountRequestId = reqId;
     const req = data.countRequests.find(r => r.id === reqId);
     if (!req) return;
+    document.getElementById('countTargetName').textContent = `Count for Request: ${reqId}`;
     document.getElementById('countResponseArea').classList.remove('hidden');
-    document.getElementById('countTargetName').textContent = req.products.map(p => p.productName).join(', ');
 }
 function submitCountResponse() {
-    const actual = parseInt(document.getElementById('actualCountInput').value);
-    if (!activeCountRequestId || isNaN(actual) || actual < 0) return alert('Enter valid count.');
+    const actualQty = parseInt(document.getElementById('actualCountInput').value);
+    if (!activeCountRequestId || isNaN(actualQty) || actualQty < 0) return alert('Enter valid quantity.');
+    
     const req = data.countRequests.find(r => r.id === activeCountRequestId);
     if (!req) return;
-    req.status = 'responded';
-    req.response = `Counted: ${actual} — ${getTimeStamp()} by ${data.currentUser.name}`;
+    
+    req.responses.push({
+        cashierId: data.currentUser.id,
+        cashierName: data.currentUser.name,
+        actualQty,
+        submittedAt: getTimeStamp()
+    });
+    if (req.responses.length >= 1) req.status = 'responded';
+    
     saveData();
-    alert('✅ Count submitted.');
-    document.getElementById('countResponseArea').classList.add('hidden');
+    alert('✅ Count submitted!');
     document.getElementById('actualCountInput').value = '';
+    document.getElementById('countResponseArea').classList.add('hidden');
     activeCountRequestId = null;
-    loadCountInbox();
+    loadCountRequests();
 }
+
+// --- End Shift ---
 function initiateEndShift() {
-    if (!confirm('End shift now?')) return;
+    if (!confirm('🚪 End shift and logout?')) return;
     document.getElementById('endShiftModal').classList.remove('hidden');
+    computeDenomTotal();
 }
 function computeDenomTotal() {
-    const d1000 = parseInt(document.getElementById('d1000').value) || 0;
-    const d500 = parseInt(document.getElementById('d500').value) || 0;
-    const d200 = parseInt(document.getElementById('d200').value) || 0;
-    const d100 = parseInt(document.getElementById('d100').value) || 0;
-    const d50 = parseInt(document.getElementById('d50').value) || 0;
+    const d1000 = (parseInt(document.getElementById('d1000').value) || 0) * 1000;
+    const d500 = (parseInt(document.getElementById('d500').value) || 0) * 500;
+    const d200 = (parseInt(document.getElementById('d200').value) || 0) * 200;
+    const d100 = (parseInt(document.getElementById('d100').value) || 0) * 100;
+    const d50 = (parseInt(document.getElementById('d50').value) || 0) * 50;
     const dCoins = parseFloat(document.getElementById('dCoins').value) || 0;
-    const total = d1000 * 1000 + d500 * 500 + d200 * 200 + d100 * 100 + d50 * 50 + dCoins;
+    
+    const total = d1000 + d500 + d200 + d100 + d50 + dCoins;
     document.getElementById('denomTotalAmt').textContent = `₱${total.toFixed(2)}`;
-    return total;
-}
-function confirmEndShift() {
-    const remit = computeDenomTotal();
-    data.shift.closingRemittance = remit;
-    data.shift.closedAt = getTimeStamp();
-    data.shift.closedBy = data.currentUser.name;
-    saveData();
-    alert(`✅ Shift closed.\nRemittance: ₱${remit.toFixed(2)}\nLogged out.`);
-    closeEndShiftModal();
-    logout();
 }
 function closeEndShiftModal() {
     document.getElementById('endShiftModal').classList.add('hidden');
-    ['d1000','d500','d200','d100','d50','dCoins'].forEach(id => document.getElementById(id).value = '0');
 }
+function confirmEndShift() {
+    if (!confirm('⚠️ Finalize and logout? Cannot undo.')) return;
+    // Shift summary can be expanded here
+    alert(`✅ Shift Ended — ${data.shift.cashierName}\nOpening Float: ₱${data.shift.openingFloat.toFixed(2)}\nLogged out successfully.`);
+    data.shift = null;
+    saveData();
+    closeEndShiftModal();
+    logout();
+}
+
+// --- POS Unlock ---
 function unlockPOS() {
-    const input = document.getElementById('unlockPassword').value.trim();
-    if (input === data.currentUser.password) {
+    const entered = document.getElementById('unlockPassword').value.trim();
+    if (entered === data.currentUser.password) {
         document.getElementById('lockModal').classList.add('hidden');
         document.getElementById('unlockPassword').value = '';
         resetActivityTimer();
     } else {
-        alert('❌ Wrong password.');
+        alert('❌ Incorrect password.');
     }
 }
+
 // ========== INITIALIZE ==========
-loadData();
-updateConnectionStatus();
+window.onload = function() {
+    loadData();
+    updateConnectionStatus();
+    // Auto-set default dates for reports
+    const today = getToday();
+    document.getElementById('salesDateFrom').value = today;
+    document.getElementById('salesDateTo').value = today;
+    document.getElementById('transDateFrom').value = today;
+    document.getElementById('transDateTo').value = today;
+    
+    // Auto-set expiry on first login
+    if (!data.serviceExpiry) {
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 7);
+        data.serviceExpiry = expiry.toISOString();
+        saveData();
+    }
+};
 </script>
 </body>
 </html>
