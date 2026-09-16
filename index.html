@@ -205,7 +205,7 @@
       <h4 style="margin-top:20px;">Cash In/Out Log</h4>
       <div id="io-log"></div>
       <hr>
-      <h4>End Shift — Cash Count by Denomination</h4>
+            <h4>End Shift — Cash Count by Denomination</h4>
       <div class="denom-row">
         <span>₱1000:</span><input type="number" class="denom" data-val="1000" placeholder="0">
         <span>₱500:</span><input type="number" class="denom" data-val="500" placeholder="0">
@@ -217,7 +217,7 @@
         <span>₱20:</span><input type="number" class="denom" data-val="20" placeholder="0">
       </div>
       <div class="denom-row">
-        <span>Coins:</span><input type="number" class="denom" data-val="1" placeholder="0">
+        <span>Coins (Total ₱):</span><input type="number" class="denom" data-val="1" placeholder="0">
       </div>
       <p><strong>Total Counted:</strong> ₱<span id="counted-total">0.00</span></p>
       <p><strong>Expected Remittance:</strong> ₱<span id="expected-total">0.00</span></p>
@@ -432,12 +432,32 @@ const DENOMS = [1000, 500, 200, 100, 50, 20, 1];
 class LocalDB {
   constructor() { this.ready = this.initDB(); }
   async initDB() {
-    return new Promise(res => {
-      const r = indexedDB.open('FortisPOS_Full', 1);
-      r.onupgradeneeded = e => { e.target.result.createObjectStore('main'); };
-      r.onsuccess = e => { this.db = e.target.result; res(); };
-    });
-  }
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('FortisPOS_Full', 1);
+    
+    r.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('main')) {
+        db.createObjectStore('main');
+      }
+    };
+    
+    r.onsuccess = e => {
+      this.db = e.target.result;
+      res();
+    };
+    
+    r.onerror = e => {
+      console.error('DB Error:', e.target.error);
+      rej(new Error('Database failed to open: ' + (e.target.error?.message || 'Unknown')));
+    };
+    
+    r.onblocked = e => {
+      console.warn('DB Blocked — close other tabs using this app');
+      rej(new Error('Please close other tabs running Fortis POS and refresh'));
+    };
+  });
+}
   async set(k, v) {
     await this.ready;
     return new Promise(res => {
@@ -551,23 +571,36 @@ async function doLogin(selectedRole, u, p) {
   }
   showDashboard();
 }
-// ---------- LOGOUT ----------
 function doLogout() {
   state.currentUser = null;
   state.shift = null;
   state.cart = [];
   sessionStorage.removeItem('fu');
-  // Clear all password fields
-  document.querySelectorAll('input[type="password"]').forEach(i => i.value = '');
-  // Clear login fields — reset username field state
+  
+  // ✅ Clear ALL password fields
+  document.querySelectorAll('input[type="password"]').forEach(i => {
+    i.value = '';
+    i.type = 'text'; i.type = 'password'; // Force clear saved autocomplete
+  });
+  
+  // ✅ Reset login fields completely
   const roleSel = document.getElementById('login-role');
   const userInp = document.getElementById('inp-user');
-  if(roleSel) roleSel.value = '';
-  if(userInp) {
+  const passInp = document.getElementById('inp-pass');
+  const userLabelRow = document.getElementById('username-row').querySelector('label');
+  
+  if (roleSel) roleSel.value = '';
+  if (userInp) {
     userInp.value = '';
     userInp.disabled = false;
-    document.getElementById('username-row').querySelector('label').textContent = 'Username';
   }
+  if (passInp) passInp.value = '';
+  if (userLabelRow) userLabelRow.textContent = 'Username';
+  
+  // ✅ Reset status indicator
+  document.getElementById('status-indicator').textContent = 'Offline';
+  document.getElementById('status-indicator').className = 'status-offline';
+  
   location.reload();
 }
 // ---------- RENDER UI HELPERS ----------
@@ -578,16 +611,29 @@ function showDashboard() {
   const u = state.currentUser;
   document.getElementById('user-role-badge').textContent = `${u.fname || u.username} — ${u.role.toUpperCase()}`;
   
-  // Role visibility
+  // ✅ FIXED Role visibility — malinaw na dagdag/tanggal
   document.querySelectorAll('.admin-only').forEach(el => {
-    el.classList.toggle('hidden-role', u.role !== ROLES.ADMIN);
+    if (u.role === ROLES.ADMIN) {
+      el.classList.remove('hidden-role');
+    } else {
+      el.classList.add('hidden-role');
+    }
   });
   document.querySelectorAll('.sp-only').forEach(el => {
-    el.classList.toggle('hidden-role', u.role !== ROLES.SP);
+    if (u.role === ROLES.SP) {
+      el.classList.remove('hidden-role');
+    } else {
+      el.classList.add('hidden-role');
+    }
   });
   document.querySelectorAll('.cashier-only').forEach(el => {
-    el.classList.toggle('hidden-role', u.role !== ROLES.CASHIER);
+    if (u.role === ROLES.CASHIER) {
+      el.classList.remove('hidden-role');
+    } else {
+      el.classList.add('hidden-role');
+    }
   });
+  
   populateStoreSelects();
   populateChatPartners();
   checkSubscription();
@@ -705,11 +751,38 @@ document.getElementById('btn-add-cashier')?.addEventListener('click', () => {
   const lname = document.getElementById('cashier-lname').value.trim();
   const storeId = document.getElementById('cashier-store').value;
   const pass = document.getElementById('cashier-pass').value.trim();
-  if (!fname || !/^\d{4}$/.test(pass)) return alert('Enter name and 4-digit password');
-  const un = fname.toLowerCase().replace(/\s/g,'') + Date.now().toString(36).slice(0,3);
-  state.users[un] = { role: ROLES.CASHIER, pass, active: true, fname, lname, storeId };
-  saveAll(); renderCashiers();
-  document.getElementById('cashier-fname').value = ''; document.getElementById('cashier-lname').value = ''; document.getElementById('cashier-pass').value = '';
+  
+  if (!fname) return alert('Enter first name');
+  if (!/^\d{4}$/.test(pass)) return alert('Password must be exactly 4 digits');
+  
+  // Clean consistent username: firstname + short unique suffix
+  const baseName = fname.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const suffix = Math.random().toString(36).substring(2, 5);
+  let un = `${baseName}${suffix}`;
+  
+  // Ensure no duplicate username
+  while (state.users[un]) {
+    un = `${baseName}${Math.random().toString(36).substring(2, 5)}`;
+  }
+  
+  state.users[un] = { 
+    role: ROLES.CASHIER, 
+    pass, 
+    active: true, 
+    fname, 
+    lname, 
+    storeId 
+  };
+  
+  saveAll();
+  renderCashiers();
+  populateChatPartners();
+  
+  // Clear fields
+  document.getElementById('cashier-fname').value = '';
+  document.getElementById('cashier-lname').value = '';
+  document.getElementById('cashier-pass').value = '';
+  alert(`Cashier created! Username: ${un}`);
 });
 document.addEventListener('click', e => {
   if (e.target.dataset.setpass) {
@@ -1171,25 +1244,44 @@ function renderRequests() {
   }
 }
 document.addEventListener('click', e => {
-  if (e.target.dataset.approve) {
+    if (e.target.dataset.approve) {
     const req = state.requests.find(r => r.id === e.target.dataset.approve);
     if (!req) return;
     req.status = 'approved';
+    
     // Apply void: mark transaction
     if (req.type === 'void') {
       const tnx = state.transactions.find(t => t.id === req.voidTnx);
       if (tnx) tnx.status = 'voided';
     }
-    // Apply stock out
+    
+    // ✅ FIXED: Stock Out — Deduct quantity from actual product stock
     if (req.type === 'stockout') {
       const prod = state.products.find(p => p.id === req.prodId && p.storeId === req.storeId);
-      if (prod) prod.qty = Math.max(0, prod.qty - req.qty);
+      if (prod) {
+        prod.qty = Math.max(0, prod.qty - req.qty); // Never go below 0
+      } else {
+        alert('Product not found or wrong store — stock not deducted');
+      }
     }
-    saveAll(); renderRequests(); renderProducts(); renderTransactions();
-  }
-  if (e.target.dataset.reject) {
-    const req = state.requests.find(r => r.id === e.target.dataset.reject);
-    if (req) { req.status = 'rejected'; saveAll(); renderRequests(); }
+    
+    saveAll();
+      {
+  db.set('users', state.users);
+  db.set('stores', state.stores);
+  db.set('products', state.products);
+  db.set('transactions', state.transactions);
+  db.set('requests', state.requests);
+  db.set('conversations', state.conversations);
+  db.set('passwordLogs', state.passwordLogs);
+  db.set('subscriptions', state.subscriptions);
+  db.set('stockCounts', state.stockCounts);
+  db.set('shift', state.shift); // ✅ Isinama ang shift
+}
+    renderRequests();
+    renderProducts();
+    renderStocks();
+    renderTransactions();
   }
 });
 
@@ -1377,44 +1469,67 @@ function sendChatMsg() {
 
 // --- TAB SWITCHING ---
 document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', e => {
+    e.preventDefault(); // ✅ Pigilan ang default reload
+    
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const tabId = btn.dataset.tab;
+    
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
-
-    // lazy refresh on tab open
+    
+    const targetTab = document.getElementById(`${tabId}-tab`);
+    if (targetTab) { // ✅ I-check kung mayroon muna bago gamitin
+      targetTab.classList.remove('hidden');
+    }
+    
+    // Lazy refresh on tab open
     if (tabId === 'stocks') renderStocks();
     if (tabId === 'overview') renderTransactions();
     if (tabId === 'counts') renderStockCounts();
     if (tabId === 'approvals') renderRequests();
   });
 });
-
 // --- Auto-set username based on role ---
 document.getElementById('login-role')?.addEventListener('change', e => {
   const role = e.target.value;
   const userRow = document.getElementById('username-row');
   const userInp = document.getElementById('inp-user');
+  const label = userRow.querySelector('label');
   
   if (role === 'admin') {
     userInp.value = 'admin';
     userInp.disabled = true;
-    userRow.querySelector('label').textContent = 'Username (Fixed)';
+    label.textContent = 'Username (Fixed)';
   } else if (role === 'sp') {
     userInp.value = 'sp';
     userInp.disabled = true;
-    userRow.querySelector('label').textContent = 'Username (Fixed)';
+    label.textContent = 'Username (Fixed)';
   } else if (role === 'cashier') {
     userInp.value = '';
     userInp.disabled = false;
-    userRow.querySelector('label').textContent = 'Username';
+    label.textContent = 'Username';
   } else {
     userInp.value = '';
     userInp.disabled = false;
-    userRow.querySelector('label').textContent = 'Username';
+    label.textContent = 'Username';
   }
+});
+
+// --- Login button action ---
+document.getElementById('btn-login')?.addEventListener('click', () => {
+  const role = document.getElementById('login-role').value;
+  const username = document.getElementById('inp-user').value;
+  const password = document.getElementById('inp-pass').value;
+  const errEl = document.getElementById('login-error');
+  
+  errEl.textContent = '';
+  
+  if (!role) return errEl.textContent = 'Please select your role';
+  if (!username.trim()) return errEl.textContent = 'Username is required';
+  if (!password.trim()) return errEl.textContent = 'Password is required';
+  
+  doLogin(role, username, password);
 });
 
 // --- OFFLINE STATUS SIMULATION ---
