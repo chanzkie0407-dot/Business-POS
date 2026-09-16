@@ -134,8 +134,8 @@
     <button onclick="login()">➡️ Login</button>
     <button class="danger sm" onclick="clearAndReload()">🔄 Reset All Data</button>
     <p style="margin-top: 10px; font-size: 12px; color: #666;">
-        Defaults: Admin=8888 | SP=19970407chan<br>
-        Cashier accounts created by Admin only.
+        Default credentials will be changed on first login.<br>
+        Cashier accounts are created and managed by Admin only.
     </p>
 </div>
 <!-- PASSWORD CHANGE SECTION -->
@@ -468,7 +468,7 @@
 </div>
 </div>
 <script>
-// ========== DEFAULT CREDENTIALS ==========
+// ========== DEFAULT CREDENTIALS — NOT DISPLAYED ON PAGE ==========
 const DEFAULTS = { admin: '8888', sp: '19970407chan' };
 const PLANS = {
     weekly: { days: 7, price: 199 },
@@ -759,14 +759,12 @@ function renderProductList() {
             <div class="card" style="padding: 10px;">
                 <strong>${p.name}</strong> — ₱${p.price.toFixed(2)}
                 <br>
-                <small>Store: ${store?.name || 'Unknown'} | Stock: ${p.stock} | Bar
-                code: ${p.barcode}</small>
+                <small>Store: ${store?.name || 'Unknown'} | Stock: ${p.stock} | Barcode: ${p.barcode}</small>
                 <button class="sm" onclick="editProduct(${p.id})">✏️ Edit</button>
                 <button class="danger sm" onclick="deleteProduct(${p.id})">🗑️ Delete</button>
             </div>`;
     }).join('') || '<p>No products added yet.</p>';
 }
-
 function editProduct(id) {
     const prod = data.products.find(p => p.id === id);
     if (!prod) return;
@@ -777,326 +775,240 @@ function editProduct(id) {
     const newStock = prompt('Enter new stock quantity:', prod.stock);
     if (newStock === null) return;
     const newBarcode = prompt('Enter new barcode/SKU:', prod.barcode);
-    if (newBarcode === null) return;
-    
+        if (newBarcode === null) return;
     prod.name = newName.trim() || prod.name;
     prod.price = parseFloat(newPrice) || prod.price;
-    prod.stock = parseInt(newStock) || prod.stock;
+    prod.stock = parseInt(newStock) || 0;
     prod.barcode = newBarcode.trim() || prod.barcode;
-    
-    saveData();
-    alert('✅ Product updated!');
-    renderProductList();
+    saveData(); alert('✅ Product updated!'); renderProductList();
 }
-
 function deleteProduct(id) {
-    if (!confirm('⚠️ Delete this product? This cannot be undone.')) return;
+    if (!confirm('Delete this product?')) return;
     data.products = data.products.filter(p => p.id !== id);
-    saveData();
-    renderProductList();
+    saveData(); renderProductList();
 }
-
 // --- Stocks Overview ---
 function renderStocksOverview() {
     const storeId = Number(document.getElementById('stockStoreFilter').value);
     if (!storeId) {
-        document.getElementById('stocksOverviewResult').innerHTML = '<p>Select a store to view stocks.</p>';
+        document.getElementById('stocksOverviewResult').innerHTML = '<p>Select a store.</p>';
         return;
     }
     const prods = data.products.filter(p => p.storeId === storeId);
-    document.getElementById('stocksOverviewResult').innerHTML = prods.map(p => `
-        <div class="card" style="padding: 10px;">
-            <strong>${p.name}</strong> — Stock: 
-            <span class="${p.stock <= 5 ? 'badge badge-danger' : p.stock <= 15 ? 'badge badge-warn' : 'badge badge-success'}">
-                ${p.stock}
-            </span>
-            | ₱${p.price.toFixed(2)} | Code: ${p.barcode}
-        </div>`).join('') || '<p>No products for this store.</p>';
+    document.getElementById('stocksOverviewResult').innerHTML = prods.length ? `
+        <table>
+            <tr><th>Product</th><th>Price</th><th>Stock</th><th>Status</th></tr>
+            ${prods.map(p => `
+                <tr>
+                    <td>${p.name}<br><small>${p.barcode}</small></td>
+                    <td>₱${p.price.toFixed(2)}</td>
+                    <td>${p.stock}</td>
+                    <td>${p.stock <= 5 ? '<span class="badge badge-danger">Low Stock</span>' : '<span class="badge badge-success">Adequate</span>'}</td>
+                </tr>`).join('')}
+        </table>` : '<p>No products yet.</p>';
 }
-
 // --- Void Requests ---
 function renderVoidRequests() {
-    const container = document.getElementById('voidReqList');
-    if (!data.voidRequests.length) {
-        container.innerHTML = '<p>No void/refund requests yet.</p>';
-        return;
-    }
-    container.innerHTML = data.voidRequests.map(r => {
-        const store = data.stores.find(s => s.id === r.storeId);
-        return `
-        <div class="card" style="padding: 12px;">
-            <p><strong>Transaction:</strong> ${r.wrongTransId}</p>
-            <p><strong>Store:</strong> ${store?.name || 'Unknown'}</p>
-            <p><strong>Requested by:</strong> ${r.cashierName}</p>
-            <p><strong>Reason:</strong> ${r.reason}</p>
-            <p><strong>Status:</strong> 
-                <span class="badge ${r.status === 'pending' ? 'badge-warn' : r.status === 'approved' ? 'badge-success' : 'badge-danger'}">
-                    ${r.status.toUpperCase()}
-                </span>
-            </p>
-            ${r.status === 'pending' ? `
-                <button class="sm" onclick="approveVoid('${r.wrongTransId}')">✅ Approve</button>
-                <button class="danger sm" onclick="rejectVoid('${r.wrongTransId}')">❌ Reject</button>
-            ` : `<small>Handled: ${r.handledAt || '—'}</small>`}
-        </div>`;
-    }).join('');
+    document.getElementById('voidReqList').innerHTML = !data.voidRequests.length
+        ? '<p>No void requests yet.</p>'
+        : data.voidRequests.map(r => `
+            <div class="card" style="padding:10px;">
+                <strong>Transaction: ${r.wrongTransId}</strong>
+                <br>From: ${r.cashierName} — ${r.time}
+                <br>Reason: ${r.reason}
+                <br>Status: ${r.status === 'pending' ? '<span class="badge badge-warn">Pending</span>' : r.status === 'approved' ? '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-danger">Rejected</span>'}
+                ${r.status === 'pending' ? `
+                    <button class="sm" onclick="approveVoid('${r.id}')">✅ Approve</button>
+                    <button class="danger sm" onclick="rejectVoid('${r.id}')">❌ Reject</button>` : ''}
+            </div>`).join('');
 }
-
-function approveVoid(transId) {
-    const req = data.voidRequests.find(r => r.wrongTransId === transId);
+function approveVoid(reqId) {
+    const req = data.voidRequests.find(r => r.id === reqId);
     if (!req) return;
     req.status = 'approved';
-    req.handledAt = getTimeStamp();
-    req.handledBy = data.currentUser.name;
-    saveData();
-    alert('✅ Void approved — transaction marked as voided.');
-    renderVoidRequests();
+    saveData(); alert('✅ Void Approved'); renderVoidRequests();
 }
-
-function rejectVoid(transId) {
-    const req = data.voidRequests.find(r => r.wrongTransId === transId);
+function rejectVoid(reqId) {
+    const req = data.voidRequests.find(r => r.id === reqId);
     if (!req) return;
     req.status = 'rejected';
-    req.handledAt = getTimeStamp();
-    req.handledBy = data.currentUser.name;
-    saveData();
-    alert('❌ Void rejected.');
-    renderVoidRequests();
+    saveData(); alert('❌ Void Rejected'); renderVoidRequests();
 }
-
 // --- Transaction Summary ---
 function renderTransSummary() {
     const storeId = Number(document.getElementById('transStoreFilter').value);
     const from = document.getElementById('transDateFrom').value;
     const to = document.getElementById('transDateTo').value;
     if (!storeId || !from || !to) {
-        document.getElementById('transSummaryResult').innerHTML = '<p>Select store and date range.</p>';
+        document.getElementById('transSummaryResult').innerHTML = '<p>Select store & dates.</p>';
         return;
     }
     const voidedIds = data.voidRequests.filter(r => r.status === 'approved').map(r => r.wrongTransId);
     const trans = data.transactions.filter(t =>
         t.storeId === storeId && t.date >= from && t.date <= to && !voidedIds.includes(t.id)
     );
-    
-    let html = `<h4>📋 Transactions (${from} to ${to})</h4><table><tr><th>ID</th><th>Time</th><th>Items</th><th>Total</th><th>Method</th><th>Cashier</th></tr>`;
-    trans.forEach(t => {
-        html += `<tr>
-            <td>${t.id}</td><td>${t.time}</td><td>${t.items.length}</td>
-            <td>₱${t.total.toFixed(2)}</td><td>${t.method}</td><td>${t.cashierName}</td>
-        </tr>`;
-    });
-    html += `</table><p style="margin-top:8px;"><strong>Total Sales:</strong> ₱${trans.reduce((s,t)=>s+t.total,0).toFixed(2)}</p>`;
-    document.getElementById('transSummaryResult').innerHTML = html;
+    document.getElementById('transSummaryResult').innerHTML = !trans.length
+        ? '<p>No transactions for this period.</p>'
+        : `<table>
+            <tr><th>Date/Time</th><th>Items</th><th>Method</th><th>Total</th></tr>
+            ${trans.map(t => `
+                <tr>
+                    <td>${t.date} ${t.time}</td>
+                    <td>${t.items.length} item(s)</td>
+                    <td>${t.method === 'cash' ? '💵 Cash' : t.method === 'gcash' ? '🟢 GCash' : '💵+🟢 Split'}</td>
+                    <td>₱${t.total.toFixed(2)}</td>
+                </tr>`).join('')}
+            <tr><td colspan="3"><strong>TOTAL</strong></td><td><strong>₱${trans.reduce((s,t)=>s+t.total,0).toFixed(2)}</strong></td></tr>
+        </table>`;
 }
-
-// --- Stock Count Requests ---
+// --- Stock Count ---
 function loadCountProductChecklist() {
     const storeId = Number(document.getElementById('countReqStore').value);
     if (!storeId) {
-        document.getElementById('countProductChecklist').innerHTML = '<p>Select a store first.</p>';
+        document.getElementById('countProductChecklist').innerHTML = '<p>Select store first.</p>';
         return;
     }
     const prods = data.products.filter(p => p.storeId === storeId);
     document.getElementById('countProductChecklist').innerHTML = prods.map(p => `
         <label class="checklist-item">
-            <input type="checkbox" class="count-prod-check" value="${p.id}">
+            <input type="checkbox" class="count-prod-checkbox" value="${p.id}">
             ${p.name} — System Qty: ${p.stock}
         </label>`).join('');
 }
-
 function sendCountRequest() {
     const storeId = Number(document.getElementById('countReqStore').value);
-    const selected = Array.from(document.querySelectorAll('.count-prod-check:checked')).map(c => Number(c.value));
+    const selected = Array.from(document.querySelectorAll('.count-prod-checkbox:checked')).map(c => Number(c.value));
     if (!storeId || !selected.length) return alert('Select store and at least one product.');
-    
-    selected.forEach(prodId => {
-        const prod = data.products.find(p => p.id === prodId);
-        data.countRequests.push({
-            id: 'CR' + Date.now() + Math.random().toString(36).slice(2,6),
-            storeId,
-            productId: prodId,
-            productName: prod.name,
-            systemQty: prod.stock,
-            requestedAt: getTimeStamp(),
-            status: 'pending',
-            actualQty: null,
-            respondedAt: null
-        });
+    data.countRequests.push({
+        id: 'CR' + Date.now(), storeId, productIds: selected,
+        status: 'pending', createdAt: getTimeStamp(), responses: []
     });
-    saveData();
-    alert('✅ Count request(s) sent to cashier.');
-    loadCountProductChecklist();
+    saveData(); alert('✅ Request sent'); loadCountProductChecklist(); renderCountResponses();
 }
-
 function renderCountResponses() {
-    const container = document.getElementById('countRespList');
-    if (!data.countRequests.length) {
-        container.innerHTML = '<p>No count responses yet.</p>';
-        return;
-    }
-    container.innerHTML = data.countRequests.map(r => {
-        const store = data.stores.find(s => s.id === r.storeId);
-        return `
-        <div class="card" style="padding: 10px;">
-            <p><strong>Product:</strong> ${r.productName}</p>
-            <p><strong>Store:</strong> ${store?.name || 'Unknown'}</p>
-            <p>System: ${r.systemQty} | Actual: ${r.actualQty ?? '—'}</p>
-            <p><strong>Status:</strong> 
-                <span class="badge ${r.status === 'pending' ? 'badge-warn' : 'badge-success'}">
-                    ${r.status === 'pending' ? 'Awaiting Response' : 'Responded'}
-                </span>
-            </p>
-            ${r.status === 'responded' ? `<small>Responded: ${r.respondedAt}</small>` : ''}
-        </div>`;
-    }).join('');
+    document.getElementById('countRespList').innerHTML = !data.countRequests.length
+        ? '<p>No stock count requests yet.</p>'
+        : data.countRequests.map(r => {
+            const store = data.stores.find(s => s.id === r.storeId);
+            return `
+                <div class="card" style="padding:10px;">
+                    <strong>Request ${r.id}</strong> — ${store?.name || 'Unknown Store'} (${r.createdAt})
+                    <br>Status: ${r.status}
+                    ${r.responses.length ? `<br>Responses: ${r.responses.length}` : ''}
+                </div>`;
+        }).join('');
 }
-
 // --- Admin Chat ---
 function populateAdminChatTargets() {
     const sel = document.getElementById('adminChatTarget');
-    sel.innerHTML = '<option value="sp">🛠️ Service Provider</option>';
-    data.cashiers.forEach(c => {
-        const store = data.stores.find(s => s.id === c.storeId);
-        sel.innerHTML += `<option value="cashier-${c.id}">👤 ${c.firstName} ${c.lastName || ''} — ${store?.name || 'Unknown'}</option>`;
-    });
+    sel.innerHTML = '<option value="sp">🛠️ Service Provider</option>' +
+        data.cashiers.map(c => `<option value="cashier-${c.id}">👤 ${c.firstName} ${c.lastName || ''}</option>`).join('');
 }
-
 function loadAdminChat() {
     const target = document.getElementById('adminChatTarget').value;
     if (!target) return;
-    renderChatMessages('admin', target, 'adminChatDisplay');
+    renderChat('admin', target, 'adminChatDisplay');
 }
-
 function adminSendMessage() {
     const target = document.getElementById('adminChatTarget').value;
     const msg = document.getElementById('adminChatMsg').value.trim();
     if (!target || !msg) return alert('Select recipient and type message.');
-    
     data.chats.push({
-        from: 'admin',
-        to: target,
-        text: msg,
-        time: getTimeStamp()
+        from: 'admin', to: target, message: msg, time: getTimeStamp()
     });
-    saveData();
-    document.getElementById('adminChatMsg').value = '';
-    loadAdminChat();
+    saveData(); document.getElementById('adminChatMsg').value = ''; loadAdminChat();
 }
-
-function renderChatMessages(sender, target, displayId) {
-    const msgs = data.chats.filter(m =>
-        (m.from === sender && m.to === target) ||
-        (m.from === target && m.to === sender)
-    ).sort((a,b) => new Date(a.time) - new Date(b.time));
-    
-    document.getElementById(displayId).innerHTML = msgs.map(m => `
-        <div class="${m.from === sender ? 'msg-me' : 'msg-other'}">
-            <small style="opacity:0.7;">${m.time}</small><br>
-            ${m.text}
-        </div>`).join('') || '<p style="color:#888;">No messages yet. Start the conversation!</p>';
-    
-    const box = document.getElementById(displayId);
-    box.scrollTop = box.scrollHeight;
-}
-
 // ========== SP DASHBOARD ==========
 function showSPDashboard() {
     showSection('spDashboard');
-    renderServiceStatus();
-    renderCashierPassLog();
-    loadSPChat();
+    updateServiceStatus(); renderCashierPassLog();
 }
-
 function showSPTab(tabId) {
     document.querySelectorAll('#spDashboard .section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('#spDashboard .tab').forEach(t => t.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     event.target.classList.add('active');
     if (tabId === 'spChat') loadSPChat();
-    if (tabId === 'spCashierLog') renderCashierPassLog();
 }
-
-function renderServiceStatus() {
-    let expiry;
+function updateServiceStatus() {
+    const el = document.getElementById('spServiceStatus');
     if (!data.serviceExpiry) {
-        expiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-        data.serviceExpiry = expiry.toISOString();
-        saveData();
-    } else {
-        expiry = new Date(data.serviceExpiry);
+        el.innerHTML = '<p class="alert success">Free trial active — expires in 7 days from first login</p>';
+        return;
     }
+    const expiry = new Date(data.serviceExpiry);
     const now = new Date();
-    const daysLeft = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
-    const isActive = expiry > now;
-    
-    document.getElementById('spServiceStatus').innerHTML = `
-        <p><strong>Expiry Date:</strong> ${expiry.toLocaleString('en-PH')}</p>
-        <p class="alert ${isActive ? 'success' : 'danger'}">
-            ${isActive ? `✅ Active — ${daysLeft} day(s) remaining` : '❌ EXPIRED — Service disabled'}
-        </p>`;
+    const daysLeft = Math.ceil((expiry - now)/(1000*60*60*24));
+    if (daysLeft <= 0) {
+        el.innerHTML = '<p class="alert danger">⚠️ Subscription expired — Renew now</p>';
+    } else if (daysLeft <= 3) {
+        el.innerHTML = `<p class="alert warn">⚠️ Expires in ${daysLeft} day(s)</p>`;
+    } else {
+        el.innerHTML = `<p class="alert success">✅ Active — ${daysLeft} day(s) remaining</p>`;
+    }
 }
-
 function renewService() {
     const plan = document.getElementById('planSelect').value;
-    if (!PLANS[plan]) return alert('Invalid plan.');
-    
-    const days = PLANS[plan].days;
-    const current = data.serviceExpiry ? new Date(data.serviceExpiry) : new Date();
-    const start = current > new Date() ? current : new Date();
+    const {days, price} = PLANS[plan];
+    if (!confirm(`Confirm ${plan} plan — ₱${price} for ${days} days?`)) return;
+    const start = data.serviceExpiry && new Date(data.serviceExpiry) > new Date()
+        ? new Date(data.serviceExpiry) : new Date();
     start.setDate(start.getDate() + days);
-    
     data.serviceExpiry = start.toISOString();
-    saveData();
-    alert(`✅ Subscription renewed! ${days} days added. Expires: ${start.toLocaleString('en-PH')}`);
-    renderServiceStatus();
+    saveData(); alert(`✅ Renewed — valid until ${start.toLocaleDateString('en-PH')}`);
+    updateServiceStatus();
 }
-
 function spChangeAdminPass() {
-    const newPass = document.getElementById('spNewAdminPass').value.trim();
-    if (newPass.length < 6) return alert('❌ Min 6 characters.');
+    const newPass = document.getElementById('spNewAdminPass').value;
+    if (newPass.length < 6) return alert('Min 6 characters.');
     data.adminPassword = newPass;
-    data.passwordChanged.admin = true;
-    saveData();
-    alert('✅ Admin password updated.');
+    saveData(); alert('✅ Admin password updated');
     document.getElementById('spNewAdminPass').value = '';
 }
-
 function spChangeOwnPass() {
-    const newPass = document.getElementById('spNewSelfPass').value.trim();
-    if (newPass.length < 6) return alert('❌ Min 6 characters.');
+    const newPass = document.getElementById('spNewSelfPass').value;
+    if (newPass.length < 6) return alert('Min 6 characters.');
     data.spPassword = newPass;
-    data.passwordChanged.sp = true;
-    saveData();
-    alert('✅ SP password updated.');
+    saveData(); alert('✅ SP password updated');
     document.getElementById('spNewSelfPass').value = '';
 }
-
 function renderCashierPassLog() {
-    document.getElementById('cashierPassLogList').innerHTML = data.cashierPassLog.length ?
-        data.cashierPassLog.map(l => `
-        <div class="card" style="padding: 8px; font-size:13px;">
-            <p><strong>${l.cashierName}</strong></p>
-            <p>Old: ${l.oldPass} → New: ${l.newPass}</p>
-            <p>Changed by: ${l.changedBy} — ${l.time}</p>
-        </div>`).join('') : '<p>No password changes recorded.</p>';
+    document.getElementById('cashierPassLogList').innerHTML = !data.cashierPassLog.length
+        ? '<p>No password changes recorded.</p>'
+        : `<table>
+            <tr><th>Cashier</th><th>Old PIN</th><th>New PIN</th><th>Changed By</th><th>Time</th></tr>
+            ${data.cashierPassLog.map(l => `
+                <tr>
+                    <td>${l.cashierName}</td>
+                    <td>${'•'.repeat(4)}</td>
+                    <td>${'•'.repeat(4)}</td>
+                    <td>${l.changedBy}</td>
+                    <td>${l.time}</td>
+                </tr>`).join('')}
+        </table>`;
 }
-
-function loadSPChat() {
-    renderChatMessages('sp', 'admin', 'spChatDisplay');
-}
-
+function loadSPChat() { renderChat('sp', 'admin', 'spChatDisplay'); }
 function spSendMessage() {
     const msg = document.getElementById('spChatMsg').value.trim();
-    if (!msg) return alert('Type a message.');
-    
-    data.chats.push({
-        from: 'sp', to: 'admin', text: msg, time: getTimeStamp()
-    });
-    saveData();
-    document.getElementById('spChatMsg').value = '';
-    loadSPChat();
+    if (!msg) return alert('Type message.');
+    data.chats.push({ from: 'sp', to: 'admin', message: msg, time: getTimeStamp() });
+    saveData(); document.getElementById('spChatMsg').value = ''; loadSPChat();
 }
-
+// ========== SHARED CHAT RENDERER ==========
+function renderChat(sender, target, displayId) {
+    const msgs = data.chats.filter(m =>
+        (m.from === sender && m.to === target) || (m.from === target && m.to === sender)
+    );
+    document.getElementById(displayId).innerHTML = !msgs.length
+        ? '<p style="color:#888;">No messages yet</p>'
+        : msgs.map(m => `
+            <div class="${m.from === sender ? 'msg-me' : 'msg-other'}">
+                <small><strong>${m.from === sender ? 'You' : m.from}</strong> — ${m.time}</small>
+                <br>${m.message}
+            </div>`).join('');
+    const box = document.getElementById(displayId);
+    box.scrollTop = box.scrollHeight;
+}
 // ========== CASHIER POS ==========
 function showCashierStartScreen() {
     showSection('cashierPOS');
@@ -1109,498 +1021,377 @@ function showCashierStartScreen() {
         document.getElementById('posMain').classList.add('hidden');
     }
 }
-
 function beginShift() {
-    const opening = parseFloat(document.getElementById('openingFloat').value);
-    if (isNaN(opening) || opening < 0) return alert('Enter valid opening amount.');
-    
+    const float = parseFloat(document.getElementById('openingFloat').value);
+    if (isNaN(float) || float < 0) return alert('Enter valid opening fund.');
     data.shift = {
+        cashierId: data.currentUser.id,
+        cashierName: data.currentUser.name,
+        storeId: data.currentUser.storeId,
+        openingFloat: float,
         startTime: getTimeStamp(),
-        openingFloat: opening,
-        cashIn: 0,
-        cashOut: 0,
-        salesTotal: 0,
+        cashIn: 0, cashOut: 0,
         transactions: []
     };
-    saveData();
-    document.getElementById('startShiftCard').classList.add('hidden');
-    document.getElementById('posMain').classList.remove('hidden');
-    loadPOSData();
-    alert('✅ Shift started!');
+    saveData(); alert('✅ Shift started');
+    showCashierStartScreen();
 }
-
 function loadPOSData() {
-    renderProductGrid();
-    updateRecentTrans();
-    loadVoidDropdowns();
-    loadStockOutProducts();
-    loadChatRecipient();
-    loadCountInbox();
+    loadStoreDropdown('stockOutProduct');
+    loadVoidTransSelect();
+    filterProducts('');
 }
-
 function showPosTab(tabId) {
     document.querySelectorAll('#posMain .section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('#posMain .tab').forEach(t => t.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     event.target.classList.add('active');
-    
-    if (tabId === 'posHistory') updateRecentTrans();
-    if (tabId === 'posVoid') loadVoidDropdowns();
-    if (tabId === 'posChat') loadChatRecipient();
+    if (tabId === 'posHistory') renderRecentTrans();
+    if (tabId === 'posVoid') loadVoidTransSelect();
+    if (tabId === 'posStockOut') loadStockOutProductOptions();
+    if (tabId === 'posChat') loadPosChat();
     if (tabId === 'posStockCount') loadCountInbox();
 }
-
-// --- Product Grid & Search ---
-function renderProductGrid(filter = '') {
-    const storeId = data.currentUser.storeId;
-    let prods = data.products.filter(p => p.storeId === storeId && p.stock > 0);
-    
-    if (filter) {
-        const f = filter.toLowerCase();
-        prods = prods.filter(p =>
-            p.name.toLowerCase().includes(f) || p.barcode.includes(f)
-        );
-    }
-    
-    document.getElementById('productGrid').innerHTML = prods.map(p => `
-        <div class="prod-card" onclick="addToCart(${p.id})">
-            <div class="prod-icon">📦</div>
-            <div><strong>${p.name}</strong></div>
-            <div>₱${p.price.toFixed(2)}</div>
-            <small>Stock: ${p.stock}</small>
-        </div>`).join('') || '<p style="grid-column:1/-1;">No products found.</p>';
+function loadVoidTransSelect() {
+    const sel = document.getElementById('voidTransSelect');
+    const storeTrans = data.transactions.filter(t => t.storeId === data.currentUser.storeId);
+    sel.innerHTML = storeTrans.length
+        ? '<option value="">-- Select Transaction --</option>' +
+            storeTrans.map(t => `<option value="${t.id}">${t.id} — ₱${t.total.toFixed(2)} — ${t.date} ${t.time}</option>`).join('')
+        : '<option value="">No transactions yet</option>';
 }
-
-function filterProducts(val) {
-    renderProductGrid(val);
+function loadStockOutProductOptions() {
+    const sel = document.getElementById('stockOutProduct');
+    const prods = data.products.filter(p => p.storeId === data.currentUser.storeId);
+    sel.innerHTML = prods.length
+        ? prods.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`).join('')
+        : '<option value="">No products yet</option>';
 }
-
-// --- Cart ---
+// --- Cart & POS ---
+function filterProducts(q) {
+    q = q.toLowerCase().trim();
+    const prods = data.products.filter(p =>
+        p.storeId === data.currentUser.storeId &&
+        (p.name.toLowerCase().includes(q) || p.barcode.includes(q))
+    );
+    document.getElementById('productGrid').innerHTML = prods.length
+        ? prods.map(p => `
+            <div class="prod-card" onclick="addToCart(${p.id})">
+                <div class="prod-icon">📦</div>
+                <div><strong>${p.name}</strong></div>
+                <div>₱${p.price.toFixed(2)}</div>
+                <small>Stock: ${p.stock}</small>
+            </div>`).join('')
+        : '<p style="grid-column:1/-1; color:#888;">No product found</p>';
+}
 function addToCart(prodId) {
     const prod = data.products.find(p => p.id === prodId);
-    if (!prod || prod.stock <= 0) return alert('❌ Out of stock.');
-    
-    const existing = cart.find(item => item.productId === prodId);
+    if (!prod) return;
+    if (prod.stock <= 0) return alert('❌ Out of stock');
+    const existing = cart.find(c => c.id === prodId);
     if (existing) {
-        if (existing.qty >= prod.stock) return alert('❌ Not enough stock available.');
+        if (existing.qty >= prod.stock) return alert('❌ Not enough stock');
         existing.qty++;
     } else {
-        cart.push({
-            productId: prod.id,
-            name: prod.name,
-            price: prod.price,
-            qty: 1
-        });
+        cart.push({ id: prod.id, name: prod.name, price: prod.price, qty: 1 });
     }
-    updateCartDisplay();
+    renderCart();
 }
-
-function removeFromCart(index) {
-    cart.splice(index, 1);
-    updateCartDisplay();
-}
-
-function changeQty(index, delta) {
-    const item = cart[index];
-    const prod = data.products.find(p => p.id === item.productId);
-    const newQty = item.qty + delta;
-    
-    if (newQty < 1) return removeFromCart(index);
-    if (newQty > prod.stock) return alert('❌ Not enough stock.');
-    
-    item.qty = newQty;
-    updateCartDisplay();
-}
-
-function updateCartDisplay() {
-    const container = document.getElementById('cartDisplay');
-    if (!cart.length) {
-        container.innerHTML = '<p style="opacity:0.7;">Cart is empty — scan or tap products</p>';
-        recalculateTotals();
-        return;
-    }
-    
-    container.innerHTML = cart.map((item, idx) => `
-        <div class="cart-item">
-            <div>
-                <strong>${item.name}</strong><br>
-                ₱${item.price.toFixed(2)} × ${item.qty}
-            </div>
-            <div style="display:flex;align-items:center;">
-                <button class="qty-btn" onclick="changeQty(${idx}, -1)">−</button>
-                <button class="qty-btn" onclick="changeQty(${idx}, +1)">+</button>
-                <button class="qty-btn danger" onclick="removeFromCart(${idx})" style="margin-left:6px;">×</button>
-            </div>
-        </div>`).join('');
+function renderCart() {
+    document.getElementById('cartDisplay').innerHTML = !cart.length
+        ? '<p style="color:rgba(255,255,255,0.7);">Click products to add here</p>'
+        : cart.map(item => `
+            <div class="cart-item">
+                <div>
+                    <strong>${item.name}</strong><br>
+                    ₱${item.price.toFixed(2)} × ${item.qty}
+                </div>
+                <div style="display:flex;align-items:center;">
+                    <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+                    <span>${item.qty}</span>
+                    <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                </div>
+            </div>`).join('');
     recalculateTotals();
 }
-
+function changeQty(id, delta) {
+    const item = cart.find(c => c.id === id);
+    const prod = data.products.find(p => p.id === id);
+    if (!item || !prod) return;
+    item.qty += delta;
+    if (item.qty <= 0) {
+        cart = cart.filter(c => c.id !== id);
+    } else if (item.qty > prod.stock) {
+        return alert('❌ Not enough stock');
+    }
+    renderCart();
+}
 function recalculateTotals() {
-    const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-    const applyDiscount = document.getElementById('applyPwdDiscount').checked;
-    const discount = applyDiscount ? subtotal * 0.05 : 0;
-    const grandTotal = subtotal - discount;
-    
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    const discount = document.getElementById('applyPwdDiscount').checked ? subtotal * 0.05 : 0;
+    const grand = subtotal - discount;
     document.getElementById('subtotal').textContent = `₱${subtotal.toFixed(2)}`;
     document.getElementById('discountAmt').textContent = `₱${discount.toFixed(2)}`;
-    document.getElementById('grandTotal').textContent = `₱${grandTotal.toFixed(2)}`;
-    
+    document.getElementById('grandTotal').textContent = `₱${grand.toFixed(2)}`;
     calculateChange();
     calculateSplit();
 }
-
 function togglePaymentFields() {
     const method = document.getElementById('paymentMethod').value;
     document.getElementById('cashFields').classList.toggle('hidden', method !== 'cash');
     document.getElementById('splitFields').classList.toggle('hidden', method !== 'split');
-    
-    if (method !== 'split') {
-        document.getElementById('splitLiveDisplay').classList.add('hidden');
-    } else {
-        document.getElementById('splitLiveDisplay').classList.remove('hidden');
-    }
+    document.getElementById('splitLiveDisplay').classList.toggle('hidden', method !== 'split');
 }
-
 function calculateChange() {
-    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[₱,]/g, '')) || 0;
+    const grand = getGrandTotal();
     const received = parseFloat(document.getElementById('cashReceived').value) || 0;
-    const change = received - grandTotal;
-    document.getElementById('changeAmt').textContent = `₱${Math.max(0, change).toFixed(2)}`;
+    document.getElementById('changeAmt').textContent = `₱${Math.max(0, received - grand).toFixed(2)}`;
 }
-
 function calculateSplit() {
-    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[₱,]/g, '')) || 0;
-    const cashAmt = parseFloat(document.getElementById('splitCashAmt').value) || 0;
-    const gcashAmt = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
-    const totalPaid = cashAmt + gcashAmt;
-    const remaining = grandTotal - totalPaid;
-    
-    document.getElementById('splitLiveCash').textContent = `₱${cashAmt.toFixed(2)}`;
-    document.getElementById('splitLiveGcash').textContent = `₱${gcashAmt.toFixed(2)}`;
-    document.getElementById('splitRemain').textContent = `₱${Math.max(0, remaining).toFixed(2)}`;
+    const grand = getGrandTotal();
+    const cash = parseFloat(document.getElementById('splitCashAmt').value) || 0;
+    const gcash = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
+    document.getElementById('splitLiveCash').textContent = `₱${cash.toFixed(2)}`;
+    document.getElementById('splitLiveGcash').textContent = `₱${gcash.toFixed(2)}`;
+    document.getElementById('splitRemain').textContent = `₱${Math.max(0, grand - cash - gcash).toFixed(2)}`;
 }
-
+function getGrandTotal() {
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    return subtotal - (document.getElementById('applyPwdDiscount').checked ? subtotal * 0.05 : 0);
+}
 function clearCart() {
     if (cart.length && !confirm('Clear cart?')) return;
-    cart = [];
-    document.getElementById('productSearch').value = '';
+    cart = []; renderCart();
     document.getElementById('cashReceived').value = '';
     document.getElementById('splitCashAmt').value = '';
     document.getElementById('splitGcashAmt').value = '';
-    document.getElementById('applyPwdDiscount').checked = false;
-    document.getElementById('splitLiveDisplay').classList.add('hidden');
-    renderProductGrid();
-    updateCartDisplay();
 }
-
 function finalizeSale() {
-    if (!cart.length) return alert('❌ Cart is empty.');
-    
-    const grandTotal = parseFloat(document.getElementById('grandTotal').textContent.replace(/[₱,]/g, '')) || 0;
+    if (!cart.length) return alert('Cart is empty');
+    const grand = getGrandTotal();
     const method = document.getElementById('paymentMethod').value;
     let cashGiven = 0, gcashAmount = 0;
-    
     if (method === 'cash') {
         cashGiven = parseFloat(document.getElementById('cashReceived').value) || 0;
-        if (cashGiven < grandTotal) return alert('❌ Insufficient cash.');
+        if (cashGiven < grand) return alert(`❌ Insufficient cash — need ₱${grand.toFixed(2)}`);
     } else if (method === 'gcash') {
-        gcashAmount = grandTotal;
-    } else if (method === 'split') {
+        gcashAmount = grand;
+    } else {
         cashGiven = parseFloat(document.getElementById('splitCashAmt').value) || 0;
         gcashAmount = parseFloat(document.getElementById('splitGcashAmt').value) || 0;
-        if (cashGiven + gcashAmount < grandTotal) return alert('❌ Amount not fully paid.');
+        if (cashGiven + gcashAmount < grand) return alert(`❌ Underpaid — need ₱${grand.toFixed(2)} total`);
     }
-    
     // Deduct stock
     for (const item of cart) {
-        const prod = data.products.find(p => p.id === item.productId);
-        if (!prod || prod.stock < item.qty) return alert(`❌ Out of stock: ${item.name}`);
+        const prod = data.products.find(p => p.id === item.id);
+        if (!prod || prod.stock < item.qty) return alert(`❌ ${item.name} out of stock — refresh`);
         prod.stock -= item.qty;
     }
-    
-    const transId = generateTransId();
-    const transaction = {
-        id: transId,
-        date: getToday(),
-        time: getTimeStamp(),
+    const trans = {
+        id: generateTransId(),
         storeId: data.currentUser.storeId,
         cashierId: data.currentUser.id,
         cashierName: data.currentUser.name,
+        date: getToday(),
+        time: new Date().toLocaleTimeString('en-PH'),
         items: [...cart],
-        subtotal: cart.reduce((s, i) => s + i.price * i.qty, 0),
-        discount: document.getElementById('applyPwdDiscount').checked ? cart.reduce((s, i) => s + i.price * i.qty, 0) * 0.05 : 0,
-        total: grandTotal,
-        method,
-        cashGiven,
-        gcashAmount,
-        change: method === 'cash' ? cashGiven - grandTotal : 0
+        subtotal: cart.reduce((s,i)=>s+i.price*i.qty,0),
+        discount: document.getElementById('applyPwdDiscount').checked ? cart.reduce((s,i)=>s+i.price*i.qty,0)*0.05 : 0,
+        total: grand,
+        method, cashGiven, gcashAmount,
+        change: method === 'cash' ? cashGiven - grand : 0
     };
-    
-    data.transactions.push(transaction);
-    if (data.shift) {
-        data.shift.transactions.push(transId);
-        data.shift.salesTotal += grandTotal;
-    }
-    
+    data.transactions.push(trans);
+    if (data.shift) data.shift.transactions.push(trans.id);
     saveData();
-    alert(`✅ SALE COMPLETE!\nReceipt:\n#${transId}\nTotal: ₱${grandTotal.toFixed(2)}\nThank you!`);
+    alert(`✅ SALE COMPLETE\nReceipt:\n${trans.id}\nTotal: ₱${grand.toFixed(2)}\nThank you!`);
     clearCart();
-    updateRecentTrans();
+    filterProducts('');
 }
-
-// --- Recent Transactions ---
-function updateRecentTrans() {
-    const storeId = data.currentUser.storeId;
-    const voidedIds = data.voidRequests.filter(r => r.status === 'approved').map(r => r.wrongTransId);
-    const recent = data.transactions
-        .filter(t => t.storeId === storeId && !voidedIds.includes(t.id))
-        .sort((a,b) => new Date(b.time) - new Date(a.time))
-        .slice(0, MAX_RECENT_TRANS);
-    
-    document.getElementById('recentTransList').innerHTML = recent.length ?
-        recent.map(t => `
-        <div class="trans-item">
-            <p><strong>${t.id}</strong> — ${t.time}</p>
-            <p>Items: ${t.items.length} | Total: ₱${t.total.toFixed(2)} | ${t.method.toUpperCase()}</p>
-        </div>`).join('') : '<p>No recent transactions.</p>';
+function renderRecentTrans() {
+    const list = data.transactions
+        .filter(t => t.storeId === data.currentUser.storeId)
+        .slice(-MAX_RECENT_TRANS).reverse();
+    document.getElementById('recentTransList').innerHTML = !list.length
+        ? '<p>No transactions yet.</p>'
+        : list.map(t => `
+            <div class="trans-item">
+                <strong>${t.id}</strong> — ${t.date} ${t.time}
+                <br>Items: ${t.items.length} | ${t.method.toUpperCase()} — ₱${t.total.toFixed(2)}
+            </div>`).join('');
 }
-
 // --- Void Request ---
-function loadVoidDropdowns() {
-    const storeId = data.currentUser.storeId;
-    const voidedIds = data.voidRequests.filter(r => r.status === 'approved').map(r => r.wrongTransId);
-    const recent = data.transactions.filter(t => t.storeId === storeId && !voidedIds.includes(t.id));
-    
-    document.getElementById('voidTransSelect').innerHTML = '<option value="">-- Select Transaction --</option>' +
-        recent.map(t => `<option value="${t.id}">${t.id} — ₱${t.total.toFixed(2)} (${t.time})</option>`).join('');
-    
-    renderMyVoidRequests();
-}
-
 function submitVoidRequest() {
-    const wrongTransId = document.getElementById('voidTransSelect').value;
-    if (!wrongTransId) return alert('Select transaction to void.');
+    const wrongId = document.getElementById('voidTransSelect').value;
     const reason = document.getElementById('voidReasonText').value.trim();
-    if (!reason) return alert('Enter reason.');
-    
+    if (!wrongId || !reason) return alert('Fill all fields');
     data.voidRequests.push({
         id: 'VR' + Date.now(),
         storeId: data.currentUser.storeId,
         cashierId: data.currentUser.id,
         cashierName: data.currentUser.name,
-        wrongTransId,
+        wrongTransId: wrongId,
         correctTransId: document.getElementById('voidCorrectTrans').value.trim() || null,
-        reason,
-        status: 'pending',
-        requestedAt: getTimeStamp()
+        reason, status: 'pending', time: getTimeStamp()
     });
-    saveData();
-    alert('✅ Void request sent to Admin.');
+    saveData(); alert('✅ Request sent to Admin');
     document.getElementById('voidReasonText').value = '';
     document.getElementById('voidCorrectTrans').value = '';
-    loadVoidDropdowns();
+    renderMyVoidRequests();
 }
-
 function renderMyVoidRequests() {
-    const myReqs = data.voidRequests.filter(r => r.cashierId === data.currentUser.id);
-    document.getElementById('myVoidRequests').innerHTML = myReqs.length ?
-        myReqs.map(r => `
-        <div class="card" style="padding:8px;">
-            <p><strong>${r.wrongTransId}</strong></p>
-            <p>Reason: ${r.reason}</p>
-            <p>Status: <span class="badge ${r.status === 'pending' ? 'badge-warn' : r.status === 'approved' ? 'badge-success' : 'badge-danger'}">${r.status.toUpperCase()}</span></p>
-        </div>`).join('') : '<p>No requests sent yet.</p>';
+    document.getElementById('myVoidRequests').innerHTML = data.voidRequests
+        .filter(r => r.cashierId === data.currentUser.id)
+        .map(r => `
+            <div class="trans-item">
+                <strong>Req: ${r.id}</strong> — ${r.time}
+                <br>Tx: ${r.wrongTransId} | Status: ${r.status === 'pending' ? '⏳ Pending' : r.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
+            </div>`).join('');
 }
-
 // --- Stock Out ---
-function loadStockOutProducts() {
-    const prods = data.products.filter(p => p.storeId === data.currentUser.storeId);
-    document.getElementById('stockOutProduct').innerHTML = '<option value="">-- Select Product --</option>' +
-        prods.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`).join('');
-    renderStockOutLog();
-}
-
 function submitStockOut() {
     const prodId = Number(document.getElementById('stockOutProduct').value);
     const qty = parseInt(document.getElementById('stockOutQty').value);
     const reason = document.getElementById('stockOutReason').value.trim();
-    
-    if (!prodId || !qty || !reason) return alert('Fill all fields.');
     const prod = data.products.find(p => p.id === prodId);
-    if (!prod || prod.stock < qty) return alert('❌ Insufficient stock.');
-    
+    if (!prod || !qty || !reason) return alert('Fill all fields');
+    if (prod.stock < qty) return alert('❌ Not enough stock');
     prod.stock -= qty;
     data.stockOutLogs.unshift({
-        id: 'SO' + Date.now(),
-        productName: prod.name,
-        quantity: qty,
-        reason,
-        storeId: data.currentUser.storeId,
-        cashierName: data.currentUser.name,
-        time: getTimeStamp()
+        id: 'SO' + Date.now(), productId: prodId, productName: prod.name,
+        qty, reason, storeId: data.currentUser.storeId,
+        cashier: data.currentUser.name, time: getTimeStamp()
     });
-    saveData();
-    alert('✅ Stock out recorded.');
+    saveData(); alert('✅ Recorded');
+    document.getElementById('stockOutQty').value = '1';
     document.getElementById('stockOutReason').value = '';
-    loadStockOutProducts();
+    renderStockOutLog(); loadStockOutProductOptions();
 }
-
 function renderStockOutLog() {
-    const log = data.stockOutLogs.filter(l => l.storeId === data.currentUser.storeId);
-    document.getElementById('stockOutLog').innerHTML = log.length ?
-        log.map(l => `
-        <div class="trans-item">
-            <p><strong>${l.productName}</strong> — ${l.quantity} units</p>
-            <p>Reason: ${l.reason}</p>
-            <small>${l.time} — ${l.cashierName}</small>
-        </div>`).join('') : '<p>No stock-out records.</p>';
+    document.getElementById('stockOutLog').innerHTML = data.stockOutLogs
+        .filter(l => l.storeId === data.currentUser.storeId).slice(0,5)
+        .map(l => `
+            <div class="trans-item">
+                ${l.productName} — ${l.qty} pcs<br>
+                Reason: ${l.reason} | ${l.time}
+            </div>`).join('');
 }
-
-// --- Cash In / Out ---
+// --- Cash In/Out ---
 function recordCashIn() {
     const amt = parseFloat(document.getElementById('cashInAmount').value);
     const reason = document.getElementById('cashInReason').value.trim();
-    if (!amt || amt <= 0 || !reason) return alert('Fill all fields correctly.');
-    
-    data.cashInOutLogs.unshift({
-        type: 'in',
-        amount: amt,
-        reason,
-        storeId: data.currentUser.storeId,
-        cashierName: data.currentUser.name,
-        time: getTimeStamp()
+    if (!amt || !reason) return alert('Fill all fields');
+    data.cashInOutLogs.push({
+        type: 'in', amount: amt, reason, storeId: data.currentUser.storeId,
+        cashier: data.currentUser.name, time: getTimeStamp()
     });
     if (data.shift) data.shift.cashIn += amt;
-    saveData();
-    alert('✅ Cash In recorded.');
+    saveData(); alert('✅ Recorded');
     document.getElementById('cashInAmount').value = '';
     document.getElementById('cashInReason').value = '';
 }
-
 function recordCashOut() {
     const amt = parseFloat(document.getElementById('cashOutAmount').value);
     const reason = document.getElementById('cashOutReason').value.trim();
-    if (!amt || amt <= 0 || !reason) return alert('Fill all fields correctly.');
-    
-    data.cashInOutLogs.unshift({
-        type: 'out',
-        amount: amt,
-        reason,
-        storeId: data.currentUser.storeId,
-        cashierName: data.currentUser.name,
-        time: getTimeStamp()
+    if (!amt || !reason) return alert('Fill all fields');
+    data.cashInOutLogs.push({
+        type: 'out', amount: amt, reason, storeId: data.currentUser.storeId,
+        cashier: data.currentUser.name, time: getTimeStamp()
     });
     if (data.shift) data.shift.cashOut += amt;
-    saveData();
-    alert('✅ Cash Out recorded.');
+    saveData(); alert('✅ Recorded');
     document.getElementById('cashOutAmount').value = '';
     document.getElementById('cashOutReason').value = '';
 }
-
-// --- Chat ---
-function loadChatRecipient() {
-    renderChatMessages(data.currentUser.role, 'admin', 'chatMessageBox');
+// --- POS Chat ---
+function loadPosChat() {
+    const target = document.getElementById('chatRecipient').value;
+    renderChat('cashier-' + data.currentUser.id, target, 'chatMessageBox');
 }
-
 function sendChatMessage() {
     const to = document.getElementById('chatRecipient').value;
-    const text = document.getElementById('chatInputBox').value.trim();
-    if (!text) return alert('Type a message.');
-    
+    const msg = document.getElementById('chatInputBox').value.trim();
+    if (!msg) return alert('Type message.');
     data.chats.push({
-        from: data.currentUser.role === 'cashier' ? `cashier-${data.currentUser.id}` : 'cashier',
-        to,
-        text,
-        time: getTimeStamp()
+        from: 'cashier-' + data.currentUser.id, to, message: msg, time: getTimeStamp()
     });
-    saveData();
-    document.getElementById('chatInputBox').value = '';
-    loadChatRecipient();
+    saveData(); document.getElementById('chatInputBox').value = ''; loadPosChat();
 }
-
 // --- Stock Count Response ---
 function loadCountInbox() {
-    const pending = data.countRequests.filter(r => r.storeId === data.currentUser.storeId && r.status === 'pending');
-    if (!pending.length) {
-        document.getElementById('countRequestInbox').innerHTML = '<p>No pending count requests.</p>';
-        document.getElementById('countResponseArea').classList.add('hidden');
-        return;
-    }
-    document.getElementById('countRequestInbox').innerHTML = `
-        <h4>Pending Requests</h4>
-        ${pending.map(r => `
-            <button class="sm" style="margin:4px 0; width:100%; text-align:left;" onclick="openCountResponse('${r.id}')">
-                📋 ${r.productName} — System: ${r.systemQty}
-            </button>
-        `).join('')}
-    `;
-    document.getElementById('countResponseArea').classList.add('hidden');
+    const reqs = data.countRequests.filter(r => r.storeId === data.currentUser.storeId && r.status === 'pending');
+    document.getElementById('countRequestInbox').innerHTML = !reqs.length
+        ? '<p>No pending count requests.</p>'
+        : reqs.map(r => `
+            <div class="card" style="padding:10px;">
+                <strong>${r.id}</strong> — ${r.createdAt}
+                <br>${r.productIds.length} product(s) to count
+                <button class="sm" onclick="openCountResponse('${r.id}')">✅ Start Count</button>
+            </div>`).join('');
 }
-
 function openCountResponse(reqId) {
+    activeCountRequestId = reqId;
     const req = data.countRequests.find(r => r.id === reqId);
     if (!req) return;
-    activeCountRequestId = reqId;
-    
-    document.getElementById('countResponseArea').classList.remove('hidden');
-    document.getElementById('countTargetName').textContent = req.productName;
-    document.getElementById('countProdNameDisplay').value = req.productName;
-    document.getElementById('countSysQtyDisplay').value = req.systemQty;
-    document.getElementById('actualCountInput').value = '';
+    activeProductIndex = 0;
+    showNextCountProduct();
 }
-
+function showNextCountProduct() {
+    const req = data.countRequests.find(r => r.id === activeCountRequestId);
+    if (!req || activeProductIndex >= req.productIds.length) {
+        alert('✅ All count responses submitted!');
+        document.getElementById('countResponseArea').classList.add('hidden');
+        activeCountRequestId = null;
+        return;
+    }
+    const prod = data.products.find(p => p.id === req.productIds[activeProductIndex]);
+    document.getElementById('countTargetName').textContent = `Request: ${req.id} — Product ${activeProductIndex+1}/${req.productIds.length}`;
+    document.getElementById('countProdNameDisplay').value = prod?.name || 'Unknown';
+    document.getElementById('countSysQtyDisplay').value = prod?.stock || 0;
+    document.getElementById('actualCountInput').value = '';
+    document.getElementById('countResponseArea').classList.remove('hidden');
+}
 function submitCountResponse() {
     const actual = parseInt(document.getElementById('actualCountInput').value);
-    if (isNaN(actual) || actual < 0) return alert('Enter valid quantity.');
-    
+    if (isNaN(actual) || actual < 0) return alert('Enter valid count');
     const req = data.countRequests.find(r => r.id === activeCountRequestId);
     if (!req) return;
-    
-    req.status = 'responded';
-    req.actualQty = actual;
-    req.respondedAt = getTimeStamp();
+    const prodId = req.productIds[activeProductIndex];
+    req.responses.push({
+        productId: prodId, counted: actual,
+        by: data.currentUser.name, time: getTimeStamp()
+    });
+    if (req.responses.length >= req.productIds.length) req.status = 'completed';
     saveData();
-    alert('✅ Count submitted.');
-    activeCountRequestId = null;
-    loadCountInbox();
+    activeProductIndex++;
+    showNextCountProduct();
 }
-
-// --- End Shift ---
+// --- End Shift / Lock ---
 function initiateEndShift() {
-    if (!confirm('⚠️ End your shift and logout? This will finalize your shift.')) return;
     document.getElementById('endShiftModal').classList.remove('hidden');
     computeDenomTotal();
 }
-
 function closeEndShiftModal() {
     document.getElementById('endShiftModal').classList.add('hidden');
 }
-
 function computeDenomTotal() {
-    const d1000 = parseInt(document.getElementById('d1000').value) || 0;
-    const d500 = parseInt(document.getElementById('d500').value) || 0;
-    const d200 = parseInt(document.getElementById('d200').value) || 0;
-    const d100 = parseInt(document.getElementById('d100').value) || 0;
-    const d50 = parseInt(document.getElementById('d50').value) || 0;
-    const dCoins = parseFloat(document.getElementById('dCoins').value) || 0;
-    
-    const total = d1000*1000 + d500*500 + d200*200 + d100*100 + d50*50 + dCoins;
-    document.getElementById('denomTotalAmt').textContent = `₱${total.toFixed(2)}`;
+    const t = 
+        (Number(document.getElementById('d1000').value) || 0) * 1000 +
+        (Number(document.getElementById('d500').value) || 0) * 500 +
+        (Number(document.getElementById('d200').value) || 0) * 200 +
+        (Number(document.getElementById('d100').value) || 0) * 100 +
+        (Number(document.getElementById('d50').value) || 0) * 50 +
+        (Number(document.getElementById('dCoins').value) || 0);
+    document.getElementById('denomTotalAmt').textContent = `₱${t.toFixed(2)}`;
 }
-
 function confirmEndShift() {
-    const remitText = document.getElementById('denomTotalAmt').textContent;
-    if (!confirm(`Confirm remittance: ${remitText}\nThis will end your shift.`)) return;
-    
+    if (!confirm('Finalize and end shift? Make sure count is correct.')) return;
     data.shift = null;
-    if (lockTimer) clearTimeout(lockTimer);
     saveData();
-    alert('✅ Shift ended. Thank you!');
     closeEndShiftModal();
     logout();
+    alert('✅ Shift closed — Logged out');
 }
-
-// --- Lock Screen ---
 function unlockPOS() {
     const entered = document.getElementById('unlockPassword').value.trim();
     if (entered === data.currentUser.password) {
@@ -1608,11 +1399,10 @@ function unlockPOS() {
         document.getElementById('unlockPassword').value = '';
         resetActivityTimer();
     } else {
-        alert('❌ Incorrect password.');
+        alert('❌ Wrong password');
     }
 }
-
-// ========== INITIALIZE ==========
+// ========== INIT ==========
 loadData();
 updateConnectionStatus();
 </script>
