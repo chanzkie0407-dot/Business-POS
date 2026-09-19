@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashier Dashboard — BPOS</title>
+  <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+  <div class="cashier-container">
+    <header class="cashier-header">
+      <div>
+        <h1>Cashier Dashboard</h1>
+        <p id="cashier-info"></p>
+      </div>
+      <button id="logout-btn" class="btn-logout">Log Out</button>
+    </header>
+
+    <div class="cashier-grid">
+      <!-- Shift Panel -->
+      <section class="panel">
+        <h2>Shift Control</h2>
+        <button id="shift-btn" class="btn-primary">Start Shift</button>
+        <div id="shift-status"></div>
+      </section>
+
+      <!-- Sales Panel -->
+      <section class="panel">
+        <h2>New Sale</h2>
+        <div class="form-row">
+          <label>Item/Description:</label>
+          <input type="text" id="sale-item" placeholder="Item name">
+        </div>
+        <div class="form-row">
+          <label>Amount:</label>
+          <input type="number" id="sale-amount" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-row">
+          <label>Payment Method:</label>
+          <select id="sale-method">
+            <option value="cash">Cash</option>
+            <option value="gcash">GCash</option>
+          </select>
+        </div>
+        <button id="sale-btn" class="btn-primary">Record Sale</button>
+      </section>
+
+      <!-- Cash Count -->
+      <section class="panel">
+        <h2>Cash Denomination</h2>
+        <div id="denom-list">
+          <div class="denom-row"><span>1000</span><input type="number" data-denom="1000" min="0" value="0"></div>
+          <div class="denom-row"><span>500</span><input type="number" data-denom="500" min="0" value="0"></div>
+          <div class="denom-row"><span>200</span><input type="number" data-denom="200" min="0" value="0"></div>
+          <div class="denom-row"><span>100</span><input type="number" data-denom="100" min="0" value="0"></div>
+          <div class="denom-row"><span>50</span><input type="number" data-denom="50" min="0" value="0"></div>
+          <div class="denom-row"><span>20</span><input type="number" data-denom="20" min="0" value="0"></div>
+          <div class="denom-row"><span>Coins</span><input type="number" data-denom="5" min="0" value="0"></div>
+        </div>
+        <p class="total">Total: ₱<span id="cash-total">0.00</span></p>
+      </section>
+
+      <!-- Today's Sales -->
+      <section class="panel full">
+        <h2>Today's Transactions</h2>
+        <div id="sale-list"></div>
+      </section>
+    </div>
+  </div>
+
+<script type="module">
+import { requireAuth } from '../protect.js';
+import { logout } from '../login.js';
+
+const user = requireAuth(['cashier']);
+if (!user) {}
+
+document.getElementById('cashier-info').textContent = `${user.name} — Store: ${user.storeId}`;
+document.getElementById('logout-btn').addEventListener('click', logout);
+
+// Shift
+let shiftActive = localStorage.getItem('shiftActive') === 'true';
+function updateShiftBtn() {
+  const btn = document.getElementById('shift-btn');
+  const status = document.getElementById('shift-status');
+  if (shiftActive) {
+    btn.textContent = 'End Shift';
+    status.innerHTML = `<p>Started: ${localStorage.getItem('shiftStart')}</p>`;
+  } else {
+    btn.textContent = 'Start Shift';
+    status.innerHTML = '';
+  }
+}
+document.getElementById('shift-btn').addEventListener('click', () => {
+  shiftActive = !shiftActive;
+  localStorage.setItem('shiftActive', shiftActive);
+  if (shiftActive) localStorage.setItem('shiftStart', new Date().toLocaleString());
+  updateShiftBtn();
+});
+updateShiftBtn();
+
+// Record Sale
+function loadSales() {
+  const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+  const list = document.getElementById('sale-list');
+  list.innerHTML = sales.length === 0 ? '<p>No sales yet.</p>' : sales.reverse().map(s => `
+    <div class="sale-item">
+      <strong>${s.item}</strong> — ₱${s.amount.toFixed(2)}<br>
+      ${s.method} | ${s.time}
+    </div>
+  `).join('');
+}
+document.getElementById('sale-btn').addEventListener('click', () => {
+  if (!shiftActive) { alert('Start your shift first!'); return; }
+  const item = document.getElementById('sale-item').value.trim();
+  const amount = parseFloat(document.getElementById('sale-amount').value);
+  const method = document.getElementById('sale-method').value;
+  if (!item || !amount) { alert('Fill in all fields'); return; }
+  
+  const sales = JSON.parse(localStorage.getItem('sales') || '[]');
+  sales.push({
+    item, amount, method,
+    time: new Date().toLocaleString(),
+    cashier: user.name,
+    storeId: user.storeId
+  });
+  localStorage.setItem('sales', JSON.stringify(sales));
+  document.getElementById('sale-item').value = '';
+  document.getElementById('sale-amount').value = '';
+  loadSales();
+});
+
+// Denomination Calculator
+function updateTotal() {
+  let total = 0;
+  document.querySelectorAll('[data-denom]').forEach(inp => {
+    total += parseInt(inp.dataset.denom) * parseInt(inp.value || 0);
+  });
+  document.getElementById('cash-total').textContent = total.toFixed(2);
+}
+document.querySelectorAll('[data-denom]').forEach(inp => {
+  inp.addEventListener('input', updateTotal);
+});
+
+loadSales();
+</script>
+
+<style>
+.cashier-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+.cashier-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+.btn-logout { padding: 8px 16px; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; }
+.cashier-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+.panel { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.panel.full { grid-column: 1 / -1; }
+.form-row { margin-bottom: 15px; }
+.form-row label { display: block; margin-bottom: 5px; font-weight: 500; }
+.form-row input, .form-row select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+.denom-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f3f4f6; }
+.denom-row input { width: 80px; text-align: right; padding: 6px; border: 1px solid #ddd; border-radius: 4px; }
+.total { font-size: 1.2rem; font-weight: bold; margin-top: 10px; text-align: right; }
+.sale-item { padding: 10px 0; border-bottom: 1px solid #eee; }
+</style>
+</body>
+</html>
